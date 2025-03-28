@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,28 @@ import ProjectList from "@/components/ProjectList";
 import Summary from "@/components/Summary";
 import { Stack } from "@/types/stack";
 import { useToast } from "@/components/ui/use-toast";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DollarSign,
+  Euro,
+  PoundSterling,
+  Yen,
+  CurrencyRupee
+} from "lucide-react";
+
+const currencyOptions = [
+  { value: "USD", label: "USD", icon: DollarSign },
+  { value: "EUR", label: "EUR", icon: Euro },
+  { value: "GBP", label: "GBP", icon: PoundSterling },
+  { value: "JPY", label: "JPY", icon: Yen },
+  { value: "INR", label: "INR", icon: CurrencyRupee },
+];
 
 const Index = () => {
   const [view, setView] = useState<"builder" | "projects" | "summary">("builder");
@@ -24,6 +45,7 @@ const Index = () => {
     netProfit: 0,
     marginPercent: 0,
     createdAt: new Date().toISOString(),
+    currency: "USD",
   });
   const [savedStacks, setSavedStacks] = useState<Stack[]>([]);
   const { toast } = useToast();
@@ -64,6 +86,7 @@ const Index = () => {
       netProfit: 0,
       marginPercent: 0,
       createdAt: new Date().toISOString(),
+      currency: currentStack.currency,
     });
     setView("builder");
   };
@@ -87,35 +110,78 @@ const Index = () => {
     });
   };
 
+  const getCurrencySymbol = (currencyCode: string) => {
+    switch(currencyCode) {
+      case "USD": return "$";
+      case "EUR": return "€";
+      case "GBP": return "£";
+      case "JPY": return "¥";
+      case "INR": return "₹";
+      default: return "$";
+    }
+  };
+
+  const handleCurrencyChange = (value: string) => {
+    setCurrentStack(prev => ({
+      ...prev,
+      currency: value
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <header className="border-b border-gray-100 py-4 px-4 md:px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-black">Stack Builder</h1>
-          <div className="flex space-x-2">
-            <Button 
-              variant={view === "builder" ? "default" : "outline"}
-              onClick={() => setView("builder")}
-              className={view === "builder" ? "bg-[#9B87F5] hover:bg-[#8A76E4]" : ""}
-            >
-              Builder
-            </Button>
-            <Button 
-              variant={view === "projects" ? "default" : "outline"}
-              onClick={() => setView("projects")}
-              className={view === "projects" ? "bg-[#9B87F5] hover:bg-[#8A76E4]" : ""}
-            >
-              Projects
-            </Button>
-            {currentStack.modules.length > 0 && (
-              <Button 
-                variant={view === "summary" ? "default" : "outline"}
-                onClick={() => setView("summary")}
-                className={view === "summary" ? "bg-[#9B87F5] hover:bg-[#8A76E4]" : ""}
+          <div className="flex items-center space-x-4">
+            <div className="hidden sm:block">
+              <Select 
+                value={currentStack.currency} 
+                onValueChange={handleCurrencyChange}
               >
-                Summary
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue placeholder="Currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currencyOptions.map((option) => {
+                    const Icon = option.icon;
+                    return (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center gap-2">
+                          <Icon size={14} />
+                          <span>{option.label}</span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex space-x-2">
+              <Button 
+                variant={view === "builder" ? "default" : "outline"}
+                onClick={() => setView("builder")}
+                className={view === "builder" ? "bg-[#9B87F5] hover:bg-[#8A76E4]" : ""}
+              >
+                Builder
               </Button>
-            )}
+              <Button 
+                variant={view === "projects" ? "default" : "outline"}
+                onClick={() => setView("projects")}
+                className={view === "projects" ? "bg-[#9B87F5] hover:bg-[#8A76E4]" : ""}
+              >
+                Projects
+              </Button>
+              {currentStack.modules.length > 0 && (
+                <Button 
+                  variant={view === "summary" ? "default" : "outline"}
+                  onClick={() => setView("summary")}
+                  className={view === "summary" ? "bg-[#9B87F5] hover:bg-[#8A76E4]" : ""}
+                >
+                  Summary
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -128,6 +194,7 @@ const Index = () => {
               setStack={setCurrentStack} 
               onSave={saveStack}
               onViewSummary={() => setView("summary")} 
+              currencySymbol={getCurrencySymbol(currentStack.currency)}
             />
           )}
           
@@ -137,11 +204,16 @@ const Index = () => {
               onLoadStack={loadStack} 
               onDeleteStack={deleteStack} 
               onCreateNew={createNewStack} 
+              getCurrencySymbol={getCurrencySymbol}
             />
           )}
           
           {view === "summary" && (
-            <Summary stack={currentStack} onBack={() => setView("builder")} />
+            <Summary 
+              stack={currentStack} 
+              onBack={() => setView("builder")} 
+              currencySymbol={getCurrencySymbol(currentStack.currency)} 
+            />
           )}
         </Card>
       </main>

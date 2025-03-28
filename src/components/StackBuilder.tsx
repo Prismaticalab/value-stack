@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,14 +15,14 @@ interface StackBuilderProps {
   setStack: (stack: Stack) => void;
   onSave: () => void;
   onViewSummary: () => void;
+  currencySymbol: string;
 }
 
-const StackBuilder = ({ stack, setStack, onSave, onViewSummary }: StackBuilderProps) => {
+const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }: StackBuilderProps) => {
   const [valueCaptureView, setValueCaptureView] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Calculate total cost whenever modules change
     calculateTotals();
   }, [stack.modules, stack.agencyFees, stack.referralCosts, stack.marketingExpenses, stack.desiredMargin]);
 
@@ -31,11 +30,9 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary }: StackBuilderPr
     const totalDeliveryCost = stack.modules.reduce((sum, module) => sum + module.cost, 0);
     const totalCost = totalDeliveryCost + stack.agencyFees + stack.referralCosts + stack.marketingExpenses;
     
-    // Calculate final price based on desired margin
     const marginMultiplier = 1 + (stack.desiredMargin / 100);
     const finalPrice = totalCost * marginMultiplier;
     
-    // Calculate net profit and actual margin percentage
     const netProfit = finalPrice - totalCost;
     const marginPercent = totalCost > 0 ? (netProfit / totalCost) * 100 : 0;
     
@@ -210,6 +207,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary }: StackBuilderPr
                         onDelete={deleteModule}
                         onDuplicate={duplicateModule}
                         isLocked={stack.locked}
+                        currencySymbol={currencySymbol}
                       />
                     ))}
                     {provided.placeholder}
@@ -223,7 +221,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary }: StackBuilderPr
             <div className="pt-4">
               <div className="flex justify-between items-center text-sm font-medium">
                 <span>Total Delivery Cost:</span>
-                <span>${stack.totalCost.toFixed(2)}</span>
+                <span>{currencySymbol}{stack.totalCost.toFixed(2)}</span>
               </div>
               
               {stack.modules.length > 1 && !stack.locked && (
@@ -242,7 +240,8 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary }: StackBuilderPr
       ) : (
         <ValueCaptureForm 
           stack={stack} 
-          setStack={setStack} 
+          setStack={setStack}
+          currencySymbol={currencySymbol}
         />
       )}
     </div>

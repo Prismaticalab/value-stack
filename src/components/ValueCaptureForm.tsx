@@ -8,9 +8,10 @@ import { Stack } from "@/types/stack";
 interface ValueCaptureFormProps {
   stack: Stack;
   setStack: (stack: Stack) => void;
+  currencySymbol: string;
 }
 
-const ValueCaptureForm = ({ stack, setStack }: ValueCaptureFormProps) => {
+const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormProps) => {
   const handleChange = (field: string, value: number) => {
     setStack({
       ...stack,
@@ -28,11 +29,11 @@ const ValueCaptureForm = ({ stack, setStack }: ValueCaptureFormProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="agencyFees" className="text-sm font-medium">
-            Agency Fees ($)
+            Agency Fees ({currencySymbol})
           </Label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <span className="text-gray-500">$</span>
+              <span className="text-gray-500">{currencySymbol}</span>
             </div>
             <Input
               id="agencyFees"
@@ -48,11 +49,11 @@ const ValueCaptureForm = ({ stack, setStack }: ValueCaptureFormProps) => {
 
         <div className="space-y-2">
           <Label htmlFor="referralCosts" className="text-sm font-medium">
-            Referral Costs ($)
+            Referral Costs ({currencySymbol})
           </Label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <span className="text-gray-500">$</span>
+              <span className="text-gray-500">{currencySymbol}</span>
             </div>
             <Input
               id="referralCosts"
@@ -70,11 +71,11 @@ const ValueCaptureForm = ({ stack, setStack }: ValueCaptureFormProps) => {
 
         <div className="space-y-2">
           <Label htmlFor="marketingExpenses" className="text-sm font-medium">
-            Marketing Expenses ($)
+            Marketing Expenses ({currencySymbol})
           </Label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <span className="text-gray-500">$</span>
+              <span className="text-gray-500">{currencySymbol}</span>
             </div>
             <Input
               id="marketingExpenses"
@@ -113,15 +114,15 @@ const ValueCaptureForm = ({ stack, setStack }: ValueCaptureFormProps) => {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Total Delivery Cost:</span>
-              <span>${stack.totalCost.toFixed(2)}</span>
+              <span>{currencySymbol}{stack.totalCost.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>Final Price:</span>
-              <span>${stack.finalPrice.toFixed(2)}</span>
+              <span>{currencySymbol}{stack.finalPrice.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>Net Profit:</span>
-              <span>${stack.netProfit.toFixed(2)}</span>
+              <span>{currencySymbol}{stack.netProfit.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>Actual Margin:</span>

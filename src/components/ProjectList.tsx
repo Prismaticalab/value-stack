@@ -19,6 +19,7 @@ interface ProjectListProps {
   onLoadStack: (stackId: string) => void;
   onDeleteStack: (stackId: string) => void;
   onCreateNew: () => void;
+  getCurrencySymbol: (currency: string) => string;
 }
 
 const ProjectList = ({
@@ -26,6 +27,7 @@ const ProjectList = ({
   onLoadStack,
   onDeleteStack,
   onCreateNew,
+  getCurrencySymbol,
 }: ProjectListProps) => {
   useEffect(() => {
     // Try to load stacks from localStorage on first render
@@ -84,37 +86,40 @@ const ProjectList = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {stacks.map((stack) => (
-                <TableRow key={stack.id}>
-                  <TableCell className="font-medium">{stack.name}</TableCell>
-                  <TableCell>{stack.modules.length}</TableCell>
-                  <TableCell>${stack.totalCost.toFixed(2)}</TableCell>
-                  <TableCell>${stack.finalPrice.toFixed(2)}</TableCell>
-                  <TableCell>{formatDate(stack.createdAt)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onLoadStack(stack.id)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Edit size={16} />
-                        <span className="sr-only">Edit</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDeleteStack(stack.id)}
-                        className="h-8 w-8 p-0 hover:text-red-500"
-                      >
-                        <Trash size={16} />
-                        <span className="sr-only">Delete</span>
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {stacks.map((stack) => {
+                const currencySymbol = getCurrencySymbol(stack.currency || 'USD');
+                return (
+                  <TableRow key={stack.id}>
+                    <TableCell className="font-medium">{stack.name}</TableCell>
+                    <TableCell>{stack.modules.length}</TableCell>
+                    <TableCell>{currencySymbol}{stack.totalCost.toFixed(2)}</TableCell>
+                    <TableCell>{currencySymbol}{stack.finalPrice.toFixed(2)}</TableCell>
+                    <TableCell>{formatDate(stack.createdAt)}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onLoadStack(stack.id)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit size={16} />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onDeleteStack(stack.id)}
+                          className="h-8 w-8 p-0 hover:text-red-500"
+                        >
+                          <Trash size={16} />
+                          <span className="sr-only">Delete</span>
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>

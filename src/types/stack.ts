@@ -23,4 +23,5 @@ export interface Stack {
   netProfit: number;
   marginPercent: number;
   createdAt: string;
+  currency: string;
 }
