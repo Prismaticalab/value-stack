@@ -11,7 +11,6 @@ export interface Module {
   costQuantity: number;
   timeImpact: number;
   timeUnit: "days" | "weeks" | "months";
-  deliveryImpact: number; // scale 1-10
 }
 
 export interface Stack {

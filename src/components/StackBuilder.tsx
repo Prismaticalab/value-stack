@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -65,8 +64,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
       costUnit: "",
       costQuantity: 1,
       timeImpact: 1,
-      timeUnit: "days",  // Initialize with days as default
-      deliveryImpact: 5
+      timeUnit: "days",
     };
 
     setStack({

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Module } from "@/types/stack";
 import { Draggable } from "react-beautiful-dnd";
-import { Copy, Trash, GripVertical, Users, HelpCircle } from "lucide-react";
+import { Copy, Trash, GripVertical } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -23,12 +23,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 export interface ModuleCardProps {
   module: Module;
@@ -51,7 +45,6 @@ const ModuleCard = ({
 }: ModuleCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [timeUnitDialogOpen, setTimeUnitDialogOpen] = useState(false);
 
   const handleChange = (field: keyof Module, value: any) => {
     const updatedModule = { ...module, [field]: value };
@@ -80,6 +73,10 @@ const ModuleCard = ({
       return module.cost * module.costQuantity;
     }
     return module.cost;
+  };
+
+  const getStakeholderBadgeColor = () => {
+    return module.stakeholder === "internal" ? "bg-blue-100 text-blue-800" : "bg-amber-100 text-amber-800";
   };
 
   return (
@@ -111,16 +108,12 @@ const ModuleCard = ({
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                   <DialogTrigger asChild>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
-                      className="h-8 w-8 p-0 relative"
+                      className={`${getStakeholderBadgeColor()} px-2 h-8`}
                       disabled={isLocked}
                     >
-                      <Users size={16} />
-                      {module.stakeholderName && (
-                        <span className="absolute -top-1 -right-1 h-2 w-2 bg-green-500 rounded-full" />
-                      )}
-                      <span className="sr-only">Stakeholder</span>
+                      {module.stakeholderName || module.stakeholder}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
@@ -287,94 +280,37 @@ const ModuleCard = ({
                 )}
 
                 <div className="flex items-center justify-between">
-                  <div className="flex-grow">
-                    <div className="flex items-center gap-2 mb-1">
-                      <label htmlFor={`time-${module.id}`} className="block text-sm font-medium text-gray-700">
-                        Time Impact: {module.timeImpact} {module.timeUnit || 'days'}
-                      </label>
-                      <Dialog open={timeUnitDialogOpen} onOpenChange={setTimeUnitDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-6 w-6 p-0"
-                            disabled={isLocked}
-                          >
-                            <HelpCircle size={14} />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Time Impact Unit</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4 py-4">
-                            <p className="text-sm text-gray-600">
-                              Select the time unit that best represents the impact duration of this module.
-                            </p>
-                            <Select
-                              value={module.timeUnit || "days"}
-                              onValueChange={(value: "days" | "weeks" | "months") => handleChange("timeUnit", value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select time unit" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="days">Days</SelectItem>
-                                <SelectItem value="weeks">Weeks</SelectItem>
-                                <SelectItem value="months">Months</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                    <Slider
-                      id={`time-${module.id}`}
-                      value={[module.timeImpact]}
-                      min={1}
-                      max={40}
-                      step={1}
-                      onValueChange={(values) => handleChange("timeImpact", values[0])}
-                      disabled={isLocked}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <label htmlFor={`impact-${module.id}`} className="block text-sm font-medium text-gray-700">
-                      Delivery Impact: {module.deliveryImpact}/10
+                  <div className="flex-grow space-y-2">
+                    <label htmlFor={`time-${module.id}`} className="block text-sm font-medium text-gray-700">
+                      Time Impact: {module.timeImpact}
                     </label>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-6 w-6 p-0"
-                            disabled={isLocked}
-                          >
-                            <HelpCircle size={14} />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs text-sm">
-                            Delivery Impact measures how crucial this module is to the overall project success on a scale of 1-10.
-                            Higher values indicate components that are more central to the project's core value proposition.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <div className="flex gap-2 items-center">
+                      <Slider
+                        id={`time-${module.id}`}
+                        value={[module.timeImpact]}
+                        min={1}
+                        max={40}
+                        step={1}
+                        onValueChange={(values) => handleChange("timeImpact", values[0])}
+                        disabled={isLocked}
+                        className="flex-grow"
+                      />
+                      <Select
+                        value={module.timeUnit || "days"}
+                        onValueChange={(value: "days" | "weeks" | "months") => handleChange("timeUnit", value)}
+                        disabled={isLocked}
+                      >
+                        <SelectTrigger className="w-24">
+                          <SelectValue placeholder="Unit" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="days">Days</SelectItem>
+                          <SelectItem value="weeks">Weeks</SelectItem>
+                          <SelectItem value="months">Months</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <Slider
-                    id={`impact-${module.id}`}
-                    value={[module.deliveryImpact]}
-                    min={1}
-                    max={10}
-                    step={1}
-                    onValueChange={(values) => handleChange("deliveryImpact", values[0])}
-                    disabled={isLocked}
-                  />
                 </div>
               </div>
             )}
