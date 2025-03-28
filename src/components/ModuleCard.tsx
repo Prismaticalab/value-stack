@@ -14,14 +14,13 @@ import {
 } from "@/components/ui/select";
 import { Module } from "@/types/stack";
 import { Draggable } from "react-beautiful-dnd";
-import { Copy, Trash, GripVertical } from "lucide-react";
+import { Copy, Trash, GripVertical, AlertCircle } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Label } from "@/components/ui/label";
 
 export interface ModuleCardProps {
@@ -44,9 +43,36 @@ const ModuleCard = ({
   currencySymbol
 }: ModuleCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateField = (field: string, value: any): string => {
+    if (field === "name" && !value) {
+      return "Module name is required";
+    }
+    if (field === "value" && !value) {
+      return "Value description is required";
+    }
+    if (field === "stakeholderName" && !value) {
+      return "Stakeholder name is required";
+    }
+    return "";
+  };
 
   const handleChange = (field: keyof Module, value: any) => {
+    // Validate the field
+    const errorMessage = validateField(field, value);
+    
+    // Update errors state
+    if (errorMessage) {
+      setErrors(prev => ({ ...prev, [field]: errorMessage }));
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+    
     const updatedModule = { ...module, [field]: value };
     
     // Special handling for costType changes
@@ -96,59 +122,20 @@ const ModuleCard = ({
                 <GripVertical size={20} />
               </div>
 
-              <Input
-                value={module.name}
-                onChange={(e) => handleChange("name", e.target.value)}
-                placeholder="Module name"
-                className="flex-1"
-                disabled={isLocked}
-              />
+              <div className="flex-1">
+                <Input
+                  value={module.name}
+                  onChange={(e) => handleChange("name", e.target.value)}
+                  placeholder="Module name (required)"
+                  className={errors.name ? "border-red-500" : ""}
+                  disabled={isLocked}
+                />
+                {errors.name && (
+                  <p className="text-xs text-red-500 mt-1">{errors.name}</p>
+                )}
+              </div>
               
               <div className="flex items-center gap-1">
-                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className={`${getStakeholderBadgeColor()} px-2 h-8`}
-                      disabled={isLocked}
-                    >
-                      {module.stakeholderName || module.stakeholder}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Stakeholder Information</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="stakeholderName">Stakeholder Name</Label>
-                        <Input
-                          id="stakeholderName"
-                          value={module.stakeholderName || ""}
-                          onChange={(e) => handleChange("stakeholderName", e.target.value)}
-                          placeholder="Enter stakeholder name"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="stakeholderType">Stakeholder Type</Label>
-                        <Select
-                          value={module.stakeholder}
-                          onValueChange={(value) => handleChange("stakeholder", value)}
-                        >
-                          <SelectTrigger id="stakeholderType">
-                            <SelectValue placeholder="Select stakeholder type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="internal">Internal</SelectItem>
-                            <SelectItem value="external">External</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                
                 <Button
                   variant="ghost"
                   size="sm"
@@ -185,16 +172,80 @@ const ModuleCard = ({
               <div className="mt-4 space-y-4">
                 <div>
                   <label htmlFor={`value-${module.id}`} className="block text-sm font-medium text-gray-700 mb-1">
-                    Value Delivered
+                    Value Delivered <span className="text-red-500">*</span>
                   </label>
                   <Textarea
                     id={`value-${module.id}`}
                     value={module.value}
                     onChange={(e) => handleChange("value", e.target.value)}
-                    placeholder="Describe the value this module delivers..."
-                    className="resize-none h-20"
+                    placeholder="Describe the value this module delivers... (required)"
+                    className={`resize-none h-20 ${errors.value ? "border-red-500" : ""}`}
                     disabled={isLocked}
                   />
+                  {errors.value && (
+                    <p className="text-xs text-red-500 mt-1">{errors.value}</p>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor={`stakeholder-name-${module.id}`} className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      Stakeholder Name <span className="text-red-500 mx-1">*</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <AlertCircle size={14} className="text-gray-400 cursor-help ml-1" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">Enter the name of the person or organization responsible for this module</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </label>
+                    <Input
+                      id={`stakeholder-name-${module.id}`}
+                      value={module.stakeholderName || ""}
+                      onChange={(e) => handleChange("stakeholderName", e.target.value)}
+                      placeholder="Enter stakeholder name (required)"
+                      className={errors.stakeholderName ? "border-red-500" : ""}
+                      disabled={isLocked}
+                    />
+                    {errors.stakeholderName && (
+                      <p className="text-xs text-red-500 mt-1">{errors.stakeholderName}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label htmlFor={`stakeholder-type-${module.id}`} className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      Stakeholder Type <span className="text-red-500 mx-1">*</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <AlertCircle size={14} className="text-gray-400 cursor-help ml-1" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">Internal: Your team or organization. External: Client, vendor, or third party.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </label>
+                    <Select
+                      value={module.stakeholder}
+                      onValueChange={(value: "internal" | "external") => handleChange("stakeholder", value)}
+                      disabled={isLocked}
+                    >
+                      <SelectTrigger id={`stakeholder-type-${module.id}`} className={!module.stakeholder ? "border-red-500" : ""}>
+                        <SelectValue placeholder="Select stakeholder type (required)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="internal">Internal</SelectItem>
+                        <SelectItem value="external">External</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {!module.stakeholder && (
+                      <p className="text-xs text-red-500 mt-1">Stakeholder type is required</p>
+                    )}
+                  </div>
                 </div>
 
                 <div>
@@ -279,37 +330,51 @@ const ModuleCard = ({
                   </div>
                 )}
 
-                <div className="flex items-center justify-between">
-                  <div className="flex-grow space-y-2">
-                    <label htmlFor={`time-${module.id}`} className="block text-sm font-medium text-gray-700">
-                      Time Impact: {module.timeImpact}
-                    </label>
-                    <div className="flex gap-2 items-center">
-                      <Slider
-                        id={`time-${module.id}`}
-                        value={[module.timeImpact]}
-                        min={1}
-                        max={40}
-                        step={1}
-                        onValueChange={(values) => handleChange("timeImpact", values[0])}
-                        disabled={isLocked}
-                        className="flex-grow"
-                      />
-                      <Select
-                        value={module.timeUnit || "days"}
-                        onValueChange={(value: "days" | "weeks" | "months") => handleChange("timeUnit", value)}
-                        disabled={isLocked}
-                      >
-                        <SelectTrigger className="w-24">
-                          <SelectValue placeholder="Unit" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="days">Days</SelectItem>
-                          <SelectItem value="weeks">Weeks</SelectItem>
-                          <SelectItem value="months">Months</SelectItem>
-                        </SelectContent>
-                      </Select>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Time Impact
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <AlertCircle size={14} className="text-gray-400 cursor-help ml-1" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">Estimated time needed to complete this module</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </label>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-grow">
+                        <Slider
+                          id={`time-${module.id}`}
+                          value={[module.timeImpact]}
+                          min={1}
+                          max={40}
+                          step={1}
+                          onValueChange={(values) => handleChange("timeImpact", values[0])}
+                          disabled={isLocked}
+                        />
+                      </div>
+                      <span className="text-sm font-medium min-w-10 text-right">
+                        {module.timeImpact}
+                      </span>
                     </div>
+                    <Select
+                      value={module.timeUnit || "days"}
+                      onValueChange={(value: "days" | "weeks" | "months") => handleChange("timeUnit", value)}
+                      disabled={isLocked}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select time unit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="days">Days</SelectItem>
+                        <SelectItem value="weeks">Weeks</SelectItem>
+                        <SelectItem value="months">Months</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
