@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,14 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
   }, [stack.modules, stack.agencyFees, stack.referralCosts, stack.marketingExpenses, stack.desiredMargin]);
 
   const calculateTotals = () => {
-    const totalDeliveryCost = stack.modules.reduce((sum, module) => sum + module.cost, 0);
+    // Calculate total module costs, accounting for variable costs
+    const totalDeliveryCost = stack.modules.reduce((sum, module) => {
+      if (module.costType === "variable" && module.cost && module.costQuantity) {
+        return sum + (module.cost * module.costQuantity);
+      }
+      return sum + module.cost;
+    }, 0);
+    
     const totalCost = totalDeliveryCost + stack.agencyFees + stack.referralCosts + stack.marketingExpenses;
     
     const marginMultiplier = 1 + (stack.desiredMargin / 100);
@@ -51,7 +59,11 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
       name: "",
       value: "",
       stakeholder: "internal",
+      stakeholderName: "",
+      costType: "fixed", 
       cost: 0,
+      costUnit: "",
+      costQuantity: 1,
       timeImpact: 1,
       deliveryImpact: 5
     };

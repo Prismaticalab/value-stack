@@ -4,7 +4,11 @@ export interface Module {
   name: string;
   value: string;
   stakeholder: "internal" | "external";
+  stakeholderName: string;
+  costType: "fixed" | "variable";
   cost: number;
+  costUnit: string;
+  costQuantity: number;
   timeImpact: number; // in hours
   deliveryImpact: number; // scale 1-10
 }

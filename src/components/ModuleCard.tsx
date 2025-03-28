@@ -14,7 +14,15 @@ import {
 } from "@/components/ui/select";
 import { Module } from "@/types/stack";
 import { Draggable } from "react-beautiful-dnd";
-import { Copy, Trash, GripVertical } from "lucide-react";
+import { Copy, Trash, GripVertical, Users } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 export interface ModuleCardProps {
   module: Module;
@@ -36,10 +44,35 @@ const ModuleCard = ({
   currencySymbol
 }: ModuleCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleChange = (field: keyof Module, value: any) => {
     const updatedModule = { ...module, [field]: value };
+    
+    // Special handling for costType changes
+    if (field === "costType") {
+      if (value === "variable" && !updatedModule.costUnit) {
+        updatedModule.costUnit = "hours";
+        updatedModule.costQuantity = 1;
+      }
+    }
+    
+    // Update total cost calculation when cost type, unit cost or quantity changes
+    if (field === "cost" || field === "costQuantity") {
+      if (module.costType === "variable") {
+        const totalCost = updatedModule.cost * updatedModule.costQuantity;
+        // We don't actually update the cost field directly, since we want to preserve the unit cost
+      }
+    }
+    
     onUpdate(module.id, updatedModule);
+  };
+
+  const calculateTotalCost = () => {
+    if (module.costType === "variable" && module.cost && module.costQuantity) {
+      return module.cost * module.costQuantity;
+    }
+    return module.cost;
   };
 
   return (
@@ -68,6 +101,54 @@ const ModuleCard = ({
               />
               
               <div className="flex items-center gap-1">
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 relative"
+                      disabled={isLocked}
+                    >
+                      <Users size={16} />
+                      {module.stakeholderName && (
+                        <span className="absolute -top-1 -right-1 h-2 w-2 bg-green-500 rounded-full" />
+                      )}
+                      <span className="sr-only">Stakeholder</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Stakeholder Information</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="stakeholderName">Stakeholder Name</Label>
+                        <Input
+                          id="stakeholderName"
+                          value={module.stakeholderName || ""}
+                          onChange={(e) => handleChange("stakeholderName", e.target.value)}
+                          placeholder="Enter stakeholder name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="stakeholderType">Stakeholder Type</Label>
+                        <Select
+                          value={module.stakeholder}
+                          onValueChange={(value) => handleChange("stakeholder", value)}
+                        >
+                          <SelectTrigger id="stakeholderType">
+                            <SelectValue placeholder="Select stakeholder type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="internal">Internal</SelectItem>
+                            <SelectItem value="external">External</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                
                 <Button
                   variant="ghost"
                   size="sm"
@@ -116,26 +197,26 @@ const ModuleCard = ({
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor={`stakeholder-${module.id}`} className="block text-sm font-medium text-gray-700 mb-1">
-                      Responsible Stakeholder
-                    </label>
-                    <Select
-                      value={module.stakeholder}
-                      onValueChange={(value) => handleChange("stakeholder", value)}
-                      disabled={isLocked}
-                    >
-                      <SelectTrigger id={`stakeholder-${module.id}`}>
-                        <SelectValue placeholder="Select stakeholder" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="internal">Internal</SelectItem>
-                        <SelectItem value="external">External</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cost Type
+                  </label>
+                  <Select
+                    value={module.costType || "fixed"}
+                    onValueChange={(value) => handleChange("costType", value)}
+                    disabled={isLocked}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select cost type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fixed">Fixed Cost</SelectItem>
+                      <SelectItem value="variable">Variable Cost</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
+                {module.costType === "fixed" ? (
                   <div>
                     <label htmlFor={`cost-${module.id}`} className="block text-sm font-medium text-gray-700 mb-1">
                       Cost ({currencySymbol})
@@ -143,13 +224,60 @@ const ModuleCard = ({
                     <Input
                       id={`cost-${module.id}`}
                       type="number"
-                      value={module.cost}
+                      value={module.cost || ""}
                       onChange={(e) => handleChange("cost", parseFloat(e.target.value) || 0)}
                       placeholder="0"
                       disabled={isLocked}
                     />
                   </div>
-                </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-1">
+                        <label htmlFor={`cost-unit-${module.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                          Unit
+                        </label>
+                        <Input
+                          id={`cost-unit-${module.id}`}
+                          type="text"
+                          value={module.costUnit || ""}
+                          onChange={(e) => handleChange("costUnit", e.target.value)}
+                          placeholder="hours"
+                          disabled={isLocked}
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        <label htmlFor={`cost-per-${module.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                          Cost per unit
+                        </label>
+                        <Input
+                          id={`cost-per-${module.id}`}
+                          type="number"
+                          value={module.cost || ""}
+                          onChange={(e) => handleChange("cost", parseFloat(e.target.value) || 0)}
+                          placeholder="0"
+                          disabled={isLocked}
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        <label htmlFor={`quantity-${module.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                          Quantity
+                        </label>
+                        <Input
+                          id={`quantity-${module.id}`}
+                          type="number"
+                          value={module.costQuantity || ""}
+                          onChange={(e) => handleChange("costQuantity", parseFloat(e.target.value) || 0)}
+                          placeholder="0"
+                          disabled={isLocked}
+                        />
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-700 font-medium">
+                      Total: {currencySymbol}{calculateTotalCost().toFixed(2)}
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label htmlFor={`time-${module.id}`} className="block text-sm font-medium text-gray-700 mb-1">
