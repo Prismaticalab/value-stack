@@ -65,6 +65,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
       costUnit: "",
       costQuantity: 1,
       timeImpact: 1,
+      timeUnit: "days",  // Initialize with days as default
       deliveryImpact: 5
     };
 

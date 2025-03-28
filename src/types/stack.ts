@@ -9,7 +9,8 @@ export interface Module {
   cost: number;
   costUnit: string;
   costQuantity: number;
-  timeImpact: number; // in hours
+  timeImpact: number;
+  timeUnit: "days" | "weeks" | "months";
   deliveryImpact: number; // scale 1-10
 }
 
