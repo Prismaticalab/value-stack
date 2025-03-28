@@ -17,11 +17,11 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
   const { toast } = useToast();
   
   const handleChange = (field: string, value: number | boolean) => {
-    const newStack = {
+    const updatedStack = {
       ...stack,
       [field]: value,
     };
-    setStack(newStack);
+    setStack(updatedStack);
   };
 
   const calculateFinalPrice = () => {
@@ -44,26 +44,31 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     // Calculate the total required net revenue (before value capture costs)
     const totalRequiredIncome = costWithContingency * (1 + stack.desiredMargin / 100);
     
-    // For percentage-based costs, we need to adjust the formula
-    // If we have percentage costs, the formula becomes:
-    // finalPrice * (1 - percentageFee1 - percentageFee2...) = totalRequiredIncome
-    // Therefore: finalPrice = totalRequiredIncome / (1 - percentageFee1 - percentageFee2...)
+    // For percentage-based costs, we need to use the formula:
+    // finalPrice = totalRequiredIncome / (1 - sumOfPercentages)
     
     let percentageTotalDeduction = 0;
+    let fixedCostsTotal = 0;
     
     if (stack.isReferralPercentage) {
       percentageTotalDeduction += (stack.referralCosts / 100);
+    } else {
+      fixedCostsTotal += stack.referralCosts;
     }
     
     if (stack.isAgencyFeesPercentage) {
       percentageTotalDeduction += (stack.agencyFees / 100);
+    } else {
+      fixedCostsTotal += stack.agencyFees;
     }
     
     if (stack.isMarketingPercentage) {
       percentageTotalDeduction += (stack.marketingExpenses / 100);
+    } else {
+      fixedCostsTotal += stack.marketingExpenses;
     }
     
-    // Prevent division by zero or negative numbers by setting a minimum denominator
+    // Prevent division by zero or negative numbers
     let denominator = 1 - percentageTotalDeduction;
     
     if (denominator <= 0.01) {
@@ -76,28 +81,27 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       });
     }
     
-    // Calculate the final price needed to cover all percentage costs and reach required income
-    let finalPrice = totalRequiredIncome / denominator;
+    // Calculate the final price needed to cover all costs
+    // If we have percentage costs:
+    // finalPrice * (1 - percentages) = totalRequiredIncome + fixedCosts
+    let finalPrice;
     
-    // Add any fixed costs (non-percentage)
-    if (!stack.isReferralPercentage) {
-      finalPrice += stack.referralCosts;
+    if (percentageTotalDeduction > 0) {
+      finalPrice = (totalRequiredIncome + fixedCostsTotal) / denominator;
+    } else {
+      finalPrice = totalRequiredIncome + fixedCostsTotal;
     }
     
-    if (!stack.isAgencyFeesPercentage) {
-      finalPrice += stack.agencyFees;
-    }
-    
-    if (!stack.isMarketingPercentage) {
-      finalPrice += stack.marketingExpenses;
-    }
+    // Round up to nearest 50
+    finalPrice = Math.ceil(finalPrice / 50) * 50;
     
     console.log('Calculated price before returning:', { 
       finalPrice, 
       costWithContingency, 
       totalRequiredIncome,
       percentageTotalDeduction,
-      denominator 
+      denominator,
+      fixedCostsTotal
     });
     
     return {
@@ -122,7 +126,6 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       contingencyBuffer: stack.contingencyBuffer
     });
 
-    const modulesCost = stack.totalCost;
     const { finalPrice, costWithContingency, totalRequiredIncome } = calculateFinalPrice();
     
     // Now calculate the effective costs based on the final price
@@ -141,14 +144,14 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     // Total value capture costs
     const valueCaptureTotal = effectiveReferralCost + effectiveAgencyFees + effectiveMarketingExpenses;
     
-    // Verify calculation consistency - this is the key check
+    // Net revenue should exactly equal totalRequiredIncome
     const netRevenue = finalPrice - valueCaptureTotal;
     
     // Net profit = net revenue - cost with contingency
     const netProfit = netRevenue - costWithContingency;
     
-    // Margin percent = (net profit / modulesCost) * 100
-    const marginPercent = modulesCost > 0 ? (netProfit / modulesCost) * 100 : 0;
+    // Margin percent = (net profit / cost with contingency) * 100
+    const marginPercent = costWithContingency > 0 ? (netProfit / costWithContingency) * 100 : 0;
     
     console.log('Pricing calculation results:', {
       finalPrice,
@@ -164,13 +167,14 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     
     // Create a completely new stack object
     const updatedStack: Stack = {
-      ...JSON.parse(JSON.stringify(stack)), // Deep clone to ensure no references remain
+      ...stack,
       finalPrice,
       netProfit,
       marginPercent,
       effectiveReferralCost,
       effectiveAgencyFees,
-      effectiveMarketingExpenses
+      effectiveMarketingExpenses,
+      totalRequiredIncome // Add this new field to track the required net income
     };
     
     // Set the new stack with all calculated values
@@ -364,45 +368,59 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
             
             <div className="flex justify-between text-sm">
               <span>Total Net Revenue Required:</span>
-              <span>{currencySymbol}{(stack.totalCost * (1 + (stack.contingencyBuffer || 0) / 100) * (1 + stack.desiredMargin / 100)).toFixed(2)}</span>
+              <span>{currencySymbol}{(stack.totalRequiredIncome || 0).toFixed(2)}</span>
             </div>
             
             <div className="pt-2 border-t border-gray-200 mt-2">
               <h4 className="font-medium text-sm mb-2">Value Capture Costs:</h4>
               
-              {stack.isAgencyFeesPercentage ? (
-                <div className="flex justify-between text-sm">
-                  <span>Agency Fees ({stack.agencyFees}% of sales):</span>
-                  <span>{currencySymbol}{stack.effectiveAgencyFees?.toFixed(2) || "0.00"}</span>
-                </div>
-              ) : stack.agencyFees > 0 && (
+              {/* Fixed costs section */}
+              {!stack.isAgencyFeesPercentage && stack.agencyFees > 0 && (
                 <div className="flex justify-between text-sm">
                   <span>Agency Fees (fixed):</span>
                   <span>{currencySymbol}{stack.agencyFees.toFixed(2)}</span>
                 </div>
               )}
               
-              {stack.isReferralPercentage ? (
-                <div className="flex justify-between text-sm">
-                  <span>Referral Fee ({stack.referralCosts}% of sales):</span>
-                  <span>{currencySymbol}{stack.effectiveReferralCost?.toFixed(2) || "0.00"}</span>
-                </div>
-              ) : stack.referralCosts > 0 && (
+              {!stack.isReferralPercentage && stack.referralCosts > 0 && (
                 <div className="flex justify-between text-sm">
                   <span>Referral Fee (fixed):</span>
                   <span>{currencySymbol}{stack.referralCosts.toFixed(2)}</span>
                 </div>
               )}
               
-              {stack.isMarketingPercentage ? (
-                <div className="flex justify-between text-sm">
-                  <span>Marketing Expenses ({stack.marketingExpenses}% of sales):</span>
-                  <span>{currencySymbol}{stack.effectiveMarketingExpenses?.toFixed(2) || "0.00"}</span>
-                </div>
-              ) : stack.marketingExpenses > 0 && (
+              {!stack.isMarketingPercentage && stack.marketingExpenses > 0 && (
                 <div className="flex justify-between text-sm">
                   <span>Marketing Expenses (fixed):</span>
                   <span>{currencySymbol}{stack.marketingExpenses.toFixed(2)}</span>
+                </div>
+              )}
+              
+              {/* Percentage costs section - show after Total Net Revenue Required */}
+              {(stack.isAgencyFeesPercentage || stack.isReferralPercentage || stack.isMarketingPercentage) && (
+                <div className="pt-2 mt-1 space-y-2">
+                  <h4 className="font-medium text-sm">Percentage of Sales:</h4>
+                  
+                  {stack.isAgencyFeesPercentage && stack.agencyFees > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span>Agency Fees ({stack.agencyFees}% of sales):</span>
+                      <span>{currencySymbol}{stack.effectiveAgencyFees?.toFixed(2) || "0.00"}</span>
+                    </div>
+                  )}
+                  
+                  {stack.isReferralPercentage && stack.referralCosts > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span>Referral Fee ({stack.referralCosts}% of sales):</span>
+                      <span>{currencySymbol}{stack.effectiveReferralCost?.toFixed(2) || "0.00"}</span>
+                    </div>
+                  )}
+                  
+                  {stack.isMarketingPercentage && stack.marketingExpenses > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span>Marketing Expenses ({stack.marketingExpenses}% of sales):</span>
+                      <span>{currencySymbol}{stack.effectiveMarketingExpenses?.toFixed(2) || "0.00"}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -415,10 +433,6 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
               <div className="flex justify-between text-sm">
                 <span>Net Profit:</span>
                 <span>{currencySymbol}{stack.netProfit.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Actual Margin:</span>
-                <span>{stack.marginPercent.toFixed(1)}%</span>
               </div>
             </div>
           </div>
