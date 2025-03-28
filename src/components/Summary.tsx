@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Stack } from "@/types/stack";
 import { Button } from "@/components/ui/button";
@@ -45,12 +46,19 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
   const referralCostsValue = stack.isReferralPercentage ? stack.effectiveReferralCost : stack.referralCosts;
   const marketingExpensesValue = stack.isMarketingPercentage ? stack.effectiveMarketingExpenses : stack.marketingExpenses;
   
+  // Add contingency to the cost breakdown
+  const contingencyValue = (stack.totalCost * (stack.contingencyBuffer || 0) / 100);
+  
   const costBreakdown = [
     { name: "Modules", value: modulesCost },
-    { name: "Agency Fees", value: agencyFeesValue },
-    { name: "Referrals", value: referralCostsValue },
-    { name: "Marketing", value: marketingExpensesValue },
+    ...(contingencyValue > 0 ? [{ name: "Contingency", value: contingencyValue }] : []),
+    ...(agencyFeesValue > 0 ? [{ name: "Agency Fees", value: agencyFeesValue }] : []),
+    ...(referralCostsValue > 0 ? [{ name: "Referrals", value: referralCostsValue }] : []),
+    ...(marketingExpensesValue > 0 ? [{ name: "Marketing", value: marketingExpensesValue }] : []),
   ];
+
+  // Calculate the total value capture costs
+  const valueCaptureTotal = agencyFeesValue + referralCostsValue + marketingExpensesValue;
 
   const downloadPdf = () => {
     // This is a placeholder for PDF generation functionality
@@ -134,6 +142,7 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
                       (item.name === "Agency Fees" && stack.isAgencyFeesPercentage) ? ` (${stack.agencyFees}%)` : 
                       (item.name === "Referrals" && stack.isReferralPercentage) ? ` (${stack.referralCosts}%)` : 
                       (item.name === "Marketing" && stack.isMarketingPercentage) ? ` (${stack.marketingExpenses}%)` : 
+                      (item.name === "Contingency") ? ` (${stack.contingencyBuffer}%)` :
                       ''
                     }</span>
                     <span>{currencySymbol}{item.value.toFixed(2)}</span>
@@ -142,7 +151,7 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
                     <div
                       className="bg-[#9B87F5] h-full"
                       style={{
-                        width: `${(item.value / (stack.totalCost || 1)) * 100}%`,
+                        width: `${(item.value / (stack.finalPrice || 1)) * 100}%`,
                       }}
                     ></div>
                   </div>
@@ -156,17 +165,23 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
                   <span>Value Delivery Cost</span>
                   <span>{currencySymbol}{stack.totalCost.toFixed(2)}</span>
                 </div>
+                {stack.contingencyBuffer > 0 && (
+                  <div className="flex justify-between">
+                    <span>Contingency Buffer ({stack.contingencyBuffer}%)</span>
+                    <span>{currencySymbol}{contingencyValue.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>Desired Margin</span>
                   <span>{stack.desiredMargin}%</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Total Net Revenue</span>
-                  <span>{currencySymbol}{(stack.totalCost * (1 + stack.desiredMargin / 100)).toFixed(2)}</span>
+                  <span>{currencySymbol}{(stack.totalCost * (1 + (stack.contingencyBuffer || 0) / 100) * (1 + stack.desiredMargin / 100)).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Value Capture Cost</span>
-                  <span>{currencySymbol}{(agencyFeesValue + referralCostsValue + marketingExpensesValue).toFixed(2)}</span>
+                  <span>{currencySymbol}{valueCaptureTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Actual Margin</span>

@@ -100,7 +100,7 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     // Net profit = final price - total expenses
     const netProfit = finalPrice - totalExpenses;
     
-    // Margin percent = (net profit / cost) * 100
+    // Margin percent = (net profit / modulesCost) * 100
     const marginPercent = modulesCost > 0 ? (netProfit / modulesCost) * 100 : 0;
     
     // Update the stack with all calculated values
