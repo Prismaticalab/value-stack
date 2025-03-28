@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,34 +37,35 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       contingencyBuffer: stack.contingencyBuffer
     });
     
-    // Total cost of modules (X)
-    const modulesCost = stack.totalCost;
+    // Calculate base cost with contingency
+    const baseModulesCost = stack.totalCost;
+    const costWithContingency = baseModulesCost * (1 + (stack.contingencyBuffer || 0) / 100);
     
-    // Add contingency buffer if specified
-    const costWithContingency = modulesCost * (1 + (stack.contingencyBuffer || 0) / 100);
+    // Calculate the total required net revenue (before value capture costs)
+    const totalRequiredIncome = costWithContingency * (1 + stack.desiredMargin / 100);
     
-    // Calculate desired profit based on margin percentage (Y)
-    const desiredProfit = costWithContingency * (stack.desiredMargin / 100);
+    // For percentage-based costs, we need to adjust the formula
+    // If we have percentage costs, the formula becomes:
+    // finalPrice * (1 - percentageFee1 - percentageFee2...) = totalRequiredIncome
+    // Therefore: finalPrice = totalRequiredIncome / (1 - percentageFee1 - percentageFee2...)
     
-    // Total income required (Z = X + Y)
-    const totalRequiredIncome = costWithContingency + desiredProfit;
-    
-    // Calculate the denominator for percentage-based costs
-    let denominator = 1;
+    let percentageTotalDeduction = 0;
     
     if (stack.isReferralPercentage) {
-      denominator -= (stack.referralCosts / 100);
+      percentageTotalDeduction += (stack.referralCosts / 100);
     }
     
     if (stack.isAgencyFeesPercentage) {
-      denominator -= (stack.agencyFees / 100);
+      percentageTotalDeduction += (stack.agencyFees / 100);
     }
     
     if (stack.isMarketingPercentage) {
-      denominator -= (stack.marketingExpenses / 100);
+      percentageTotalDeduction += (stack.marketingExpenses / 100);
     }
     
-    // Prevent division by zero or negative numbers
+    // Prevent division by zero or negative numbers by setting a minimum denominator
+    let denominator = 1 - percentageTotalDeduction;
+    
     if (denominator <= 0.01) {
       denominator = 0.01; // Fallback to avoid errors
       
@@ -74,10 +76,10 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       });
     }
     
-    // Calculate final price with all fixed costs and percentage-based adjustments
+    // Calculate the final price needed to cover all percentage costs and reach required income
     let finalPrice = totalRequiredIncome / denominator;
     
-    // Add any fixed costs
+    // Add any fixed costs (non-percentage)
     if (!stack.isReferralPercentage) {
       finalPrice += stack.referralCosts;
     }
@@ -90,7 +92,13 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       finalPrice += stack.marketingExpenses;
     }
     
-    console.log('Calculated price before returning:', { finalPrice, costWithContingency, totalRequiredIncome });
+    console.log('Calculated price before returning:', { 
+      finalPrice, 
+      costWithContingency, 
+      totalRequiredIncome,
+      percentageTotalDeduction,
+      denominator 
+    });
     
     return {
       finalPrice,
@@ -115,7 +123,7 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     });
 
     const modulesCost = stack.totalCost;
-    const { finalPrice, costWithContingency } = calculateFinalPrice();
+    const { finalPrice, costWithContingency, totalRequiredIncome } = calculateFinalPrice();
     
     // Now calculate the effective costs based on the final price
     const effectiveReferralCost = stack.isReferralPercentage 
@@ -130,26 +138,31 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       ? finalPrice * (stack.marketingExpenses / 100) 
       : stack.marketingExpenses;
     
-    // Total cost including all expenses (including contingency)
-    const totalExpenses = costWithContingency + effectiveAgencyFees + effectiveReferralCost + effectiveMarketingExpenses;
+    // Total value capture costs
+    const valueCaptureTotal = effectiveReferralCost + effectiveAgencyFees + effectiveMarketingExpenses;
     
-    // Net profit = final price - total expenses
-    const netProfit = finalPrice - totalExpenses;
+    // Verify calculation consistency - this is the key check
+    const netRevenue = finalPrice - valueCaptureTotal;
+    
+    // Net profit = net revenue - cost with contingency
+    const netProfit = netRevenue - costWithContingency;
     
     // Margin percent = (net profit / modulesCost) * 100
     const marginPercent = modulesCost > 0 ? (netProfit / modulesCost) * 100 : 0;
     
     console.log('Pricing calculation results:', {
       finalPrice,
+      valueCaptureTotal,
+      netRevenue,
+      totalRequiredIncome, // This should equal netRevenue within rounding errors
       effectiveReferralCost,
       effectiveAgencyFees,
       effectiveMarketingExpenses,
       netProfit,
-      marginPercent,
-      totalExpenses
+      marginPercent
     });
     
-    // Create a completely new stack object - DO NOT KEEP ANY REFERENCE TO THE OLD ONE
+    // Create a completely new stack object
     const updatedStack: Stack = {
       ...JSON.parse(JSON.stringify(stack)), // Deep clone to ensure no references remain
       finalPrice,
@@ -159,12 +172,6 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       effectiveAgencyFees,
       effectiveMarketingExpenses
     };
-    
-    console.log('Setting updated stack with new values:', {
-      finalPrice: updatedStack.finalPrice,
-      netProfit: updatedStack.netProfit,
-      marginPercent: updatedStack.marginPercent
-    });
     
     // Set the new stack with all calculated values
     setStack(updatedStack);

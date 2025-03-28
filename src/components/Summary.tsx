@@ -1,3 +1,4 @@
+
 import React, { useMemo } from "react";
 import { Stack } from "@/types/stack";
 import { Button } from "@/components/ui/button";
@@ -48,12 +49,22 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
   const COLORS = ["#9B87F5", "#F8E16C"];
 
   // Calculate cost breakdown including value capture elements
-  const modulesCost = stack.modules.reduce((sum, module) => sum + module.cost, 0);
+  const modulesCost = useMemo(() => 
+    stack.modules.reduce((sum, module) => sum + module.cost, 0),
+  [stack.modules]);
   
   // Calculate the effective costs for display
-  const agencyFeesValue = stack.isAgencyFeesPercentage ? stack.effectiveAgencyFees : stack.agencyFees;
-  const referralCostsValue = stack.isReferralPercentage ? stack.effectiveReferralCost : stack.referralCosts;
-  const marketingExpensesValue = stack.isMarketingPercentage ? stack.effectiveMarketingExpenses : stack.marketingExpenses;
+  const agencyFeesValue = useMemo(() => 
+    stack.isAgencyFeesPercentage ? stack.effectiveAgencyFees : stack.agencyFees,
+  [stack.effectiveAgencyFees, stack.isAgencyFeesPercentage, stack.agencyFees]);
+  
+  const referralCostsValue = useMemo(() => 
+    stack.isReferralPercentage ? stack.effectiveReferralCost : stack.referralCosts,
+  [stack.effectiveReferralCost, stack.isReferralPercentage, stack.referralCosts]);
+  
+  const marketingExpensesValue = useMemo(() => 
+    stack.isMarketingPercentage ? stack.effectiveMarketingExpenses : stack.marketingExpenses,
+  [stack.effectiveMarketingExpenses, stack.isMarketingPercentage, stack.marketingExpenses]);
   
   // Add contingency to the cost breakdown
   const contingencyValue = useMemo(() => 
@@ -73,6 +84,14 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
   const valueCaptureTotal = useMemo(() => 
     agencyFeesValue + referralCostsValue + marketingExpensesValue,
   [agencyFeesValue, referralCostsValue, marketingExpensesValue]);
+
+  // Calculate total net revenue (cost with contingency + desired profit)
+  const totalNetRevenue = useMemo(() => 
+    stack.totalCost * (1 + (stack.contingencyBuffer || 0) / 100) * (1 + stack.desiredMargin / 100),
+  [stack.totalCost, stack.contingencyBuffer, stack.desiredMargin]);
+
+  // Verify calculation consistency
+  const netRevenue = useMemo(() => stack.finalPrice - valueCaptureTotal, [stack.finalPrice, valueCaptureTotal]);
 
   const downloadPdf = () => {
     // This is a placeholder for PDF generation functionality
