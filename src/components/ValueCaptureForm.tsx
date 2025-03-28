@@ -87,19 +87,32 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
 
   // Update final price, profit and margin calculations when any values change
   useEffect(() => {
+    // Force calculation to run
+    console.log('Recalculating pricing with:', {
+      totalCost: stack.totalCost,
+      referralCosts: stack.referralCosts,
+      isReferralPercentage: stack.isReferralPercentage,
+      agencyFees: stack.agencyFees,
+      isAgencyFeesPercentage: stack.isAgencyFeesPercentage,
+      marketingExpenses: stack.marketingExpenses,
+      isMarketingPercentage: stack.isMarketingPercentage,
+      desiredMargin: stack.desiredMargin,
+      contingencyBuffer: stack.contingencyBuffer
+    });
+
     const modulesCost = stack.totalCost;
-    const { finalPrice, costWithContingency, totalRequiredIncome } = calculateFinalPrice();
+    const { finalPrice, costWithContingency } = calculateFinalPrice();
     
     // Now calculate the effective costs based on the final price
-    let effectiveReferralCost = stack.isReferralPercentage 
+    const effectiveReferralCost = stack.isReferralPercentage 
       ? finalPrice * (stack.referralCosts / 100) 
       : stack.referralCosts;
       
-    let effectiveAgencyFees = stack.isAgencyFeesPercentage 
+    const effectiveAgencyFees = stack.isAgencyFeesPercentage 
       ? finalPrice * (stack.agencyFees / 100) 
       : stack.agencyFees;
       
-    let effectiveMarketingExpenses = stack.isMarketingPercentage 
+    const effectiveMarketingExpenses = stack.isMarketingPercentage 
       ? finalPrice * (stack.marketingExpenses / 100) 
       : stack.marketingExpenses;
     
@@ -118,12 +131,12 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       effectiveAgencyFees,
       effectiveMarketingExpenses,
       netProfit,
-      marginPercent
+      marginPercent,
+      totalExpenses
     });
     
-    // Update the stack with all calculated values
-    // Fix: Instead of using a function updater, directly provide the new stack object
-    setStack({
+    // Create a completely new stack object to ensure React detects the change
+    const updatedStack: Stack = {
       ...stack,
       finalPrice,
       netProfit,
@@ -131,12 +144,18 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       effectiveReferralCost,
       effectiveAgencyFees,
       effectiveMarketingExpenses
-    });
+    };
+    
+    // Set the new stack
+    setStack(updatedStack);
   }, [
     stack.totalCost, 
-    stack.agencyFees, stack.isAgencyFeesPercentage,
-    stack.referralCosts, stack.isReferralPercentage,
-    stack.marketingExpenses, stack.isMarketingPercentage,
+    stack.agencyFees, 
+    stack.isAgencyFeesPercentage,
+    stack.referralCosts, 
+    stack.isReferralPercentage,
+    stack.marketingExpenses, 
+    stack.isMarketingPercentage,
     stack.desiredMargin,
     stack.contingencyBuffer
   ]);
