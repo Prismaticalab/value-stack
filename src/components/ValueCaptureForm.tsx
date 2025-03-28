@@ -122,15 +122,16 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     });
     
     // Update the stack with all calculated values
-    setStack(prev => ({
-      ...prev,
+    // Fix: Instead of using a function updater, directly provide the new stack object
+    setStack({
+      ...stack,
       finalPrice,
       netProfit,
       marginPercent,
       effectiveReferralCost,
       effectiveAgencyFees,
       effectiveMarketingExpenses
-    }));
+    });
   }, [
     stack.totalCost, 
     stack.agencyFees, stack.isAgencyFeesPercentage,
