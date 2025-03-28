@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,16 +18,16 @@ import {
   DollarSign,
   Euro,
   PoundSterling,
-  Yen,
-  CurrencyRupee
+  IndianRupee,
+  JapaneseYen
 } from "lucide-react";
 
 const currencyOptions = [
   { value: "USD", label: "USD", icon: DollarSign },
   { value: "EUR", label: "EUR", icon: Euro },
   { value: "GBP", label: "GBP", icon: PoundSterling },
-  { value: "JPY", label: "JPY", icon: Yen },
-  { value: "INR", label: "INR", icon: CurrencyRupee },
+  { value: "JPY", label: "JPY", icon: JapaneseYen },
+  { value: "INR", label: "INR", icon: IndianRupee },
 ];
 
 const Index = () => {

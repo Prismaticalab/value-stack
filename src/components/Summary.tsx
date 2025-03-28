@@ -10,9 +10,10 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 interface SummaryProps {
   stack: Stack;
   onBack: () => void;
+  currencySymbol: string;
 }
 
-const Summary = ({ stack, onBack }: SummaryProps) => {
+const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
   // Calculate stakeholder distribution
   const internalModules = stack.modules.filter(
     (module) => module.stakeholder === "internal"
@@ -75,7 +76,7 @@ const Summary = ({ stack, onBack }: SummaryProps) => {
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold">{stack.name}</h1>
         <p className="text-sm text-gray-500">
-          {stack.modules.length} modules, ${stack.finalPrice.toFixed(2)} total price
+          {stack.modules.length} modules, {currencySymbol}{stack.finalPrice.toFixed(2)} total price
         </p>
       </div>
 
@@ -107,7 +108,7 @@ const Summary = ({ stack, onBack }: SummaryProps) => {
                       />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                  <Tooltip formatter={(value: any) => `${currencySymbol}${Number(value).toFixed(2)}`} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -125,7 +126,7 @@ const Summary = ({ stack, onBack }: SummaryProps) => {
                 <div key={item.name}>
                   <div className="flex justify-between text-sm mb-1">
                     <span>{item.name}</span>
-                    <span>${item.value.toFixed(2)}</span>
+                    <span>{currencySymbol}{item.value.toFixed(2)}</span>
                   </div>
                   <div className="bg-gray-100 h-2 rounded-full overflow-hidden">
                     <div
@@ -143,7 +144,7 @@ const Summary = ({ stack, onBack }: SummaryProps) => {
               <div className="space-y-2">
                 <div className="flex justify-between font-medium">
                   <span>Total Cost</span>
-                  <span>${stack.totalCost.toFixed(2)}</span>
+                  <span>{currencySymbol}{stack.totalCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Desired Margin</span>
@@ -155,11 +156,11 @@ const Summary = ({ stack, onBack }: SummaryProps) => {
                 </div>
                 <div className="flex justify-between font-medium text-[#9B87F5]">
                   <span>Final Price</span>
-                  <span>${stack.finalPrice.toFixed(2)}</span>
+                  <span>{currencySymbol}{stack.finalPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Net Profit</span>
-                  <span>${stack.netProfit.toFixed(2)}</span>
+                  <span>{currencySymbol}{stack.netProfit.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -194,7 +195,7 @@ const Summary = ({ stack, onBack }: SummaryProps) => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="font-medium">${module.cost.toFixed(2)}</span>
+                    <span className="font-medium">{currencySymbol}{module.cost.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
