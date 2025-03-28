@@ -1,11 +1,14 @@
 
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import { Stack } from "@/types/stack";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Download } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { useToast } from "@/components/ui/use-toast";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface SummaryProps {
   stack: Stack;
@@ -14,6 +17,9 @@ interface SummaryProps {
 }
 
 const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
+  const { toast } = useToast();
+  const summaryRef = useRef<HTMLDivElement>(null);
+  
   console.log('Summary component rendering with stack values:', {
     finalPrice: stack.finalPrice,
     netProfit: stack.netProfit, 
@@ -93,9 +99,63 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
   // Verify calculation consistency
   const netRevenue = useMemo(() => stack.finalPrice - valueCaptureTotal, [stack.finalPrice, valueCaptureTotal]);
 
-  const downloadPdf = () => {
-    // This is a placeholder for PDF generation functionality
-    alert("PDF generation would be implemented here");
+  const downloadPdf = async () => {
+    if (summaryRef.current) {
+      toast({
+        title: "Generating PDF",
+        description: "Please wait while we generate your PDF...",
+      });
+      
+      try {
+        // Create instance of jsPDF
+        const pdf = new jsPDF("p", "mm", "a4");
+        
+        // Get the content of the div
+        const canvas = await html2canvas(summaryRef.current, {
+          scale: 2,  // Higher scale for better quality
+          useCORS: true,
+          logging: false,
+          backgroundColor: "#ffffff"
+        });
+        
+        // Convert the canvas to an image
+        const imgData = canvas.toDataURL("image/png");
+        
+        // Calculate the width and height of the PDF
+        const imgWidth = 210; // A4 width in mm
+        const pageHeight = 297; // A4 height in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+        
+        // Add image to PDF
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        
+        // Add new pages if the content doesn't fit on one page
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+        
+        // Save the PDF with a meaningful filename
+        pdf.save(`${stack.name.replace(/\s+/g, "-")}_project-quote.pdf`);
+        
+        toast({
+          title: "PDF Generated",
+          description: "Your PDF has been successfully generated and downloaded.",
+        });
+      } catch (error) {
+        console.error("Error generating PDF:", error);
+        toast({
+          title: "Error",
+          description: "Failed to generate PDF. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   // Ensure we're using the most up-to-date data from props
@@ -113,7 +173,7 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" ref={summaryRef}>
       <div className="flex justify-between items-center">
         <Button
           variant="outline"
@@ -229,10 +289,6 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
                 <div className="flex justify-between">
                   <span>Value Capture Cost</span>
                   <span>{currencySymbol}{valueCaptureTotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Actual Margin</span>
-                  <span>{marginPercent.toFixed(1)}%</span>
                 </div>
                 <div className="flex justify-between font-medium text-[#9B87F5]">
                   <span>Suggested Sale Price</span>
