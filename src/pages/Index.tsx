@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,8 @@ const Index = () => {
     marginPercent: 0,
     createdAt: new Date().toISOString(),
     currency: "USD",
+    isReferralPercentage: false,
+    effectiveReferralCost: 0,
   });
   const [savedStacks, setSavedStacks] = useState<Stack[]>([]);
   const { toast } = useToast();
@@ -86,6 +89,8 @@ const Index = () => {
       marginPercent: 0,
       createdAt: new Date().toISOString(),
       currency: currentStack.currency,
+      isReferralPercentage: false,
+      effectiveReferralCost: 0,
     });
     setView("builder");
   };

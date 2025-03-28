@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import ModuleCard from "./ModuleCard";
 import ValueCaptureForm from "./ValueCaptureForm";
 import { Stack, Module } from "@/types/stack";
@@ -46,20 +45,14 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
       return sum + module.cost;
     }, 0);
     
-    const totalCost = totalDeliveryCost + stack.agencyFees + stack.referralCosts + stack.marketingExpenses;
-    
-    const marginMultiplier = 1 + (stack.desiredMargin / 100);
-    const finalPrice = totalCost * marginMultiplier;
-    
-    const netProfit = finalPrice - totalCost;
-    const marginPercent = totalCost > 0 ? (netProfit / totalCost) * 100 : 0;
+    // Just calculate the base cost for now
+    // The ValueCaptureForm component will handle the more complex calculations
+    // with referral percentage and final pricing
+    const totalCost = totalDeliveryCost;
     
     setStack({
       ...stack,
       totalCost,
-      finalPrice,
-      netProfit,
-      marginPercent
     });
   };
 
@@ -204,14 +197,6 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-medium">Modules</h2>
-            <Button 
-              onClick={addNewModule}
-              className="bg-[#9B87F5] hover:bg-[#8A76E4] flex items-center gap-1"
-              disabled={stack.locked}
-            >
-              <Plus size={16} />
-              Add Module
-            </Button>
           </div>
 
           {stack.modules.length === 0 ? (
@@ -243,7 +228,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
                         onDuplicate={duplicateModule}
                         isLocked={stack.locked}
                         currencySymbol={currencySymbol}
-                        onAddNewModule={addNewModule}
+                        // We no longer pass the addNewModule function to ModuleCard components
                       />
                     ))}
                     {provided.placeholder}
@@ -253,22 +238,33 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
             </DragDropContext>
           )}
           
+          {/* Add Module button now appears at the bottom of the page */}
+          {!stack.locked && stack.modules.length > 0 && (
+            <div className="flex justify-center mt-6">
+              <Button 
+                className="bg-[#9B87F5] hover:bg-[#8A76E4] flex items-center gap-1 mr-4"
+                onClick={addNewModule}
+              >
+                <Plus size={16} />
+                Add Module
+              </Button>
+              
+              <Button 
+                className="bg-[#9B87F5] hover:bg-[#8A76E4] flex items-center gap-1"
+                onClick={goToPricing}
+              >
+                <ArrowRight size={16} />
+                Go to Pricing
+              </Button>
+            </div>
+          )}
+          
+          {/* Show total cost at bottom if modules exist */}
           {stack.modules.length > 0 && (
             <div className="pt-4">
               <div className="flex justify-between items-center text-sm font-medium">
                 <span>Total Delivery Cost:</span>
                 <span>{currencySymbol}{stack.totalCost.toFixed(2)}</span>
-              </div>
-              
-              {/* Add Go To Pricing button at the bottom */}
-              <div className="flex justify-center mt-6">
-                <Button 
-                  className="bg-[#9B87F5] hover:bg-[#8A76E4] flex items-center gap-1 px-8"
-                  onClick={goToPricing}
-                >
-                  <ArrowRight size={16} />
-                  Go to Pricing
-                </Button>
               </div>
             </div>
           )}

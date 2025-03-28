@@ -28,4 +28,6 @@ export interface Stack {
   marginPercent: number;
   createdAt: string;
   currency: string;
+  isReferralPercentage: boolean;
+  effectiveReferralCost: number;
 }
