@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,7 +51,6 @@ const Index = () => {
   const { toast } = useToast();
 
   const saveStack = () => {
-    // Check if stack exists, update it, otherwise add new
     const exists = savedStacks.findIndex(stack => stack.id === currentStack.id);
     let updatedStacks;
     
@@ -133,7 +131,7 @@ const Index = () => {
     <div className="min-h-screen bg-white">
       <header className="border-b border-gray-100 py-4 px-4 md:px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-black">Stack Builder</h1>
+          <h1 className="text-2xl font-semibold text-black">Project Stack Builder</h1>
           <div className="flex items-center space-x-4">
             <div className="hidden sm:block">
               <Select 
