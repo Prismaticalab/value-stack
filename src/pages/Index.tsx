@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,8 @@ const Index = () => {
     effectiveAgencyFees: 0,
     isMarketingPercentage: false,
     effectiveMarketingExpenses: 0,
-    contingencyBuffer: 0
+    contingencyBuffer: 0,
+    totalRequiredIncome: 0  // Added this missing property
   });
   const [savedStacks, setSavedStacks] = useState<Stack[]>([]);
   const { toast } = useToast();
@@ -127,7 +129,8 @@ const Index = () => {
       effectiveAgencyFees: 0,
       isMarketingPercentage: false,
       effectiveMarketingExpenses: 0,
-      contingencyBuffer: 0
+      contingencyBuffer: 0,
+      totalRequiredIncome: 0  // Added this missing property
     });
     setView("builder");
   };
