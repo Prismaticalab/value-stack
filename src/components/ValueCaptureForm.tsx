@@ -21,46 +21,65 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
   };
 
   const calculateFinalPrice = () => {
-    // If referral costs are a percentage, we need to adjust the final price calculation
+    // Total cost of modules (X)
+    const modulesCost = stack.totalCost;
+    
+    // Calculate desired profit based on margin percentage (Y)
+    const desiredProfit = modulesCost * (stack.desiredMargin / 100);
+    
+    // Total income required (Z = X + Y)
+    const totalRequiredIncome = modulesCost + desiredProfit;
+    
+    // Additional costs (agency fees, marketing expenses) - these are part of costs, not affecting sale price calculation
+    const additionalCosts = stack.agencyFees + stack.marketingExpenses;
+    
+    // If referral is a percentage, we need to "gross up" the price
+    // Sale Price (S) should be such that S - M = Z
     if (stack.isReferralPercentage) {
-      // When referral is a percentage, we need to "gross up" the price
-      // so that after deducting the referral %, we still hit our target margin
-      const referralMultiplier = 1 - (stack.referralCosts / 100);
-      if (referralMultiplier <= 0) return stack.totalCost * (1 + (stack.desiredMargin / 100));
-      
-      // Calculate price needed to achieve desired margin after referral percentage is deducted
-      const basePrice = stack.totalCost * (1 + (stack.desiredMargin / 100));
-      return basePrice / referralMultiplier;
+      // When referral is percentage, S - (S * percentage) = Z
+      // Which means S * (1 - percentage/100) = Z
+      // Therefore S = Z / (1 - percentage/100)
+      const referralPercentDecimal = stack.referralCosts / 100;
+      if (referralPercentDecimal >= 1) {
+        // Cannot have 100% or more as referral percentage
+        return totalRequiredIncome + additionalCosts;
+      }
+      return totalRequiredIncome / (1 - referralPercentDecimal);
     } else {
-      // Standard calculation for fixed costs
-      const totalCost = stack.totalCost + stack.agencyFees + stack.referralCosts + stack.marketingExpenses;
-      return totalCost * (1 + (stack.desiredMargin / 100));
+      // For fixed referral cost:
+      // S - fixedReferral = Z
+      // S = Z + fixedReferral
+      return totalRequiredIncome + stack.referralCosts + additionalCosts;
     }
   };
 
   // Update final price, profit and margin calculations when any values change
   React.useEffect(() => {
+    const modulesCost = stack.totalCost;
     const finalPrice = calculateFinalPrice();
-    let totalCostForMargin;
-    let referralCostAmount;
+    let effectiveReferralCost;
     
     if (stack.isReferralPercentage) {
-      referralCostAmount = finalPrice * (stack.referralCosts / 100);
-      totalCostForMargin = stack.totalCost + stack.agencyFees + referralCostAmount + stack.marketingExpenses;
+      effectiveReferralCost = finalPrice * (stack.referralCosts / 100);
     } else {
-      totalCostForMargin = stack.totalCost + stack.agencyFees + stack.referralCosts + stack.marketingExpenses;
-      referralCostAmount = stack.referralCosts;
+      effectiveReferralCost = stack.referralCosts;
     }
     
-    const netProfit = finalPrice - totalCostForMargin;
-    const marginPercent = totalCostForMargin > 0 ? (netProfit / totalCostForMargin) * 100 : 0;
+    // Total cost including all expenses
+    const totalExpenses = modulesCost + stack.agencyFees + effectiveReferralCost + stack.marketingExpenses;
+    
+    // Net profit = final price - total expenses
+    const netProfit = finalPrice - totalExpenses;
+    
+    // Margin percent = (net profit / cost) * 100
+    const marginPercent = modulesCost > 0 ? (netProfit / modulesCost) * 100 : 0;
     
     setStack({
       ...stack,
       finalPrice,
       netProfit,
       marginPercent,
-      effectiveReferralCost: referralCostAmount
+      effectiveReferralCost
     });
   }, [stack.totalCost, stack.agencyFees, stack.referralCosts, stack.marketingExpenses, 
       stack.desiredMargin, stack.isReferralPercentage]);
