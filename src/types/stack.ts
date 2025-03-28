@@ -35,4 +35,5 @@ export interface Stack {
   isMarketingPercentage: boolean;
   effectiveMarketingExpenses: number;
   contingencyBuffer: number;
+  totalRequiredIncome: number; // Added the missing property
 }
