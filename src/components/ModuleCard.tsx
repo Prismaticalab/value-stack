@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Module } from "@/types/stack";
 import { Draggable } from "react-beautiful-dnd";
-import { Copy, Trash, GripVertical, AlertCircle } from "lucide-react";
+import { Copy, Trash, GripVertical, AlertCircle, Check, Clock, Plus, ArrowRight } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -22,6 +22,17 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 export interface ModuleCardProps {
   module: Module;
@@ -31,6 +42,8 @@ export interface ModuleCardProps {
   onDuplicate: (moduleId: string) => void;
   isLocked: boolean;
   currencySymbol: string;
+  onGoToPricing?: () => void;
+  onAddNewModule?: () => void;
 }
 
 const ModuleCard = ({
@@ -40,10 +53,46 @@ const ModuleCard = ({
   onDelete,
   onDuplicate,
   isLocked,
-  currencySymbol
+  currencySymbol,
+  onGoToPricing,
+  onAddNewModule
 }: ModuleCardProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [saved, setSaved] = useState(false);
+  const [showValidationAlert, setShowValidationAlert] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
+  const { toast } = useToast();
+
+  const validateModule = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    const missing: string[] = [];
+
+    if (!module.name) {
+      newErrors.name = "Module name is required";
+      missing.push("Module Name");
+    }
+    
+    if (!module.value) {
+      newErrors.value = "Value description is required";
+      missing.push("Value Delivered");
+    }
+
+    if (!module.stakeholderName) {
+      newErrors.stakeholderName = "Stakeholder name is required";
+      missing.push("Stakeholder Name");
+    }
+
+    if (!module.stakeholder) {
+      newErrors.stakeholder = "Stakeholder type is required";
+      missing.push("Stakeholder Type");
+    }
+
+    setErrors(newErrors);
+    setMissingFields(missing);
+
+    return Object.keys(newErrors).length === 0;
+  };
 
   const validateField = (field: string, value: any): string => {
     if (field === "name" && !value) {
@@ -54,6 +103,9 @@ const ModuleCard = ({
     }
     if (field === "stakeholderName" && !value) {
       return "Stakeholder name is required";
+    }
+    if (field === "stakeholder" && !value) {
+      return "Stakeholder type is required";
     }
     return "";
   };
@@ -105,13 +157,26 @@ const ModuleCard = ({
     return module.stakeholder === "internal" ? "bg-blue-100 text-blue-800" : "bg-amber-100 text-amber-800";
   };
 
+  const handleSaveModule = () => {
+    if (validateModule()) {
+      setSaved(true);
+      setIsExpanded(false);
+      toast({
+        title: "Module saved",
+        description: "Module has been added to your stack."
+      });
+    } else {
+      setShowValidationAlert(true);
+    }
+  };
+
   return (
-    <Draggable draggableId={module.id} index={index} isDragDisabled={isLocked}>
+    <Draggable draggableId={module.id} index={index} isDragDisabled={isLocked || saved}>
       {(provided) => (
         <Card
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className="border-gray-200 bg-white"
+          className={`border-gray-200 bg-white ${saved ? 'border-l-4 border-l-green-500' : ''}`}
         >
           <CardContent className="p-4">
             <div className="flex justify-between items-center gap-2">
@@ -128,7 +193,7 @@ const ModuleCard = ({
                   onChange={(e) => handleChange("name", e.target.value)}
                   placeholder="Module name (required)"
                   className={errors.name ? "border-red-500" : ""}
-                  disabled={isLocked}
+                  disabled={isLocked || saved}
                 />
                 {errors.name && (
                   <p className="text-xs text-red-500 mt-1">{errors.name}</p>
@@ -136,39 +201,51 @@ const ModuleCard = ({
               </div>
               
               <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onDuplicate(module.id)}
-                  className="h-8 w-8 p-0"
-                  disabled={isLocked}
-                >
-                  <Copy size={16} />
-                  <span className="sr-only">Duplicate</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onDelete(module.id)}
-                  className="h-8 w-8 p-0 hover:text-red-500"
-                  disabled={isLocked}
-                >
-                  <Trash size={16} />
-                  <span className="sr-only">Delete</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="h-8 px-2 text-xs"
-                  disabled={isLocked}
-                >
-                  {isExpanded ? "Collapse" : "Expand"}
-                </Button>
+                {!saved && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onDuplicate(module.id)}
+                      className="h-8 w-8 p-0"
+                      disabled={isLocked}
+                    >
+                      <Copy size={16} />
+                      <span className="sr-only">Duplicate</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onDelete(module.id)}
+                      className="h-8 w-8 p-0 hover:text-red-500"
+                      disabled={isLocked}
+                    >
+                      <Trash size={16} />
+                      <span className="sr-only">Delete</span>
+                    </Button>
+                  </>
+                )}
+                {!saved && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="h-8 px-2 text-xs"
+                    disabled={isLocked}
+                  >
+                    {isExpanded ? "Collapse" : "Expand"}
+                  </Button>
+                )}
+                {saved && (
+                  <div className="flex items-center text-green-600">
+                    <Check size={16} className="mr-1" />
+                    <span className="text-xs font-medium">Saved</span>
+                  </div>
+                )}
               </div>
             </div>
 
-            {isExpanded && (
+            {isExpanded && !saved && (
               <div className="mt-4 space-y-4">
                 <div>
                   <label htmlFor={`value-${module.id}`} className="block text-sm font-medium text-gray-700 mb-1">
@@ -377,8 +454,84 @@ const ModuleCard = ({
                     </Select>
                   </div>
                 </div>
+
+                <div className="pt-4">
+                  <Button 
+                    className="w-full bg-[#9B87F5] hover:bg-[#8A76E4]"
+                    onClick={handleSaveModule}
+                  >
+                    Save Module to Stack
+                  </Button>
+                </div>
               </div>
             )}
+
+            {saved && (
+              <div className="mt-4 space-y-3">
+                {module.stakeholderName && (
+                  <div className="text-sm">
+                    <span className="font-medium">Stakeholder:</span> {module.stakeholderName}{' '}
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${getStakeholderBadgeColor()}`}>
+                      {module.stakeholder === "internal" ? "Internal" : "External"}
+                    </span>
+                  </div>
+                )}
+                
+                {module.costType && (
+                  <div className="text-sm">
+                    <span className="font-medium">Cost:</span> {currencySymbol}{calculateTotalCost().toFixed(2)}
+                  </div>
+                )}
+
+                {module.timeImpact && (
+                  <div className="text-sm">
+                    <span className="font-medium">Time:</span> {module.timeImpact} {module.timeUnit}
+                  </div>
+                )}
+
+                <div className="flex space-x-3 pt-3">
+                  {onAddNewModule && (
+                    <Button 
+                      variant="outline"
+                      onClick={onAddNewModule}
+                      className="flex-1"
+                    >
+                      <Plus size={16} className="mr-1" />
+                      Add Module
+                    </Button>
+                  )}
+                  
+                  {onGoToPricing && (
+                    <Button 
+                      className="flex-1 bg-[#9B87F5] hover:bg-[#8A76E4]"
+                      onClick={onGoToPricing}
+                    >
+                      <ArrowRight size={16} className="mr-1" />
+                      Go to Pricing
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <AlertDialog open={showValidationAlert} onOpenChange={setShowValidationAlert}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Incomplete Module</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Please fill in all required fields before saving:
+                    <ul className="list-disc pl-5 mt-2">
+                      {missingFields.map((field, index) => (
+                        <li key={index} className="text-red-500">{field}</li>
+                      ))}
+                    </ul>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogAction>Okay</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </CardContent>
         </Card>
       )}

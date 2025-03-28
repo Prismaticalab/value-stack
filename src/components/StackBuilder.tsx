@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import ValueCaptureForm from "./ValueCaptureForm";
 import { Stack, Module } from "@/types/stack";
 import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
 import { Plus, Save, FileText } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface StackBuilderProps {
   stack: Stack;
@@ -134,6 +135,14 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
     }
   };
 
+  const goToPricing = () => {
+    setValueCaptureView(true);
+    toast({
+      title: "Ready to set pricing",
+      description: "Now you can set your pricing and margins."
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
@@ -219,6 +228,8 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
                         onDuplicate={duplicateModule}
                         isLocked={stack.locked}
                         currencySymbol={currencySymbol}
+                        onGoToPricing={goToPricing}
+                        onAddNewModule={addNewModule}
                       />
                     ))}
                     {provided.placeholder}
@@ -234,17 +245,6 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
                 <span>Total Delivery Cost:</span>
                 <span>{currencySymbol}{stack.totalCost.toFixed(2)}</span>
               </div>
-              
-              {stack.modules.length > 1 && !stack.locked && (
-                <div className="flex justify-end mt-4">
-                  <Button 
-                    onClick={toggleLock}
-                    className="bg-[#9B87F5] hover:bg-[#8A76E4]"
-                  >
-                    Complete & Set Pricing
-                  </Button>
-                </div>
-              )}
             </div>
           )}
         </div>
