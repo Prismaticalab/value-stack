@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useMemo } from "react";
 import { Stack } from "@/types/stack";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -47,23 +47,38 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
   const marketingExpensesValue = stack.isMarketingPercentage ? stack.effectiveMarketingExpenses : stack.marketingExpenses;
   
   // Add contingency to the cost breakdown
-  const contingencyValue = (stack.totalCost * (stack.contingencyBuffer || 0) / 100);
+  const contingencyValue = useMemo(() => 
+    (stack.totalCost * (stack.contingencyBuffer || 0) / 100), 
+  [stack.totalCost, stack.contingencyBuffer]);
   
-  const costBreakdown = [
+  // Create cost breakdown items, only including items with values > 0
+  const costBreakdown = useMemo(() => [
     { name: "Modules", value: modulesCost },
     ...(contingencyValue > 0 ? [{ name: "Contingency", value: contingencyValue }] : []),
     ...(agencyFeesValue > 0 ? [{ name: "Agency Fees", value: agencyFeesValue }] : []),
     ...(referralCostsValue > 0 ? [{ name: "Referrals", value: referralCostsValue }] : []),
     ...(marketingExpensesValue > 0 ? [{ name: "Marketing", value: marketingExpensesValue }] : []),
-  ];
+  ], [modulesCost, contingencyValue, agencyFeesValue, referralCostsValue, marketingExpensesValue]);
 
   // Calculate the total value capture costs
-  const valueCaptureTotal = agencyFeesValue + referralCostsValue + marketingExpensesValue;
+  const valueCaptureTotal = useMemo(() => 
+    agencyFeesValue + referralCostsValue + marketingExpensesValue,
+  [agencyFeesValue, referralCostsValue, marketingExpensesValue]);
 
   const downloadPdf = () => {
     // This is a placeholder for PDF generation functionality
     alert("PDF generation would be implemented here");
   };
+
+  console.log('Summary rendering with values:', {
+    effectiveReferralCost: stack.effectiveReferralCost,
+    referralCostsValue,
+    agencyFeesValue,
+    marketingExpensesValue,
+    finalPrice: stack.finalPrice,
+    netProfit: stack.netProfit,
+    marginPercent: stack.marginPercent
+  });
 
   return (
     <div className="space-y-6">

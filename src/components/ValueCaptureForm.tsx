@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Stack } from "@/types/stack";
 import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 
 interface ValueCaptureFormProps {
   stack: Stack;
@@ -13,6 +14,8 @@ interface ValueCaptureFormProps {
 }
 
 const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormProps) => {
+  const { toast } = useToast();
+  
   const handleChange = (field: string, value: number | boolean) => {
     setStack({
       ...stack,
@@ -51,6 +54,12 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     // Prevent division by zero or negative numbers
     if (denominator <= 0.01) {
       denominator = 0.01; // Fallback to avoid errors
+      
+      toast({
+        title: "Warning",
+        description: "The percentage costs are too high. Adjusting calculations to prevent errors.",
+        variant: "destructive"
+      });
     }
     
     // Calculate final price with all fixed costs and percentage-based adjustments
@@ -103,16 +112,25 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     // Margin percent = (net profit / modulesCost) * 100
     const marginPercent = modulesCost > 0 ? (netProfit / modulesCost) * 100 : 0;
     
+    console.log('Pricing calculation update:', {
+      finalPrice,
+      effectiveReferralCost,
+      effectiveAgencyFees,
+      effectiveMarketingExpenses,
+      netProfit,
+      marginPercent
+    });
+    
     // Update the stack with all calculated values
-    setStack({
-      ...stack,
+    setStack(prev => ({
+      ...prev,
       finalPrice,
       netProfit,
       marginPercent,
       effectiveReferralCost,
       effectiveAgencyFees,
       effectiveMarketingExpenses
-    });
+    }));
   }, [
     stack.totalCost, 
     stack.agencyFees, stack.isAgencyFeesPercentage,
