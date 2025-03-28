@@ -51,7 +51,8 @@ const Index = () => {
     isAgencyFeesPercentage: false,
     effectiveAgencyFees: 0,
     isMarketingPercentage: false,
-    effectiveMarketingExpenses: 0
+    effectiveMarketingExpenses: 0,
+    contingencyBuffer: 0
   });
   const [savedStacks, setSavedStacks] = useState<Stack[]>([]);
   const { toast } = useToast();
@@ -97,7 +98,8 @@ const Index = () => {
       isAgencyFeesPercentage: false,
       effectiveAgencyFees: 0,
       isMarketingPercentage: false,
-      effectiveMarketingExpenses: 0
+      effectiveMarketingExpenses: 0,
+      contingencyBuffer: 0
     });
     setView("builder");
   };

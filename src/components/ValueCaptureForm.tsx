@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -24,37 +24,14 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     // Total cost of modules (X)
     const modulesCost = stack.totalCost;
     
+    // Add contingency buffer if specified
+    const costWithContingency = modulesCost * (1 + (stack.contingencyBuffer || 0) / 100);
+    
     // Calculate desired profit based on margin percentage (Y)
-    const desiredProfit = modulesCost * (stack.desiredMargin / 100);
+    const desiredProfit = costWithContingency * (stack.desiredMargin / 100);
     
     // Total income required (Z = X + Y)
-    const totalRequiredIncome = modulesCost + desiredProfit;
-    
-    // Additional costs calculations - handle each one based on whether it's percentage or fixed
-    let effectiveAgencyFees;
-    let effectiveReferralCosts;
-    let effectiveMarketingExpenses;
-    
-    // Calculate agency fees
-    if (stack.isAgencyFeesPercentage) {
-      // We need to calculate this based on final price, which we don't know yet
-      // This will be calculated after we determine the final price
-      effectiveAgencyFees = 0; // Placeholder, will be updated
-    } else {
-      effectiveAgencyFees = stack.agencyFees;
-    }
-    
-    // Calculate marketing expenses
-    if (stack.isMarketingPercentage) {
-      // We need to calculate this based on final price, which we don't know yet
-      // This will be calculated after we determine the final price
-      effectiveMarketingExpenses = 0; // Placeholder, will be updated
-    } else {
-      effectiveMarketingExpenses = stack.marketingExpenses;
-    }
-    
-    // If referral or other costs are percentages, we need to "gross up" the price
-    // Sale Price (S) should be such that S - M = Z
+    const totalRequiredIncome = costWithContingency + desiredProfit;
     
     // Calculate the denominator for percentage-based costs
     let denominator = 1;
@@ -72,7 +49,7 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     }
     
     // Prevent division by zero or negative numbers
-    if (denominator <= 0) {
+    if (denominator <= 0.01) {
       denominator = 0.01; // Fallback to avoid errors
     }
     
@@ -92,13 +69,17 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       finalPrice += stack.marketingExpenses;
     }
     
-    return finalPrice;
+    return {
+      finalPrice,
+      costWithContingency,
+      totalRequiredIncome
+    };
   };
 
   // Update final price, profit and margin calculations when any values change
-  React.useEffect(() => {
+  useEffect(() => {
     const modulesCost = stack.totalCost;
-    const finalPrice = calculateFinalPrice();
+    const { finalPrice, costWithContingency, totalRequiredIncome } = calculateFinalPrice();
     
     // Now calculate the effective costs based on the final price
     let effectiveReferralCost = stack.isReferralPercentage 
@@ -113,8 +94,8 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       ? finalPrice * (stack.marketingExpenses / 100) 
       : stack.marketingExpenses;
     
-    // Total cost including all expenses
-    const totalExpenses = modulesCost + effectiveAgencyFees + effectiveReferralCost + effectiveMarketingExpenses;
+    // Total cost including all expenses (including contingency)
+    const totalExpenses = costWithContingency + effectiveAgencyFees + effectiveReferralCost + effectiveMarketingExpenses;
     
     // Net profit = final price - total expenses
     const netProfit = finalPrice - totalExpenses;
@@ -137,7 +118,8 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     stack.agencyFees, stack.isAgencyFeesPercentage,
     stack.referralCosts, stack.isReferralPercentage,
     stack.marketingExpenses, stack.isMarketingPercentage,
-    stack.desiredMargin
+    stack.desiredMargin,
+    stack.contingencyBuffer
   ]);
 
   return (
@@ -148,6 +130,29 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <div className="flex justify-between items-center mb-2">
+            <Label htmlFor="contingencyBuffer" className="text-sm font-medium">
+              Contingency Buffer (%)
+            </Label>
+          </div>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <span className="text-gray-500">%</span>
+            </div>
+            <Input
+              id="contingencyBuffer"
+              type="number"
+              min="0"
+              step="1"
+              max="100"
+              value={stack.contingencyBuffer || 0}
+              onChange={(e) => handleChange("contingencyBuffer", parseFloat(e.target.value) || 0)}
+              className="pl-7 border-gray-200"
+            />
+          </div>
+        </div>
+
         <div className="space-y-2">
           <div className="flex justify-between items-center mb-2">
             <Label htmlFor="agencyFees" className="text-sm font-medium">
@@ -258,7 +263,7 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
         </div>
         <Slider
           id="desiredMargin"
-          min={10}
+          min={0}
           max={300}
           step={1}
           value={[stack.desiredMargin]}
@@ -273,13 +278,27 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
               <span>Value Delivery Cost:</span>
               <span>{currencySymbol}{stack.totalCost.toFixed(2)}</span>
             </div>
+            
+            {stack.contingencyBuffer > 0 && (
+              <div className="flex justify-between text-sm">
+                <span>Contingency Buffer ({stack.contingencyBuffer}%):</span>
+                <span>{currencySymbol}{(stack.totalCost * (stack.contingencyBuffer / 100)).toFixed(2)}</span>
+              </div>
+            )}
+            
+            <div className="flex justify-between text-sm">
+              <span>Cost with Contingency:</span>
+              <span>{currencySymbol}{(stack.totalCost * (1 + (stack.contingencyBuffer || 0) / 100)).toFixed(2)}</span>
+            </div>
+            
             <div className="flex justify-between text-sm">
               <span>Desired Margin:</span>
               <span>{stack.desiredMargin}%</span>
             </div>
+            
             <div className="flex justify-between text-sm">
               <span>Total Net Revenue Required:</span>
-              <span>{currencySymbol}{(stack.totalCost * (1 + stack.desiredMargin / 100)).toFixed(2)}</span>
+              <span>{currencySymbol}{(stack.totalCost * (1 + (stack.contingencyBuffer || 0) / 100) * (1 + stack.desiredMargin / 100)).toFixed(2)}</span>
             </div>
             
             <div className="pt-2 border-t border-gray-200 mt-2">
@@ -300,7 +319,7 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
               {stack.isReferralPercentage ? (
                 <div className="flex justify-between text-sm">
                   <span>Referral Fee ({stack.referralCosts}% of sales):</span>
-                  <span>{currencySymbol}{stack.effectiveReferralCost.toFixed(2)}</span>
+                  <span>{currencySymbol}{stack.effectiveReferralCost?.toFixed(2) || "0.00"}</span>
                 </div>
               ) : stack.referralCosts > 0 && (
                 <div className="flex justify-between text-sm">

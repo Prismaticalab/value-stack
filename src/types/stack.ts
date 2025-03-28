@@ -34,4 +34,5 @@ export interface Stack {
   effectiveAgencyFees: number;
   isMarketingPercentage: boolean;
   effectiveMarketingExpenses: number;
+  contingencyBuffer: number;
 }
