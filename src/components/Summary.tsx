@@ -184,13 +184,10 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
                     <p className="text-sm text-gray-600 mt-1">{module.value}</p>
                     <div className="flex gap-2 mt-2 text-xs">
                       <span className={`px-2 py-1 rounded-full ${module.stakeholder === 'internal' ? 'bg-purple-100 text-purple-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                        {module.stakeholder}
+                        {module.stakeholderName || module.stakeholder}
                       </span>
                       <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-800">
-                        {module.timeImpact} hrs
-                      </span>
-                      <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-800">
-                        Impact: {module.deliveryImpact}/10
+                        {module.timeImpact} {module.timeUnit}
                       </span>
                     </div>
                   </div>
