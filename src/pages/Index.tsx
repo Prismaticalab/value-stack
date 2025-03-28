@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,6 +48,10 @@ const Index = () => {
     currency: "USD",
     isReferralPercentage: false,
     effectiveReferralCost: 0,
+    isAgencyFeesPercentage: false,
+    effectiveAgencyFees: 0,
+    isMarketingPercentage: false,
+    effectiveMarketingExpenses: 0
   });
   const [savedStacks, setSavedStacks] = useState<Stack[]>([]);
   const { toast } = useToast();
@@ -91,6 +94,10 @@ const Index = () => {
       currency: currentStack.currency,
       isReferralPercentage: false,
       effectiveReferralCost: 0,
+      isAgencyFeesPercentage: false,
+      effectiveAgencyFees: 0,
+      isMarketingPercentage: false,
+      effectiveMarketingExpenses: 0
     });
     setView("builder");
   };

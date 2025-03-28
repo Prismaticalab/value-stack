@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Stack } from "@/types/stack";
 import { Button } from "@/components/ui/button";
@@ -40,11 +39,17 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
 
   // Calculate cost breakdown including value capture elements
   const modulesCost = stack.modules.reduce((sum, module) => sum + module.cost, 0);
+  
+  // Calculate the effective costs for display
+  const agencyFeesValue = stack.isAgencyFeesPercentage ? stack.effectiveAgencyFees : stack.agencyFees;
+  const referralCostsValue = stack.isReferralPercentage ? stack.effectiveReferralCost : stack.referralCosts;
+  const marketingExpensesValue = stack.isMarketingPercentage ? stack.effectiveMarketingExpenses : stack.marketingExpenses;
+  
   const costBreakdown = [
     { name: "Modules", value: modulesCost },
-    { name: "Agency Fees", value: stack.agencyFees },
-    { name: "Referrals", value: stack.referralCosts },
-    { name: "Marketing", value: stack.marketingExpenses },
+    { name: "Agency Fees", value: agencyFeesValue },
+    { name: "Referrals", value: referralCostsValue },
+    { name: "Marketing", value: marketingExpensesValue },
   ];
 
   const downloadPdf = () => {
@@ -125,14 +130,19 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
               {costBreakdown.map((item) => (
                 <div key={item.name}>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>{item.name}</span>
+                    <span>{item.name}{
+                      (item.name === "Agency Fees" && stack.isAgencyFeesPercentage) ? ` (${stack.agencyFees}%)` : 
+                      (item.name === "Referrals" && stack.isReferralPercentage) ? ` (${stack.referralCosts}%)` : 
+                      (item.name === "Marketing" && stack.isMarketingPercentage) ? ` (${stack.marketingExpenses}%)` : 
+                      ''
+                    }</span>
                     <span>{currencySymbol}{item.value.toFixed(2)}</span>
                   </div>
                   <div className="bg-gray-100 h-2 rounded-full overflow-hidden">
                     <div
                       className="bg-[#9B87F5] h-full"
                       style={{
-                        width: `${(item.value / stack.totalCost) * 100}%`,
+                        width: `${(item.value / (stack.totalCost || 1)) * 100}%`,
                       }}
                     ></div>
                   </div>
@@ -143,7 +153,7 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
 
               <div className="space-y-2">
                 <div className="flex justify-between font-medium">
-                  <span>Total Cost</span>
+                  <span>Value Delivery Cost</span>
                   <span>{currencySymbol}{stack.totalCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
@@ -151,11 +161,19 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
                   <span>{stack.desiredMargin}%</span>
                 </div>
                 <div className="flex justify-between">
+                  <span>Total Net Revenue</span>
+                  <span>{currencySymbol}{(stack.totalCost * (1 + stack.desiredMargin / 100)).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Value Capture Cost</span>
+                  <span>{currencySymbol}{(agencyFeesValue + referralCostsValue + marketingExpensesValue).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
                   <span>Actual Margin</span>
                   <span>{stack.marginPercent.toFixed(1)}%</span>
                 </div>
                 <div className="flex justify-between font-medium text-[#9B87F5]">
-                  <span>Final Price</span>
+                  <span>Suggested Sale Price</span>
                   <span>{currencySymbol}{stack.finalPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">

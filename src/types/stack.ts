@@ -30,4 +30,8 @@ export interface Stack {
   currency: string;
   isReferralPercentage: boolean;
   effectiveReferralCost: number;
+  isAgencyFeesPercentage: boolean;
+  effectiveAgencyFees: number;
+  isMarketingPercentage: boolean;
+  effectiveMarketingExpenses: number;
 }
