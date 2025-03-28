@@ -16,13 +16,26 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
   const { toast } = useToast();
   
   const handleChange = (field: string, value: number | boolean) => {
-    setStack({
+    const newStack = {
       ...stack,
       [field]: value,
-    });
+    };
+    setStack(newStack);
   };
 
   const calculateFinalPrice = () => {
+    console.log('Starting price calculation with values:', {
+      totalCost: stack.totalCost,
+      referralCosts: stack.referralCosts,
+      isReferralPercentage: stack.isReferralPercentage,
+      agencyFees: stack.agencyFees,
+      isAgencyFeesPercentage: stack.isAgencyFeesPercentage,
+      marketingExpenses: stack.marketingExpenses,
+      isMarketingPercentage: stack.isMarketingPercentage,
+      desiredMargin: stack.desiredMargin,
+      contingencyBuffer: stack.contingencyBuffer
+    });
+    
     // Total cost of modules (X)
     const modulesCost = stack.totalCost;
     
@@ -77,6 +90,8 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       finalPrice += stack.marketingExpenses;
     }
     
+    console.log('Calculated price before returning:', { finalPrice, costWithContingency, totalRequiredIncome });
+    
     return {
       finalPrice,
       costWithContingency,
@@ -124,7 +139,7 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     // Margin percent = (net profit / modulesCost) * 100
     const marginPercent = modulesCost > 0 ? (netProfit / modulesCost) * 100 : 0;
     
-    console.log('Pricing calculation update:', {
+    console.log('Pricing calculation results:', {
       finalPrice,
       effectiveReferralCost,
       effectiveAgencyFees,
@@ -134,9 +149,9 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       totalExpenses
     });
     
-    // Create a completely new stack object to ensure React detects the change
-    const updatedStack = {
-      ...stack,
+    // Create a completely new stack object - DO NOT KEEP ANY REFERENCE TO THE OLD ONE
+    const updatedStack: Stack = {
+      ...JSON.parse(JSON.stringify(stack)), // Deep clone to ensure no references remain
       finalPrice,
       netProfit,
       marginPercent,
@@ -144,6 +159,12 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       effectiveAgencyFees,
       effectiveMarketingExpenses
     };
+    
+    console.log('Setting updated stack with new values:', {
+      finalPrice: updatedStack.finalPrice,
+      netProfit: updatedStack.netProfit,
+      marginPercent: updatedStack.marginPercent
+    });
     
     // Set the new stack with all calculated values
     setStack(updatedStack);
@@ -156,7 +177,8 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     stack.marketingExpenses, 
     stack.isMarketingPercentage,
     stack.desiredMargin,
-    stack.contingencyBuffer
+    stack.contingencyBuffer,
+    setStack // Add setStack to dependencies
   ]);
 
   return (

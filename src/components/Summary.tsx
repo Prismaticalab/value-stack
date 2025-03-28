@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import { Stack } from "@/types/stack";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,16 @@ interface SummaryProps {
 }
 
 const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
+  console.log('Summary component rendering with stack values:', {
+    finalPrice: stack.finalPrice,
+    netProfit: stack.netProfit, 
+    marginPercent: stack.marginPercent,
+    totalCost: stack.totalCost,
+    effectiveReferralCost: stack.effectiveReferralCost,
+    effectiveAgencyFees: stack.effectiveAgencyFees,
+    effectiveMarketingExpenses: stack.effectiveMarketingExpenses
+  });
+
   // Calculate stakeholder distribution
   const internalModules = stack.modules.filter(
     (module) => module.stakeholder === "internal"
@@ -70,14 +79,18 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
     alert("PDF generation would be implemented here");
   };
 
-  console.log('Summary rendering with values:', {
+  // Ensure we're using the most up-to-date data from props
+  const finalPrice = stack.finalPrice;
+  const netProfit = stack.netProfit;
+  const marginPercent = stack.marginPercent;
+
+  console.log('Summary using values for display:', {
+    finalPrice,
+    netProfit,
+    marginPercent,
     effectiveReferralCost: stack.effectiveReferralCost,
-    referralCostsValue,
-    agencyFeesValue,
-    marketingExpensesValue,
-    finalPrice: stack.finalPrice,
-    netProfit: stack.netProfit,
-    marginPercent: stack.marginPercent
+    effectiveAgencyFees: stack.effectiveAgencyFees,
+    effectiveMarketingExpenses: stack.effectiveMarketingExpenses
   });
 
   return (
@@ -104,7 +117,7 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold">{stack.name}</h1>
         <p className="text-sm text-gray-500">
-          {stack.modules.length} modules, {currencySymbol}{stack.finalPrice.toFixed(2)} total price
+          {stack.modules.length} modules, {currencySymbol}{finalPrice.toFixed(2)} total price
         </p>
       </div>
 
@@ -166,7 +179,7 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
                     <div
                       className="bg-[#9B87F5] h-full"
                       style={{
-                        width: `${(item.value / (stack.finalPrice || 1)) * 100}%`,
+                        width: `${(item.value / (finalPrice || 1)) * 100}%`,
                       }}
                     ></div>
                   </div>
@@ -200,15 +213,15 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
                 </div>
                 <div className="flex justify-between">
                   <span>Actual Margin</span>
-                  <span>{stack.marginPercent.toFixed(1)}%</span>
+                  <span>{marginPercent.toFixed(1)}%</span>
                 </div>
                 <div className="flex justify-between font-medium text-[#9B87F5]">
                   <span>Suggested Sale Price</span>
-                  <span>{currencySymbol}{stack.finalPrice.toFixed(2)}</span>
+                  <span>{currencySymbol}{finalPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Net Profit</span>
-                  <span>{currencySymbol}{stack.netProfit.toFixed(2)}</span>
+                  <span>{currencySymbol}{netProfit.toFixed(2)}</span>
                 </div>
               </div>
             </div>

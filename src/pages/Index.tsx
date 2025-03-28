@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import StackBuilder from "@/components/StackBuilder";
@@ -57,15 +57,34 @@ const Index = () => {
   const [savedStacks, setSavedStacks] = useState<Stack[]>([]);
   const { toast } = useToast();
 
+  useEffect(() => {
+    const savedStacksData = localStorage.getItem('stacks');
+    if (savedStacksData) {
+      try {
+        const parsedStacks = JSON.parse(savedStacksData);
+        setSavedStacks(parsedStacks);
+      } catch (error) {
+        console.error('Error loading saved stacks:', error);
+      }
+    }
+  }, []);
+
   const saveStack = () => {
-    const exists = savedStacks.findIndex(stack => stack.id === currentStack.id);
+    const stackToSave = {...currentStack};
+    console.log('Saving stack with values:', {
+      finalPrice: stackToSave.finalPrice,
+      netProfit: stackToSave.netProfit,
+      marginPercent: stackToSave.marginPercent
+    });
+    
+    const exists = savedStacks.findIndex(stack => stack.id === stackToSave.id);
     let updatedStacks;
     
     if (exists >= 0) {
       updatedStacks = [...savedStacks];
-      updatedStacks[exists] = {...currentStack};
+      updatedStacks[exists] = stackToSave;
     } else {
-      updatedStacks = [...savedStacks, {...currentStack}];
+      updatedStacks = [...savedStacks, stackToSave];
     }
     
     setSavedStacks(updatedStacks);
@@ -73,8 +92,17 @@ const Index = () => {
     
     toast({
       title: "Stack saved",
-      description: `"${currentStack.name}" has been saved successfully.`,
+      description: `"${stackToSave.name}" has been saved successfully.`,
     });
+  };
+
+  const setStack = (newStack: Stack) => {
+    console.log('Setting stack in Index with values:', {
+      finalPrice: newStack.finalPrice,
+      netProfit: newStack.netProfit,
+      marginPercent: newStack.marginPercent
+    });
+    setCurrentStack(newStack);
   };
 
   const createNewStack = () => {
@@ -204,7 +232,7 @@ const Index = () => {
           {view === "builder" && (
             <StackBuilder 
               stack={currentStack} 
-              setStack={setCurrentStack} 
+              setStack={setStack} 
               onSave={saveStack}
               onViewSummary={() => setView("summary")} 
               currencySymbol={getCurrencySymbol(currentStack.currency)}
