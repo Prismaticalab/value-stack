@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -136,7 +135,7 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     });
     
     // Create a completely new stack object to ensure React detects the change
-    const updatedStack: Stack = {
+    const updatedStack = {
       ...stack,
       finalPrice,
       netProfit,
@@ -146,7 +145,7 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       effectiveMarketingExpenses
     };
     
-    // Set the new stack
+    // Set the new stack with all calculated values
     setStack(updatedStack);
   }, [
     stack.totalCost, 
