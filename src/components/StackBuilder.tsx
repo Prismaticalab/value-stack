@@ -8,8 +8,17 @@ import ModuleCard from "./ModuleCard";
 import ValueCaptureForm from "./ValueCaptureForm";
 import { Stack, Module } from "@/types/stack";
 import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
-import { Plus, Save, FileText } from "lucide-react";
+import { Plus, Save, FileText, ArrowRight, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface StackBuilderProps {
   stack: Stack;
@@ -21,6 +30,7 @@ interface StackBuilderProps {
 
 const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }: StackBuilderProps) => {
   const [valueCaptureView, setValueCaptureView] = useState(false);
+  const [showNameAlert, setShowNameAlert] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -136,6 +146,11 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
   };
 
   const goToPricing = () => {
+    if (!stack.name || stack.name.trim() === "" || stack.name === "New Stack") {
+      setShowNameAlert(true);
+      return;
+    }
+    
     setValueCaptureView(true);
     toast({
       title: "Ready to set pricing",
@@ -228,7 +243,6 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
                         onDuplicate={duplicateModule}
                         isLocked={stack.locked}
                         currencySymbol={currencySymbol}
-                        onGoToPricing={goToPricing}
                         onAddNewModule={addNewModule}
                       />
                     ))}
@@ -245,6 +259,17 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
                 <span>Total Delivery Cost:</span>
                 <span>{currencySymbol}{stack.totalCost.toFixed(2)}</span>
               </div>
+              
+              {/* Add Go To Pricing button at the bottom */}
+              <div className="flex justify-center mt-6">
+                <Button 
+                  className="bg-[#9B87F5] hover:bg-[#8A76E4] flex items-center gap-1 px-8"
+                  onClick={goToPricing}
+                >
+                  <ArrowRight size={16} />
+                  Go to Pricing
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -255,6 +280,21 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
           currencySymbol={currencySymbol}
         />
       )}
+      
+      {/* Alert dialog for stack name */}
+      <AlertDialog open={showNameAlert} onOpenChange={setShowNameAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Stack Name Required</AlertDialogTitle>
+            <AlertDialogDescription>
+              Please provide a unique name for your stack before proceeding to pricing.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>Okay</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

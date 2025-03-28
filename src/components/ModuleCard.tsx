@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Module } from "@/types/stack";
 import { Draggable } from "react-beautiful-dnd";
-import { Copy, Trash, GripVertical, AlertCircle, Check, Clock, Plus, ArrowRight } from "lucide-react";
+import { Copy, Trash, GripVertical, AlertCircle, Check, Clock, Plus } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -42,7 +41,6 @@ export interface ModuleCardProps {
   onDuplicate: (moduleId: string) => void;
   isLocked: boolean;
   currencySymbol: string;
-  onGoToPricing?: () => void;
   onAddNewModule?: () => void;
 }
 
@@ -54,7 +52,6 @@ const ModuleCard = ({
   onDuplicate,
   isLocked,
   currencySymbol,
-  onGoToPricing,
   onAddNewModule
 }: ModuleCardProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -111,10 +108,8 @@ const ModuleCard = ({
   };
 
   const handleChange = (field: keyof Module, value: any) => {
-    // Validate the field
     const errorMessage = validateField(field, value);
     
-    // Update errors state
     if (errorMessage) {
       setErrors(prev => ({ ...prev, [field]: errorMessage }));
     } else {
@@ -127,7 +122,6 @@ const ModuleCard = ({
     
     const updatedModule = { ...module, [field]: value };
     
-    // Special handling for costType changes
     if (field === "costType") {
       if (value === "variable" && !updatedModule.costUnit) {
         updatedModule.costUnit = "hours";
@@ -135,11 +129,9 @@ const ModuleCard = ({
       }
     }
     
-    // Update total cost calculation when cost type, unit cost or quantity changes
     if (field === "cost" || field === "costQuantity") {
       if (module.costType === "variable") {
         const totalCost = updatedModule.cost * updatedModule.costQuantity;
-        // We don't actually update the cost field directly, since we want to preserve the unit cost
       }
     }
     
@@ -489,28 +481,18 @@ const ModuleCard = ({
                   </div>
                 )}
 
-                <div className="flex space-x-3 pt-3">
-                  {onAddNewModule && (
+                {onAddNewModule && (
+                  <div className="flex pt-3">
                     <Button 
                       variant="outline"
                       onClick={onAddNewModule}
-                      className="flex-1"
+                      className="w-full"
                     >
                       <Plus size={16} className="mr-1" />
                       Add Module
                     </Button>
-                  )}
-                  
-                  {onGoToPricing && (
-                    <Button 
-                      className="flex-1 bg-[#9B87F5] hover:bg-[#8A76E4]"
-                      onClick={onGoToPricing}
-                    >
-                      <ArrowRight size={16} className="mr-1" />
-                      Go to Pricing
-                    </Button>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             )}
 
