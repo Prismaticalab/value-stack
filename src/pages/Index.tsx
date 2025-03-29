@@ -14,13 +14,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DollarSign,
   Euro,
   PoundSterling,
   IndianRupee,
-  JapaneseYen
+  JapaneseYen,
+  Menu
 } from "lucide-react";
+import { useSidebar } from "@/context/SidebarContext";
 
 const currencyOptions = [
   { value: "USD", label: "USD", icon: DollarSign },
@@ -31,7 +34,7 @@ const currencyOptions = [
 ];
 
 const Index = () => {
-  const [view, setView] = useState<"builder" | "projects" | "summary">("builder");
+  const [currentTab, setCurrentTab] = useState<"builder" | "projects" | "summary">("builder");
   const [currentStack, setCurrentStack] = useState<Stack>({
     id: crypto.randomUUID(),
     name: "New Stack",
@@ -54,10 +57,11 @@ const Index = () => {
     isMarketingPercentage: false,
     effectiveMarketingExpenses: 0,
     contingencyBuffer: 0,
-    totalRequiredIncome: 0  // Added this missing property
+    totalRequiredIncome: 0
   });
   const [savedStacks, setSavedStacks] = useState<Stack[]>([]);
   const { toast } = useToast();
+  const { toggleSidebar } = useSidebar();
 
   useEffect(() => {
     const savedStacksData = localStorage.getItem('stacks');
@@ -130,16 +134,16 @@ const Index = () => {
       isMarketingPercentage: false,
       effectiveMarketingExpenses: 0,
       contingencyBuffer: 0,
-      totalRequiredIncome: 0  // Added this missing property
+      totalRequiredIncome: 0
     });
-    setView("builder");
+    setCurrentTab("builder");
   };
 
   const loadStack = (stackId: string) => {
     const stack = savedStacks.find(s => s.id === stackId);
     if (stack) {
       setCurrentStack(stack);
-      setView("builder");
+      setCurrentTab("builder");
     }
   };
 
@@ -173,76 +177,92 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="border-b border-gray-100 py-4 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-black">Project Stack Builder</h1>
+    <div className="min-h-screen">
+      <header className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-10">
+        <div className="px-4 md:px-8 py-4 flex justify-between items-center">
+          <div className="flex items-center">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="mr-2 lg:hidden" 
+              onClick={toggleSidebar}
+            >
+              <Menu size={20} />
+            </Button>
+            <h1 className="text-2xl font-semibold text-gray-800">Project Stack Builder</h1>
+          </div>
+          
           <div className="flex items-center space-x-4">
-            <div className="hidden sm:block">
-              <Select 
-                value={currentStack.currency} 
-                onValueChange={handleCurrencyChange}
-              >
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue placeholder="Currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currencyOptions.map((option) => {
-                    const Icon = option.icon;
-                    return (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="flex items-center gap-2">
-                          <Icon size={14} />
-                          <span>{option.label}</span>
-                        </div>
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex space-x-2">
-              <Button 
-                variant={view === "builder" ? "default" : "outline"}
-                onClick={() => setView("builder")}
-                className={view === "builder" ? "bg-[#9B87F5] hover:bg-[#8A76E4]" : ""}
+            <Select 
+              value={currentStack.currency} 
+              onValueChange={handleCurrencyChange}
+            >
+              <SelectTrigger className="w-[100px] border-gray-200 bg-white">
+                <SelectValue placeholder="Currency" />
+              </SelectTrigger>
+              <SelectContent>
+                {currencyOptions.map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div className="flex items-center gap-2">
+                        <Icon size={14} />
+                        <span>{option.label}</span>
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <div className="px-4 md:px-8 bg-white">
+          <Tabs 
+            value={currentTab}
+            onValueChange={(value) => setCurrentTab(value as "builder" | "projects" | "summary")}
+            className="w-full"
+          >
+            <TabsList className="grid w-full max-w-md grid-cols-3 mb-4">
+              <TabsTrigger 
+                value="builder"
+                className="data-[state=active]:bg-[#F3EFFF] data-[state=active]:text-[#9B87F5]"
               >
                 Builder
-              </Button>
-              <Button 
-                variant={view === "projects" ? "default" : "outline"}
-                onClick={() => setView("projects")}
-                className={view === "projects" ? "bg-[#9B87F5] hover:bg-[#8A76E4]" : ""}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="projects" 
+                className="data-[state=active]:bg-[#F3EFFF] data-[state=active]:text-[#9B87F5]"
               >
                 Projects
-              </Button>
-              {currentStack.modules.length > 0 && (
-                <Button 
-                  variant={view === "summary" ? "default" : "outline"}
-                  onClick={() => setView("summary")}
-                  className={view === "summary" ? "bg-[#9B87F5] hover:bg-[#8A76E4]" : ""}
-                >
-                  Summary
-                </Button>
-              )}
-            </div>
-          </div>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="summary" 
+                disabled={currentStack.modules.length === 0}
+                className="data-[state=active]:bg-[#F3EFFF] data-[state=active]:text-[#9B87F5]"
+              >
+                Summary
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto p-4 md:p-8">
-        <Card className="p-4 md:p-6 shadow-sm">
-          {view === "builder" && (
+      <main className="p-4 md:p-8 max-w-7xl mx-auto">
+        <div className={currentTab === "builder" ? "block" : "hidden"}>
+          <Card className="bg-white p-6 shadow-sm rounded-xl border-0">
             <StackBuilder 
               stack={currentStack} 
               setStack={setStack} 
               onSave={saveStack}
-              onViewSummary={() => setView("summary")} 
+              onViewSummary={() => setCurrentTab("summary")} 
               currencySymbol={getCurrencySymbol(currentStack.currency)}
             />
-          )}
-          
-          {view === "projects" && (
+          </Card>
+        </div>
+        
+        <div className={currentTab === "projects" ? "block" : "hidden"}>
+          <Card className="bg-white p-6 shadow-sm rounded-xl border-0">
             <ProjectList 
               stacks={savedStacks} 
               onLoadStack={loadStack} 
@@ -250,16 +270,18 @@ const Index = () => {
               onCreateNew={createNewStack} 
               getCurrencySymbol={getCurrencySymbol}
             />
-          )}
-          
-          {view === "summary" && (
+          </Card>
+        </div>
+        
+        <div className={currentTab === "summary" ? "block" : "hidden"}>
+          <Card className="bg-white p-6 shadow-sm rounded-xl border-0">
             <Summary 
               stack={currentStack} 
-              onBack={() => setView("builder")} 
+              onBack={() => setCurrentTab("builder")} 
               currencySymbol={getCurrencySymbol(currentStack.currency)} 
             />
-          )}
-        </Card>
+          </Card>
+        </div>
       </main>
     </div>
   );
