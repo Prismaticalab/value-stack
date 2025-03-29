@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import ModuleCard from "./ModuleCard";
@@ -153,11 +152,6 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
   };
 
   const goToPricing = () => {
-    if (!stack.name || stack.name.trim() === "" || stack.name === "New Stack") {
-      setShowNameAlert(true);
-      return;
-    }
-    
     setValueCaptureView(true);
     toast({
       title: "Ready to set pricing",
@@ -169,13 +163,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
         <div className="flex-1">
-          <Label htmlFor="stackName" className="text-sm font-medium mb-2 block">Stack Name</Label>
-          <Input
-            id="stackName"
-            value={stack.name}
-            onChange={(e) => setStack({ ...stack, name: e.target.value })}
-            className="border-gray-200 focus:border-black focus:ring-black"
-          />
+          <h2 className="text-xl font-medium">Stack Builder</h2>
         </div>
         <div className="flex gap-2 self-end">
           <Button 
@@ -184,7 +172,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
             className="flex items-center gap-1"
           >
             <Save size={16} />
-            Save
+            Save Progress
           </Button>
           
           <Button 
@@ -242,7 +230,6 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
                         onDuplicate={duplicateModule}
                         isLocked={stack.locked}
                         currencySymbol={currencySymbol}
-                        // We no longer pass the addNewModule function to ModuleCard components
                       />
                     ))}
                     {provided.placeholder}

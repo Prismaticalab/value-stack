@@ -7,14 +7,6 @@ import Summary from "@/components/Summary";
 import { Stack } from "@/types/stack";
 import { useToast } from "@/components/ui/use-toast";
 import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
   DollarSign,
   Euro,
   PoundSterling,
@@ -24,16 +16,7 @@ import {
   Save
 } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import ProjectCreation from "@/components/ProjectCreation";
 
 const currencyOptions = [
   { value: "USD", label: "USD", icon: DollarSign },
@@ -47,7 +30,7 @@ const Index = () => {
   const [currentTab, setCurrentTab] = useState<"builder" | "summary">("builder");
   const [currentStack, setCurrentStack] = useState<Stack>({
     id: crypto.randomUUID(),
-    name: "New Stack",
+    name: "",
     modules: [],
     locked: false,
     totalCost: 0,
@@ -67,12 +50,10 @@ const Index = () => {
     isMarketingPercentage: false,
     effectiveMarketingExpenses: 0,
     contingencyBuffer: 0,
-    totalRequiredIncome: 0
+    totalRequiredIncome: 0,
+    isInitialized: false
   });
   const [savedStacks, setSavedStacks] = useState<Stack[]>([]);
-  const [showNewProjectDialog, setShowNewProjectDialog] = useState(true);
-  const [newProjectName, setNewProjectName] = useState("New Stack");
-  const [newProjectCurrency, setNewProjectCurrency] = useState("USD");
   const { toast } = useToast();
   const { toggleSidebar } = useSidebar();
 
@@ -124,33 +105,17 @@ const Index = () => {
     setCurrentStack(newStack);
   };
 
-  const createNewProject = () => {
+  const handleProjectCreate = (name: string, currency: string) => {
     setCurrentStack({
-      id: crypto.randomUUID(),
-      name: newProjectName,
-      modules: [],
-      locked: false,
-      totalCost: 0,
-      agencyFees: 0,
-      referralCosts: 0,
-      marketingExpenses: 0,
-      desiredMargin: 20,
-      finalPrice: 0,
-      netProfit: 0,
-      marginPercent: 0,
-      createdAt: new Date().toISOString(),
-      currency: newProjectCurrency,
-      isReferralPercentage: false,
-      effectiveReferralCost: 0,
-      isAgencyFeesPercentage: false,
-      effectiveAgencyFees: 0,
-      isMarketingPercentage: false,
-      effectiveMarketingExpenses: 0,
-      contingencyBuffer: 0,
-      totalRequiredIncome: 0
+      ...currentStack,
+      name: name,
+      currency: currency,
+      isInitialized: true
     });
-    setShowNewProjectDialog(false);
-    setCurrentTab("builder");
+    toast({
+      title: "Project created",
+      description: `"${name}" has been created. You can now start building your stack.`,
+    });
   };
 
   const loadStack = (stackId: string) => {
@@ -184,143 +149,94 @@ const Index = () => {
   };
 
   const handleNewProject = () => {
-    setNewProjectName("New Stack");
-    setNewProjectCurrency("USD");
-    setShowNewProjectDialog(true);
+    setCurrentStack({
+      id: crypto.randomUUID(),
+      name: "",
+      modules: [],
+      locked: false,
+      totalCost: 0,
+      agencyFees: 0,
+      referralCosts: 0,
+      marketingExpenses: 0,
+      desiredMargin: 20,
+      finalPrice: 0,
+      netProfit: 0,
+      marginPercent: 0,
+      createdAt: new Date().toISOString(),
+      currency: "USD",
+      isReferralPercentage: false,
+      effectiveReferralCost: 0,
+      isAgencyFeesPercentage: false,
+      effectiveAgencyFees: 0,
+      isMarketingPercentage: false,
+      effectiveMarketingExpenses: 0,
+      contingencyBuffer: 0,
+      totalRequiredIncome: 0,
+      isInitialized: false
+    });
+    setCurrentTab("builder");
   };
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-10 backdrop-blur-xl bg-white/80 border-b border-gray-100">
-        <div className="px-6 md:px-8 py-5 flex justify-between items-center">
-          <div className="flex items-center">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="mr-2 lg:hidden text-apple-neutral hover:bg-gray-100 hover:text-apple-primary" 
-              onClick={toggleSidebar}
-            >
-              <Menu size={22} />
-            </Button>
-            <h1 className="text-2xl font-semibold text-apple-neutral tracking-tight">Project Stack Builder</h1>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <Button 
-              variant="outline" 
-              onClick={saveStack}
-              className="flex items-center gap-1 border-gray-200 hover:bg-gray-100"
-            >
-              <Save size={16} />
-              Save Progress
-            </Button>
-          </div>
-        </div>
-        
-        <div className="px-6 md:px-8 pb-4">
-          <Tabs 
-            value={currentTab}
-            onValueChange={(value) => setCurrentTab(value as "builder" | "summary")}
-            className="w-full"
-          >
-            <TabsList className="grid w-full max-w-[300px] grid-cols-2 bg-[#f1f5fd] p-1 rounded-xl">
-              <TabsTrigger 
-                value="builder"
-                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm"
-              >
-                Builder
-              </TabsTrigger>
-              <TabsTrigger 
-                value="summary" 
-                disabled={currentStack.modules.length === 0}
-                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm"
-              >
-                Summary
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-      </header>
-
-      <main className="p-6 md:p-8 max-w-7xl mx-auto">
-        <div className={currentTab === "builder" ? "block" : "hidden"}>
-          <Card className="apple-card">
-            <StackBuilder 
-              stack={currentStack} 
-              setStack={setStack} 
-              onSave={saveStack}
-              onViewSummary={() => setCurrentTab("summary")} 
-              currencySymbol={getCurrencySymbol(currentStack.currency)}
-            />
-          </Card>
-        </div>
-        
-        <div className={currentTab === "summary" ? "block" : "hidden"}>
-          <Card className="apple-card">
-            <Summary 
-              stack={currentStack} 
-              onBack={() => setCurrentTab("builder")} 
-              currencySymbol={getCurrencySymbol(currentStack.currency)} 
-            />
-          </Card>
-        </div>
-      </main>
-
-      {/* New Project Dialog */}
-      <Dialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
-            <DialogDescription>
-              Set up your new project stack with a name and currency.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="projectName" className="text-right">
-                Name
-              </Label>
-              <Input
-                id="projectName"
-                value={newProjectName}
-                onChange={(e) => setNewProjectName(e.target.value)}
-                className="col-span-3"
-              />
+      {currentStack.isInitialized ? (
+        <>
+          <header className="sticky top-0 z-10 backdrop-blur-xl bg-white/80 border-b border-gray-100">
+            <div className="px-6 md:px-8 py-5 flex justify-between items-center">
+              <div className="flex items-center">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="mr-2 lg:hidden text-apple-neutral hover:bg-gray-100 hover:text-apple-primary" 
+                  onClick={toggleSidebar}
+                >
+                  <Menu size={22} />
+                </Button>
+                <h1 className="text-2xl font-semibold text-apple-neutral tracking-tight">{currentStack.name}</h1>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <Button 
+                  variant="outline" 
+                  onClick={saveStack}
+                  className="flex items-center gap-1 border-gray-200 hover:bg-gray-100"
+                >
+                  <Save size={16} />
+                  Save Progress
+                </Button>
+              </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="currency" className="text-right">
-                Currency
-              </Label>
-              <Select
-                value={newProjectCurrency}
-                onValueChange={setNewProjectCurrency}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currencyOptions.map((option) => {
-                    const Icon = option.icon;
-                    return (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="flex items-center gap-2">
-                          <Icon size={14} />
-                          <span>{option.label}</span>
-                        </div>
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
+          </header>
+
+          <main className="p-6 md:p-8 max-w-7xl mx-auto">
+            <div className={currentTab === "builder" ? "block" : "hidden"}>
+              <Card className="apple-card">
+                <StackBuilder 
+                  stack={currentStack} 
+                  setStack={setStack} 
+                  onSave={saveStack}
+                  onViewSummary={() => setCurrentTab("summary")} 
+                  currencySymbol={getCurrencySymbol(currentStack.currency)}
+                />
+              </Card>
             </div>
-          </div>
-          <DialogFooter>
-            <Button onClick={createNewProject} className="bg-black hover:bg-black/80">
-              Create Stack
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            
+            <div className={currentTab === "summary" ? "block" : "hidden"}>
+              <Card className="apple-card">
+                <Summary 
+                  stack={currentStack} 
+                  onBack={() => setCurrentTab("builder")} 
+                  currencySymbol={getCurrencySymbol(currentStack.currency)} 
+                />
+              </Card>
+            </div>
+          </main>
+        </>
+      ) : (
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+          <ProjectCreation onProjectCreate={handleProjectCreate} />
+        </div>
+      )}
     </div>
   );
 };

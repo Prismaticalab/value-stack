@@ -11,7 +11,7 @@ export interface Module {
   costQuantity?: number;
   timeImpact: number;
   timeUnit: 'minutes' | 'hours' | 'days' | 'weeks' | 'months';
-  nonNegotiable?: boolean; // Added nonNegotiable flag
+  nonNegotiable?: boolean;
 }
 
 export interface Stack {
@@ -37,4 +37,5 @@ export interface Stack {
   currency: string;
   contingencyBuffer: number;
   totalRequiredIncome: number;
+  isInitialized?: boolean; // New property to track if the project has been created
 }
