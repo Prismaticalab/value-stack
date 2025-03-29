@@ -4,24 +4,24 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/context/SidebarContext';
 import { 
-  LayoutDashboard, 
-  BarChartBig, 
-  FileStack, 
+  BarChart3, 
+  FileBarChart, 
   Settings, 
   Users, 
   ChevronLeft, 
   ChevronRight, 
-  PieChart
+  PieChart,
+  Blocks
 } from 'lucide-react';
 
 const Sidebar = () => {
-  const { isCollapsed, toggleSidebar } = useSidebar();
+  const { isCollapsed, toggleSidebar, isMobile } = useSidebar();
   const location = useLocation();
 
   const sidebarLinks = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-    { icon: BarChartBig, label: 'Analytics', path: '/analytics' },
-    { icon: FileStack, label: 'Projects', path: '/projects' },
+    { icon: Blocks, label: 'Dashboard', path: '/' },
+    { icon: BarChart3, label: 'Analytics', path: '/analytics' },
+    { icon: FileBarChart, label: 'Projects', path: '/projects' },
     { icon: PieChart, label: 'Reports', path: '/reports' },
     { icon: Users, label: 'Team', path: '/team' },
     { icon: Settings, label: 'Settings', path: '/settings' },
@@ -35,43 +35,54 @@ const Sidebar = () => {
 
   return (
     <>
-      <div 
-        className={`fixed inset-0 bg-black/50 z-20 transition-opacity duration-200 lg:hidden ${
-          isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'
-        }`}
-        onClick={toggleSidebar}
-      />
+      {/* Mobile overlay */}
+      {isMobile && (
+        <div 
+          className={`fixed inset-0 bg-black/30 backdrop-blur-sm z-20 transition-opacity duration-300 lg:hidden ${
+            isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+          onClick={toggleSidebar}
+        />
+      )}
+      
+      {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-30 h-full bg-white shadow-md transition-all duration-300 lg:static 
-                    ${isCollapsed ? '-translate-x-full lg:translate-x-0 lg:w-20' : 'w-64'}`}
+        className={`fixed top-0 left-0 z-30 h-full transition-all duration-300 ease-in-out 
+                    ${isCollapsed ? 
+                      (isMobile ? '-translate-x-full' : 'w-[72px]') : 
+                      'w-64'}`}
       >
-        <div className="flex flex-col h-full">
-          <div className="flex items-center p-4 h-16 border-b">
-            <div className={`overflow-hidden flex items-center ${isCollapsed ? "lg:justify-center" : ""}`}>
-              <div className="flex-shrink-0 bg-[#9B87F5] text-white p-1 rounded">
-                <PieChart size={20} />
+        <div className="flex flex-col h-full bg-white shadow-apple border-r border-gray-100 backdrop-blur-lg">
+          <div className="flex items-center p-4 h-16">
+            <div className={`flex items-center ${isCollapsed && !isMobile ? "justify-center w-full" : ""}`}>
+              <div className="flex-shrink-0 bg-apple-primary text-white p-1.5 rounded-lg">
+                <PieChart size={isCollapsed && !isMobile ? 24 : 20} />
               </div>
-              <span className={`ml-2 font-semibold text-gray-700 transition-opacity duration-200 ${isCollapsed ? "lg:opacity-0" : "opacity-100"}`}>
+              <span className={`ml-3 font-semibold transition-opacity duration-200 
+                              ${isCollapsed && !isMobile ? "opacity-0 w-0 overflow-hidden" : "opacity-100"}`}>
                 Prismatica Lab
               </span>
             </div>
           </div>
           
-          <nav className="flex-1 overflow-y-auto py-4">
-            <ul className="px-2 space-y-1">
+          <nav className="flex-1 overflow-y-auto py-6">
+            <ul className="px-2 space-y-2">
               {sidebarLinks.map((link) => (
                 <li key={link.path}>
                   <Link to={link.path}>
                     <div 
-                      className={`flex items-center px-3 py-2 rounded-md transition-colors
+                      className={`flex items-center px-3 py-2.5 rounded-xl transition-all
+                        ${isCollapsed && !isMobile ? "justify-center" : ""}
                         ${isActive(link.path) 
-                            ? 'bg-[#F3EFFF] text-[#9B87F5]' 
-                            : 'text-gray-700 hover:bg-gray-100'
+                            ? 'bg-[#f1f5fd] text-apple-primary' 
+                            : 'text-gray-700 hover:bg-gray-50'
                         }
                       `}
+                      title={isCollapsed && !isMobile ? link.label : ""}
                     >
-                      <link.icon className="flex-shrink-0" size={20} />
-                      <span className={`ml-3 transition-opacity duration-200 ${isCollapsed ? "lg:hidden" : ""}`}>
+                      <link.icon className="flex-shrink-0" size={isCollapsed && !isMobile ? 24 : 20} />
+                      <span className={`ml-3 transition-all duration-200 
+                                      ${isCollapsed && !isMobile ? "opacity-0 w-0 overflow-hidden" : "opacity-100"}`}>
                         {link.label}
                       </span>
                     </div>
@@ -81,19 +92,20 @@ const Sidebar = () => {
             </ul>
           </nav>
           
-          <div className="p-4 border-t">
+          <div className="p-4 border-t border-gray-100">
             <Button 
               variant="ghost" 
               size="sm" 
-              className="w-full flex items-center justify-center lg:justify-start"
+              className={`${isCollapsed && !isMobile ? "w-full justify-center" : "w-full"} 
+                         text-gray-500 hover:text-apple-primary hover:bg-[#f1f5fd]`}
               onClick={toggleSidebar}
             >
-              {isCollapsed ? (
-                <ChevronRight size={18} className="hidden lg:block" />
+              {isCollapsed && !isMobile ? (
+                <ChevronRight size={18} />
               ) : (
                 <>
                   <ChevronLeft size={18} />
-                  <span className="ml-2 lg:inline-block">Collapse</span>
+                  <span className="ml-2">Collapse</span>
                 </>
               )}
             </Button>
@@ -101,12 +113,15 @@ const Sidebar = () => {
         </div>
       </aside>
       
-      <button
-        className="fixed bottom-4 left-4 bg-white p-2 rounded-full shadow-lg lg:hidden z-50"
-        onClick={toggleSidebar}
-      >
-        <ChevronRight size={20} className={`${!isCollapsed ? "hidden" : ""}`} />
-      </button>
+      {/* Mobile trigger button */}
+      {isMobile && isCollapsed && (
+        <button
+          className="fixed bottom-6 left-6 bg-white p-3 rounded-full shadow-apple z-50"
+          onClick={toggleSidebar}
+        >
+          <ChevronRight size={20} />
+        </button>
+      )}
     </>
   );
 };

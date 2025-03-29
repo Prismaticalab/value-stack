@@ -24,6 +24,7 @@ import {
   Menu
 } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const currencyOptions = [
   { value: "USD", label: "USD", icon: DollarSign },
@@ -178,18 +179,18 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <header className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-10">
-        <div className="px-4 md:px-8 py-4 flex justify-between items-center">
+      <header className="sticky top-0 z-10 backdrop-blur-xl bg-white/80 border-b border-gray-100">
+        <div className="px-6 md:px-8 py-5 flex justify-between items-center">
           <div className="flex items-center">
             <Button 
               variant="ghost" 
               size="icon" 
-              className="mr-2 lg:hidden" 
+              className="mr-2 lg:hidden text-apple-neutral hover:bg-gray-100 hover:text-apple-primary" 
               onClick={toggleSidebar}
             >
-              <Menu size={20} />
+              <Menu size={22} />
             </Button>
-            <h1 className="text-2xl font-semibold text-gray-800">Project Stack Builder</h1>
+            <h1 className="text-2xl font-semibold text-apple-neutral tracking-tight">Project Stack Builder</h1>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -197,14 +198,14 @@ const Index = () => {
               value={currentStack.currency} 
               onValueChange={handleCurrencyChange}
             >
-              <SelectTrigger className="w-[100px] border-gray-200 bg-white">
+              <SelectTrigger className="w-[100px] border-gray-200 bg-white/80 focus:ring-apple-primary">
                 <SelectValue placeholder="Currency" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white border-gray-200">
                 {currencyOptions.map((option) => {
                   const Icon = option.icon;
                   return (
-                    <SelectItem key={option.value} value={option.value}>
+                    <SelectItem key={option.value} value={option.value} className="focus:bg-[#f1f5fd] focus:text-apple-primary">
                       <div className="flex items-center gap-2">
                         <Icon size={14} />
                         <span>{option.label}</span>
@@ -217,29 +218,29 @@ const Index = () => {
           </div>
         </div>
         
-        <div className="px-4 md:px-8 bg-white">
+        <div className="px-6 md:px-8 pb-4">
           <Tabs 
             value={currentTab}
             onValueChange={(value) => setCurrentTab(value as "builder" | "projects" | "summary")}
             className="w-full"
           >
-            <TabsList className="grid w-full max-w-md grid-cols-3 mb-4">
+            <TabsList className="grid w-full max-w-md grid-cols-3 bg-[#f1f5fd] p-1 rounded-xl">
               <TabsTrigger 
                 value="builder"
-                className="data-[state=active]:bg-[#F3EFFF] data-[state=active]:text-[#9B87F5]"
+                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-apple-primary data-[state=active]:shadow-sm"
               >
                 Builder
               </TabsTrigger>
               <TabsTrigger 
                 value="projects" 
-                className="data-[state=active]:bg-[#F3EFFF] data-[state=active]:text-[#9B87F5]"
+                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-apple-primary data-[state=active]:shadow-sm"
               >
                 Projects
               </TabsTrigger>
               <TabsTrigger 
                 value="summary" 
                 disabled={currentStack.modules.length === 0}
-                className="data-[state=active]:bg-[#F3EFFF] data-[state=active]:text-[#9B87F5]"
+                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-apple-primary data-[state=active]:shadow-sm"
               >
                 Summary
               </TabsTrigger>
@@ -248,9 +249,9 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="p-4 md:p-8 max-w-7xl mx-auto">
+      <main className="p-6 md:p-8 max-w-7xl mx-auto">
         <div className={currentTab === "builder" ? "block" : "hidden"}>
-          <Card className="bg-white p-6 shadow-sm rounded-xl border-0">
+          <Card className="apple-card">
             <StackBuilder 
               stack={currentStack} 
               setStack={setStack} 
@@ -262,7 +263,7 @@ const Index = () => {
         </div>
         
         <div className={currentTab === "projects" ? "block" : "hidden"}>
-          <Card className="bg-white p-6 shadow-sm rounded-xl border-0">
+          <Card className="apple-card">
             <ProjectList 
               stacks={savedStacks} 
               onLoadStack={loadStack} 
@@ -274,7 +275,7 @@ const Index = () => {
         </div>
         
         <div className={currentTab === "summary" ? "block" : "hidden"}>
-          <Card className="bg-white p-6 shadow-sm rounded-xl border-0">
+          <Card className="apple-card">
             <Summary 
               stack={currentStack} 
               onBack={() => setCurrentTab("builder")} 

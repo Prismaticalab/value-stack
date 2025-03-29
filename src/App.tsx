@@ -26,13 +26,13 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <SidebarProvider>
-          <div className="flex flex-col min-h-screen bg-[#F6F8FB]">
+          <div className="min-h-screen bg-apple-light text-apple-neutral">
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <div className="flex flex-grow relative">
+              <div className="flex min-h-screen">
                 <Sidebar />
-                <main className="flex-1 p-0 transition-all duration-300 overflow-hidden">
+                <main className="flex-1 transition-all duration-300 overflow-x-hidden">
                   <div className="min-h-screen flex flex-col">
                     <div className="flex-grow">
                       <Routes>

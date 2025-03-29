@@ -62,7 +62,19 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				apple: {
+					primary: "#06c",
+					secondary: "#f5f5f7",
+					accent: "#2997ff",
+					neutral: "#1d1d1f",
+					light: "#fbfbfd",
+					dark: "#000000"
 				}
+			},
+			fontFamily: {
+				sans: ["-apple-system", "BlinkMacSystemFont", "San Francisco", "Helvetica Neue", "Helvetica", "sans-serif"],
+				display: ["-apple-system", "BlinkMacSystemFont", "San Francisco", "Helvetica Neue", "Helvetica", "sans-serif"]
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -125,10 +137,11 @@ export default {
 				'scale-in': 'scale-in 0.2s ease-out',
 			},
 			boxShadow: {
-				'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-				'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-				'button': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-				'button-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+				'card': '0 2px 10px rgba(0, 0, 0, 0.05)',
+				'card-hover': '0 10px 20px rgba(0, 0, 0, 0.08)',
+				'button': '0 1px 4px rgba(0, 0, 0, 0.05)',
+				'button-hover': '0 4px 6px rgba(0, 0, 0, 0.08)',
+				'apple': '0 4px 30px rgba(0, 0, 0, 0.1)'
 			}
 		}
 	},
