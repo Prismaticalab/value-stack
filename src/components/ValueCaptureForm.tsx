@@ -426,7 +426,7 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
             </div>
             
             <div className="pt-2 border-t border-gray-200 mt-2">
-              <div className="flex justify-between font-medium text-[#9B87F5]">
+              <div className="flex justify-between font-medium text-black">
                 <span>Suggested Sale Price:</span>
                 <span>{currencySymbol}{stack.finalPrice.toFixed(2)}</span>
               </div>

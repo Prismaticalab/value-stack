@@ -3,14 +3,15 @@ export interface Module {
   id: string;
   name: string;
   value: string;
-  stakeholder: "internal" | "external";
+  stakeholder: 'internal' | 'external';
   stakeholderName: string;
-  costType: "fixed" | "variable";
+  costType: 'fixed' | 'variable';
   cost: number;
-  costUnit: string;
-  costQuantity: number;
+  costUnit?: string;
+  costQuantity?: number;
   timeImpact: number;
-  timeUnit: "days" | "weeks" | "months";
+  timeUnit: 'minutes' | 'hours' | 'days' | 'weeks' | 'months';
+  nonNegotiable?: boolean; // Added nonNegotiable flag
 }
 
 export interface Stack {
@@ -20,20 +21,20 @@ export interface Stack {
   locked: boolean;
   totalCost: number;
   agencyFees: number;
+  isAgencyFeesPercentage: boolean;
+  effectiveAgencyFees: number;
   referralCosts: number;
+  isReferralPercentage: boolean;
+  effectiveReferralCost: number;
   marketingExpenses: number;
+  isMarketingPercentage: boolean;
+  effectiveMarketingExpenses: number;
   desiredMargin: number;
   finalPrice: number;
   netProfit: number;
   marginPercent: number;
   createdAt: string;
   currency: string;
-  isReferralPercentage: boolean;
-  effectiveReferralCost: number;
-  isAgencyFeesPercentage: boolean;
-  effectiveAgencyFees: number;
-  isMarketingPercentage: boolean;
-  effectiveMarketingExpenses: number;
   contingencyBuffer: number;
-  totalRequiredIncome: number; // Added the missing property
+  totalRequiredIncome: number;
 }

@@ -7,7 +7,7 @@ import ModuleCard from "./ModuleCard";
 import ValueCaptureForm from "./ValueCaptureForm";
 import { Stack, Module } from "@/types/stack";
 import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
-import { Plus, Save, FileText, ArrowRight, AlertCircle } from "lucide-react";
+import { Plus, Save, FileText, ArrowRight, ArrowLeft, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -69,6 +69,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
       costQuantity: 1,
       timeImpact: 1,
       timeUnit: "days",
+      nonNegotiable: false
     };
 
     setStack({
@@ -87,6 +88,19 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
   };
 
   const deleteModule = (moduleId: string) => {
+    // Check if the module is non-negotiable
+    const moduleToDelete = stack.modules.find(mod => mod.id === moduleId);
+    
+    if (moduleToDelete && moduleToDelete.nonNegotiable) {
+      // Show warning toast instead of deleting
+      toast({
+        title: "Cannot Delete Non-Negotiable Module",
+        description: "This module is marked as non-negotiable and cannot be deleted.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setStack({
       ...stack,
       modules: stack.modules.filter(mod => mod.id !== moduleId)
@@ -130,7 +144,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
     if (!stack.locked) {
       setValueCaptureView(true);
       toast({
-        title: "Stack locked",
+        title: "Stack committed",
         description: "Now you can set pricing and margins."
       });
     } else {
@@ -160,7 +174,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
             id="stackName"
             value={stack.name}
             onChange={(e) => setStack({ ...stack, name: e.target.value })}
-            className="border-gray-200 focus:border-[#9B87F5] focus:ring-[#9B87F5]"
+            className="border-gray-200 focus:border-black focus:ring-black"
           />
         </div>
         <div className="flex gap-2 self-end">
@@ -178,13 +192,13 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
             onClick={toggleLock}
             className={stack.locked ? "bg-gray-100" : ""}
           >
-            {stack.locked ? "Unlock Stack" : "Lock Stack"}
+            {stack.locked ? "Unlock Stack" : "Commit Stack"}
           </Button>
           
           {stack.modules.length > 0 && (
             <Button 
               onClick={onViewSummary}
-              className="bg-[#9B87F5] hover:bg-[#8A76E4] flex items-center gap-1"
+              className="bg-black hover:bg-black/80 flex items-center gap-1"
             >
               <FileText size={16} />
               Summary
@@ -204,7 +218,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
               <p className="text-gray-500 mb-4">No modules added yet</p>
               <Button 
                 onClick={addNewModule}
-                className="bg-[#9B87F5] hover:bg-[#8A76E4]"
+                className="bg-black hover:bg-black/80"
               >
                 Add Your First Module
               </Button>
@@ -242,7 +256,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
           {!stack.locked && stack.modules.length > 0 && (
             <div className="flex justify-center mt-6">
               <Button 
-                className="bg-[#9B87F5] hover:bg-[#8A76E4] flex items-center gap-1 mr-4"
+                className="bg-black hover:bg-black/80 flex items-center gap-1 mr-4"
                 onClick={addNewModule}
               >
                 <Plus size={16} />
@@ -250,7 +264,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
               </Button>
               
               <Button 
-                className="bg-[#9B87F5] hover:bg-[#8A76E4] flex items-center gap-1"
+                className="bg-black hover:bg-black/80 flex items-center gap-1"
                 onClick={goToPricing}
               >
                 <ArrowRight size={16} />
@@ -270,11 +284,22 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
           )}
         </div>
       ) : (
-        <ValueCaptureForm 
-          stack={stack} 
-          setStack={setStack}
-          currencySymbol={currencySymbol}
-        />
+        <div className="space-y-6">
+          <Button 
+            variant="outline" 
+            onClick={() => setValueCaptureView(false)}
+            className="flex items-center gap-1"
+          >
+            <ArrowLeft size={16} />
+            Back to Builder
+          </Button>
+          
+          <ValueCaptureForm 
+            stack={stack} 
+            setStack={setStack}
+            currencySymbol={currencySymbol}
+          />
+        </div>
       )}
       
       {/* Alert dialog for stack name */}

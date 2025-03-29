@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 20% 2%;
 
-    --primary: 211 100% 40%;
+    --primary: 0 0% 0%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 240 5% 96%;
@@ -23,7 +23,7 @@
     --muted: 240 5% 96%;
     --muted-foreground: 240 4% 46%;
 
-    --accent: 209 100% 59%;
+    --accent: 0 0% 0%;
     --accent-foreground: 220 20% 2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -31,18 +31,18 @@
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 211 100% 40%;
+    --ring: 0 0% 0%;
 
     --radius: 0.8rem;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 20% 2%;
-    --sidebar-primary: 211 100% 40%;
+    --sidebar-primary: 0 0% 0%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 5% 96%;
     --sidebar-accent-foreground: 220 20% 2%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 211 100% 40%;
+    --sidebar-ring: 0 0% 0%;
   }
 
   .dark {
@@ -55,7 +55,7 @@
     --popover: 220 20% 2%;
     --popover-foreground: 240 5% 96%;
 
-    --primary: 210 100% 40%;
+    --primary: 0 0% 0%;
     --primary-foreground: 210 20% 98%;
 
     --secondary: 240 4% 12%;
@@ -64,7 +64,7 @@
     --muted: 240 4% 12%;
     --muted-foreground: 240 5% 64%;
 
-    --accent: 209 100% 59%;
+    --accent: 0 0% 0%;
     --accent-foreground: 240 5% 96%;
 
     --destructive: 0 62.8% 30.6%;
@@ -72,16 +72,16 @@
 
     --border: 240 4% 12%;
     --input: 240 4% 12%;
-    --ring: 211 100% 40%;
+    --ring: 0 0% 0%;
 
     --sidebar-background: 220 20% 2%;
     --sidebar-foreground: 240 5% 96%;
-    --sidebar-primary: 211 100% 40%;
+    --sidebar-primary: 0 0% 0%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 4% 12%;
     --sidebar-accent-foreground: 240 5% 96%;
     --sidebar-border: 240 4% 12%;
-    --sidebar-ring: 211 100% 40%;
+    --sidebar-ring: 0 0% 0%;
   }
 }
 
@@ -101,10 +101,10 @@
   }
 
   .apple-button {
-    @apply bg-apple-primary text-white rounded-full px-5 py-2 font-semibold text-sm transition-all;
+    @apply bg-black text-white rounded-full px-5 py-2 font-semibold text-sm transition-all;
   }
 
   .apple-button:hover {
-    @apply bg-apple-accent;
+    @apply bg-black/80;
   }
 }

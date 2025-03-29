@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import StackBuilder from "@/components/StackBuilder";
-import ProjectList from "@/components/ProjectList";
 import Summary from "@/components/Summary";
 import { Stack } from "@/types/stack";
 import { useToast } from "@/components/ui/use-toast";
@@ -21,10 +20,20 @@ import {
   PoundSterling,
   IndianRupee,
   JapaneseYen,
-  Menu
+  Menu,
+  Save
 } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const currencyOptions = [
   { value: "USD", label: "USD", icon: DollarSign },
@@ -35,7 +44,7 @@ const currencyOptions = [
 ];
 
 const Index = () => {
-  const [currentTab, setCurrentTab] = useState<"builder" | "projects" | "summary">("builder");
+  const [currentTab, setCurrentTab] = useState<"builder" | "summary">("builder");
   const [currentStack, setCurrentStack] = useState<Stack>({
     id: crypto.randomUUID(),
     name: "New Stack",
@@ -61,6 +70,9 @@ const Index = () => {
     totalRequiredIncome: 0
   });
   const [savedStacks, setSavedStacks] = useState<Stack[]>([]);
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(true);
+  const [newProjectName, setNewProjectName] = useState("New Stack");
+  const [newProjectCurrency, setNewProjectCurrency] = useState("USD");
   const { toast } = useToast();
   const { toggleSidebar } = useSidebar();
 
@@ -112,10 +124,10 @@ const Index = () => {
     setCurrentStack(newStack);
   };
 
-  const createNewStack = () => {
+  const createNewProject = () => {
     setCurrentStack({
       id: crypto.randomUUID(),
-      name: "New Stack",
+      name: newProjectName,
       modules: [],
       locked: false,
       totalCost: 0,
@@ -127,7 +139,7 @@ const Index = () => {
       netProfit: 0,
       marginPercent: 0,
       createdAt: new Date().toISOString(),
-      currency: currentStack.currency,
+      currency: newProjectCurrency,
       isReferralPercentage: false,
       effectiveReferralCost: 0,
       isAgencyFeesPercentage: false,
@@ -137,6 +149,7 @@ const Index = () => {
       contingencyBuffer: 0,
       totalRequiredIncome: 0
     });
+    setShowNewProjectDialog(false);
     setCurrentTab("builder");
   };
 
@@ -170,11 +183,10 @@ const Index = () => {
     }
   };
 
-  const handleCurrencyChange = (value: string) => {
-    setCurrentStack(prev => ({
-      ...prev,
-      currency: value
-    }));
+  const handleNewProject = () => {
+    setNewProjectName("New Stack");
+    setNewProjectCurrency("USD");
+    setShowNewProjectDialog(true);
   };
 
   return (
@@ -194,53 +206,34 @@ const Index = () => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <Select 
-              value={currentStack.currency} 
-              onValueChange={handleCurrencyChange}
+            <Button 
+              variant="outline" 
+              onClick={saveStack}
+              className="flex items-center gap-1 border-gray-200 hover:bg-gray-100"
             >
-              <SelectTrigger className="w-[100px] border-gray-200 bg-white/80 focus:ring-apple-primary">
-                <SelectValue placeholder="Currency" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-gray-200">
-                {currencyOptions.map((option) => {
-                  const Icon = option.icon;
-                  return (
-                    <SelectItem key={option.value} value={option.value} className="focus:bg-[#f1f5fd] focus:text-apple-primary">
-                      <div className="flex items-center gap-2">
-                        <Icon size={14} />
-                        <span>{option.label}</span>
-                      </div>
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
+              <Save size={16} />
+              Save Progress
+            </Button>
           </div>
         </div>
         
         <div className="px-6 md:px-8 pb-4">
           <Tabs 
             value={currentTab}
-            onValueChange={(value) => setCurrentTab(value as "builder" | "projects" | "summary")}
+            onValueChange={(value) => setCurrentTab(value as "builder" | "summary")}
             className="w-full"
           >
-            <TabsList className="grid w-full max-w-md grid-cols-3 bg-[#f1f5fd] p-1 rounded-xl">
+            <TabsList className="grid w-full max-w-[300px] grid-cols-2 bg-[#f1f5fd] p-1 rounded-xl">
               <TabsTrigger 
                 value="builder"
-                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-apple-primary data-[state=active]:shadow-sm"
+                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm"
               >
                 Builder
               </TabsTrigger>
               <TabsTrigger 
-                value="projects" 
-                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-apple-primary data-[state=active]:shadow-sm"
-              >
-                Projects
-              </TabsTrigger>
-              <TabsTrigger 
                 value="summary" 
                 disabled={currentStack.modules.length === 0}
-                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-apple-primary data-[state=active]:shadow-sm"
+                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm"
               >
                 Summary
               </TabsTrigger>
@@ -262,18 +255,6 @@ const Index = () => {
           </Card>
         </div>
         
-        <div className={currentTab === "projects" ? "block" : "hidden"}>
-          <Card className="apple-card">
-            <ProjectList 
-              stacks={savedStacks} 
-              onLoadStack={loadStack} 
-              onDeleteStack={deleteStack} 
-              onCreateNew={createNewStack} 
-              getCurrencySymbol={getCurrencySymbol}
-            />
-          </Card>
-        </div>
-        
         <div className={currentTab === "summary" ? "block" : "hidden"}>
           <Card className="apple-card">
             <Summary 
@@ -284,6 +265,62 @@ const Index = () => {
           </Card>
         </div>
       </main>
+
+      {/* New Project Dialog */}
+      <Dialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+            <DialogDescription>
+              Set up your new project stack with a name and currency.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="projectName" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="projectName"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="currency" className="text-right">
+                Currency
+              </Label>
+              <Select
+                value={newProjectCurrency}
+                onValueChange={setNewProjectCurrency}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currencyOptions.map((option) => {
+                    const Icon = option.icon;
+                    return (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center gap-2">
+                          <Icon size={14} />
+                          <span>{option.label}</span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={createNewProject} className="bg-black hover:bg-black/80">
+              Create Stack
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -4,9 +4,9 @@ import { Stack } from "@/types/stack";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Download, Flag } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -52,7 +52,7 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
     { name: "External", value: externalCost },
   ];
 
-  const COLORS = ["#9B87F5", "#F8E16C"];
+  const COLORS = ["#000000", "#F8E16C"];
 
   // Calculate cost breakdown including value capture elements
   const modulesCost = useMemo(() => 
@@ -256,7 +256,7 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
                   </div>
                   <div className="bg-gray-100 h-2 rounded-full overflow-hidden">
                     <div
-                      className="bg-[#9B87F5] h-full"
+                      className="bg-black h-full"
                       style={{
                         width: `${(item.value / (finalPrice || 1)) * 100}%`,
                       }}
@@ -290,7 +290,7 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
                   <span>Value Capture Cost</span>
                   <span>{currencySymbol}{valueCaptureTotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between font-medium text-[#9B87F5]">
+                <div className="flex justify-between font-medium text-black">
                   <span>Suggested Sale Price</span>
                   <span>{currencySymbol}{finalPrice.toFixed(2)}</span>
                 </div>
@@ -314,17 +314,25 @@ const Summary = ({ stack, onBack, currencySymbol }: SummaryProps) => {
               <div key={module.id} className="border-b pb-4 last:border-b-0 last:pb-0">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-medium">
+                    <h3 className="font-medium flex items-center gap-2">
                       {index + 1}. {module.name}
+                      {module.nonNegotiable && (
+                        <Flag size={14} className="text-red-500" />
+                      )}
                     </h3>
                     <p className="text-sm text-gray-600 mt-1">{module.value}</p>
                     <div className="flex gap-2 mt-2 text-xs">
-                      <span className={`px-2 py-1 rounded-full ${module.stakeholder === 'internal' ? 'bg-purple-100 text-purple-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                      <span className={`px-2 py-1 rounded-full ${module.stakeholder === 'internal' ? 'bg-gray-100 text-black' : 'bg-yellow-100 text-yellow-800'}`}>
                         {module.stakeholderName || module.stakeholder}
                       </span>
                       <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-800">
                         {module.timeImpact} {module.timeUnit}
                       </span>
+                      {module.nonNegotiable && (
+                        <span className="px-2 py-1 rounded-full bg-red-100 text-red-800">
+                          Non-negotiable
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="text-right">
