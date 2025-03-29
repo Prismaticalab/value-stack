@@ -17,6 +17,10 @@ export const SidebarProvider = ({ children }: { children: React.ReactNode }) => 
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024);
+      // Auto-collapse sidebar on mobile
+      if (window.innerWidth < 1024) {
+        setIsCollapsed(true);
+      }
     };
 
     checkMobile();

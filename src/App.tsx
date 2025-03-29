@@ -9,7 +9,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
-import { SidebarProvider } from "./context/SidebarContext";
+import { SidebarProvider, useSidebar } from "./context/SidebarContext";
 
 // Create the query client outside of the component to avoid recreation on re-renders
 const queryClient = new QueryClient({
@@ -21,6 +21,28 @@ const queryClient = new QueryClient({
   },
 });
 
+// Create a layout component that uses the sidebar context
+const Layout = ({ children }: { children: React.ReactNode }) => {
+  const { isCollapsed, isMobile } = useSidebar();
+  
+  return (
+    <div className="flex min-h-screen">
+      <Sidebar />
+      <main 
+        className={`flex-1 transition-all duration-300 overflow-x-hidden
+                   ${!isMobile && (isCollapsed ? 'ml-[72px]' : 'ml-64')}`}
+      >
+        <div className="min-h-screen flex flex-col">
+          <div className="flex-grow">
+            {children}
+          </div>
+          <Footer />
+        </div>
+      </main>
+    </div>
+  );
+};
+
 const App = () => (
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
@@ -30,21 +52,13 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <div className="flex min-h-screen">
-                <Sidebar />
-                <main className="flex-1 transition-all duration-300 overflow-x-hidden">
-                  <div className="min-h-screen flex flex-col">
-                    <div className="flex-grow">
-                      <Routes>
-                        <Route path="/" element={<Index />} />
-                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </div>
-                    <Footer />
-                  </div>
-                </main>
-              </div>
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Layout>
             </BrowserRouter>
           </div>
         </SidebarProvider>
