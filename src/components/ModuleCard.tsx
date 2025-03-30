@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Module } from "@/types/stack";
 import { Draggable } from "react-beautiful-dnd";
 import { Input } from "@/components/ui/input";
@@ -32,9 +32,11 @@ const ModuleCard = ({
   isLocked,
   currencySymbol
 }: ModuleCardProps) => {
-  const [expanded, setExpanded] = useState(false);
+  // Start with module expanded by default
+  const [expanded, setExpanded] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [costInputActive, setCostInputActive] = useState(false);
 
   const handleChange = (field: keyof Module, value: any) => {
     const updatedModule = { ...module, [field]: value };
@@ -89,13 +91,7 @@ const ModuleCard = ({
   const getCardClasses = () => {
     let borderColor = "";
     
-    if (module.nonNegotiable) {
-      if (module.stakeholder === 'internal') {
-        borderColor = "border-l-4 border-l-blue-500";
-      } else {
-        borderColor = "border-l-4 border-l-purple-500";
-      }
-    } else if (module.stakeholder === 'internal') {
+    if (module.stakeholder === 'internal') {
       borderColor = "border-l-4 border-l-blue-500";
     } else if (module.stakeholder === 'external') {
       borderColor = "border-l-4 border-l-purple-500";
@@ -116,8 +112,10 @@ const ModuleCard = ({
           <CardContent className="p-4">
             <div className="flex justify-between items-start">
               <div className="flex-1 mr-4">
+                <Label htmlFor={`module-name-${module.id}`} className="text-sm font-medium mb-1 block">Module Name</Label>
                 <div className="flex gap-2 items-center">
                   <Input
+                    id={`module-name-${module.id}`}
                     className={`font-medium ${!module.name ? 'italic text-gray-400' : ''} border-gray-200 focus:border-black focus:ring-black`}
                     placeholder="Module name"
                     value={module.name}
@@ -190,6 +188,29 @@ const ModuleCard = ({
                   </Button>
                 </div>
               </div>
+            </div>
+
+            {/* Non-negotiable setting - moved up between module name and purpose */}
+            <div className="mt-3 flex items-center justify-between">
+              <Label htmlFor={`non-negotiable-${module.id}`} className="cursor-pointer flex items-center gap-2">
+                <span>Non-Negotiable</span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger className="cursor-help text-gray-400 hover:text-gray-500">
+                      <Flag size={14} />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>When marked as non-negotiable, this module cannot be deleted.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </Label>
+              <Switch
+                id={`non-negotiable-${module.id}`}
+                checked={module.nonNegotiable || false}
+                onCheckedChange={(checked) => handleChange("nonNegotiable", checked)}
+                disabled={isLocked}
+              />
             </div>
 
             {expanded && (
@@ -285,23 +306,21 @@ const ModuleCard = ({
                 </div>
 
                 <div className="pt-2">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <Label className="text-sm font-medium mr-4">Cost</Label>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xs text-gray-500">Fixed</span>
-                        <Switch
-                          checked={module.costType === "variable"}
-                          onCheckedChange={(checked) =>
-                            handleChange(
-                              "costType",
-                              checked ? "variable" : "fixed"
-                            )
-                          }
-                          disabled={isLocked}
-                        />
-                        <span className="text-xs text-gray-500">Variable</span>
-                      </div>
+                  <div className="flex items-center">
+                    <Label className="text-sm font-medium mr-4">Cost</Label>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs text-gray-500">Fixed</span>
+                      <Switch
+                        checked={module.costType === "variable"}
+                        onCheckedChange={(checked) =>
+                          handleChange(
+                            "costType",
+                            checked ? "variable" : "fixed"
+                          )
+                        }
+                        disabled={isLocked}
+                      />
+                      <span className="text-xs text-gray-500">Variable</span>
                     </div>
                   </div>
 
@@ -313,12 +332,16 @@ const ModuleCard = ({
                       <Input
                         className="pl-7 border-gray-200 focus:border-black focus:ring-black"
                         type="number"
+                        inputMode="numeric"
                         min="0"
                         step="0.01"
-                        value={module.cost}
+                        placeholder={costInputActive ? "" : "0"}
+                        value={costInputActive ? module.cost : module.cost === 0 ? "" : module.cost}
                         onChange={(e) =>
                           handleChange("cost", parseFloat(e.target.value) || 0)
                         }
+                        onFocus={() => setCostInputActive(true)}
+                        onBlur={() => setCostInputActive(false)}
                         disabled={isLocked}
                       />
                     </div>
@@ -327,22 +350,23 @@ const ModuleCard = ({
                       <>
                         <Input
                           className="border-gray-200 focus:border-black focus:ring-black"
-                          placeholder="Unit (e.g., hours, users)"
+                          placeholder="Type the nature of unit (e.g., hours, users, 1000 copies, etc)"
                           value={module.costUnit || ""}
                           onChange={(e) =>
                             handleChange("costUnit", e.target.value)
                           }
                           disabled={isLocked}
                           onFocus={(e) => e.target.placeholder = ""}
-                          onBlur={(e) => e.target.placeholder = "Unit (e.g., hours, users)"}
+                          onBlur={(e) => e.target.placeholder = "Type the nature of unit (e.g., hours, users, 1000 copies, etc)"}
                         />
 
                         <Input
                           className="border-gray-200 focus:border-black focus:ring-black"
                           type="number"
+                          inputMode="numeric"
                           min="1"
                           step="1"
-                          placeholder="Quantity"
+                          placeholder="Number of units needed"
                           value={module.costQuantity || 1}
                           onChange={(e) =>
                             handleChange(
@@ -351,6 +375,8 @@ const ModuleCard = ({
                             )
                           }
                           disabled={isLocked}
+                          onFocus={(e) => e.target.placeholder = ""}
+                          onBlur={(e) => e.target.placeholder = "Number of units needed"}
                         />
                       </>
                     )}
@@ -359,10 +385,23 @@ const ModuleCard = ({
                 
                 {/* Document attachment section */}
                 <div className="pt-4">
-                  <Label className="text-sm font-medium mb-2 block">Document Attachment</Label>
+                  <div className="flex justify-between items-center">
+                    <Label className="text-sm font-medium">Document Attachment</Label>
+                    {!module.documentUrl && !isLocked && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                        onClick={triggerFileInput}
+                      >
+                        <Paperclip size={16} />
+                        Attach Document
+                      </Button>
+                    )}
+                  </div>
                   
                   {module.documentUrl ? (
-                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
+                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md mt-2">
                       <div className="flex items-center">
                         <Paperclip size={16} className="text-gray-500 mr-2" />
                         <span className="text-sm truncate max-w-xs">{module.documentName}</span>
@@ -409,47 +448,14 @@ const ModuleCard = ({
                       </div>
                     </div>
                   ) : (
-                    <Button
-                      variant="outline"
-                      className="w-full border-dashed border-gray-300 text-gray-500 hover:text-gray-700"
-                      onClick={triggerFileInput}
-                      disabled={isLocked}
-                    >
-                      <Paperclip size={16} className="mr-2" />
-                      Attach Document
-                    </Button>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      onChange={handleFileChange} 
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
+                    />
                   )}
-                  
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    className="hidden" 
-                    onChange={handleFileChange} 
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
-                  />
-                </div>
-                
-                {/* Non-negotiable setting with aligned toggle */}
-                <div className="pt-2 flex items-center justify-between">
-                  <Label htmlFor={`non-negotiable-${module.id}`} className="cursor-pointer flex items-center gap-2">
-                    <span>Non-Negotiable</span>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger className="cursor-help text-gray-400 hover:text-gray-500">
-                          <Flag size={14} />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>When marked as non-negotiable, this module cannot be deleted.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </Label>
-                  <Switch
-                    id={`non-negotiable-${module.id}`}
-                    checked={module.nonNegotiable || false}
-                    onCheckedChange={(checked) => handleChange("nonNegotiable", checked)}
-                    disabled={isLocked}
-                  />
                 </div>
               </div>
             )}

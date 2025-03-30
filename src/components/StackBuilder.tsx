@@ -5,9 +5,10 @@ import ModuleCard from "./ModuleCard";
 import ValueCaptureForm from "./ValueCaptureForm";
 import { Stack, Module } from "@/types/stack";
 import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
-import { Plus, Save, FileText, ArrowRight, ArrowLeft, Star } from "lucide-react";
+import { Plus, Save, FileText, ArrowRight, ArrowLeft, Star, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ModuleEditDialog from "./ModuleEditDialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface StackBuilderProps {
   stack: Stack;
@@ -60,6 +61,8 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
       ...stack,
       modules: [...stack.modules, newModule]
     });
+    
+    // No need to set editingModuleId here, as ModuleCard will be expanded by default
   };
 
   const updateModule = (moduleId: string, updatedModule: Module) => {
@@ -137,7 +140,25 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
         <div className="flex-1">
-          <h2 className="text-xl font-medium">Stack Builder</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-medium">Let's build your value delivery stack!</h2>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full">
+                    <HelpCircle size={16} className="text-gray-500" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>
+                    This is where you build the modules that make up your value delivery stack.
+                    Each module represents a component of your service offering.
+                    Add, edit, or arrange modules to create your complete delivery stack.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           {stack.description && (
             <p className="text-sm text-gray-500 mt-1">{stack.description}</p>
           )}
