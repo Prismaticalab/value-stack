@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Module } from "@/types/stack";
 import { Draggable } from "react-beautiful-dnd";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +17,9 @@ interface ModuleCardProps {
   isLocked: boolean;
   currencySymbol: string;
   onEdit?: () => void;
+  isExpanded: boolean;
+  setIsExpanded: (expanded: boolean) => void;
+  autoFocus?: boolean;
 }
 
 const ModuleCard = ({
@@ -27,9 +30,18 @@ const ModuleCard = ({
   onDuplicate,
   isLocked,
   currencySymbol,
-  onEdit
+  onEdit,
+  isExpanded,
+  setIsExpanded,
+  autoFocus
 }: ModuleCardProps) => {
-  const [expanded, setExpanded] = useState(true);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (autoFocus && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [autoFocus]);
 
   const handleChange = (field: keyof Module, value: any) => {
     const updatedModule = { ...module, [field]: value };
@@ -37,7 +49,7 @@ const ModuleCard = ({
   };
 
   const toggleExpanded = () => {
-    setExpanded(!expanded);
+    setIsExpanded(!isExpanded);
   };
 
   const handleDocumentUpdate = (documentUrl?: string, documentName?: string) => {
@@ -73,7 +85,11 @@ const ModuleCard = ({
     <Draggable draggableId={module.id} index={index} isDragDisabled={isLocked}>
       {(provided) => (
         <Card
-          ref={provided.innerRef}
+          ref={(el) => {
+            provided.innerRef(el);
+            // @ts-ignore - combining refs
+            cardRef.current = el;
+          }}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           className={getCardClasses()}
@@ -84,14 +100,14 @@ const ModuleCard = ({
               onUpdate={handleChange}
               onDelete={() => onDelete(module.id)}
               onDuplicate={() => onDuplicate(module.id)}
-              expanded={expanded}
+              expanded={isExpanded}
               toggleExpanded={toggleExpanded}
               isLocked={isLocked}
               displayedCost={displayedCost}
               currencySymbol={currencySymbol}
             />
             
-            {expanded && (
+            {isExpanded && (
               <>
                 <ModuleDetails 
                   module={module}

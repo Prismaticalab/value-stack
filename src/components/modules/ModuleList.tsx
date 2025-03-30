@@ -1,3 +1,5 @@
+
+import { useState, useEffect } from "react";
 import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
 import ModuleCard from "../ModuleCard";
 import { Stack, Module } from "@/types/stack";
@@ -14,7 +16,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
 
 interface ModuleListProps {
   stack: Stack;
@@ -35,6 +36,21 @@ const ModuleList = ({
 }: ModuleListProps) => {
   const { toast } = useToast();
   const [moduleToDelete, setModuleToDelete] = useState<string | null>(null);
+  const [expandedModules, setExpandedModules] = useState<{[key: string]: boolean}>({});
+  const [newModuleId, setNewModuleId] = useState<string | null>(null);
+
+  // Initialize expanded state for all modules
+  useEffect(() => {
+    const expandedState: {[key: string]: boolean} = {};
+    stack.modules.forEach(module => {
+      // If a module is newly added, it should be expanded, others collapsed
+      expandedState[module.id] = module.id === newModuleId;
+    });
+    
+    if (Object.keys(expandedState).length > 0) {
+      setExpandedModules(expandedState);
+    }
+  }, [stack.modules.length, newModuleId]);
 
   const updateModule = (moduleId: string, updatedModule: Module) => {
     setStack({
@@ -75,10 +91,20 @@ const ModuleList = ({
     const moduleToDuplicate = stack.modules.find(mod => mod.id === moduleId);
     if (!moduleToDuplicate) return;
 
+    const newId = crypto.randomUUID();
     const duplicatedModule = {
       ...moduleToDuplicate,
-      id: crypto.randomUUID()
+      id: newId
     };
+
+    // Collapse all modules and expand only the new one
+    const newExpandedState: {[key: string]: boolean} = {};
+    stack.modules.forEach(mod => {
+      newExpandedState[mod.id] = false;
+    });
+    newExpandedState[newId] = true;
+    setExpandedModules(newExpandedState);
+    setNewModuleId(newId);
 
     setStack({
       ...stack,
@@ -99,6 +125,28 @@ const ModuleList = ({
     });
   };
 
+  const handleAddModule = () => {
+    const newId = crypto.randomUUID();
+    setNewModuleId(newId);
+    
+    // Collapse all existing modules
+    const newExpandedState: {[key: string]: boolean} = {};
+    stack.modules.forEach(mod => {
+      newExpandedState[mod.id] = false;
+    });
+    // The new module will be expanded in the useEffect when it's added to stack.modules
+    setExpandedModules(newExpandedState);
+    
+    onAddModule();
+  };
+
+  const setModuleExpanded = (moduleId: string, expanded: boolean) => {
+    setExpandedModules(prev => ({
+      ...prev,
+      [moduleId]: expanded
+    }));
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -109,7 +157,7 @@ const ModuleList = ({
         <div className="border-2 border-dashed border-gray-200 rounded-lg p-10 text-center">
           <p className="text-gray-500 mb-4">No modules added yet</p>
           <Button 
-            onClick={onAddModule}
+            onClick={handleAddModule}
             className="bg-black hover:bg-black/80 transition-colors"
           >
             Add Your First Module
@@ -134,6 +182,9 @@ const ModuleList = ({
                     onDuplicate={duplicateModule}
                     isLocked={stack.locked}
                     currencySymbol={currencySymbol}
+                    isExpanded={expandedModules[module.id] || false}
+                    setIsExpanded={(expanded) => setModuleExpanded(module.id, expanded)}
+                    autoFocus={module.id === newModuleId}
                   />
                 ))}
                 {provided.placeholder}
@@ -147,7 +198,7 @@ const ModuleList = ({
         <div className="flex justify-center mt-6">
           <Button 
             className="bg-black hover:bg-black/80 transition-colors flex items-center gap-1 mr-4"
-            onClick={onAddModule}
+            onClick={handleAddModule}
           >
             <Plus size={16} />
             <span>Add Module</span>
