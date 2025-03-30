@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Module } from "@/types/stack";
 import { Draggable } from "react-beautiful-dnd";
@@ -64,7 +63,7 @@ const ModuleCard = ({
     
     const rightBorder = module.nonNegotiable 
       ? "border-r-4 border-r-red-500" 
-      : "border-r-4 border-r-gray-500";
+      : "border-r-4 border-r-gray-300";
     
     return `border border-gray-200 shadow-sm transition-all ${leftBorder} ${rightBorder}`;
   };
@@ -122,4 +121,3 @@ const ModuleCard = ({
 };
 
 export default ModuleCard;
-
