@@ -29,6 +29,14 @@ const EditProjectDialog = ({
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
+    // Reset the form values when the dialog opens
+    setName(projectName);
+    setDescription(projectDescription);
+    setOwner(projectOwner);
+    setHasChanges(false);
+  }, [projectName, projectDescription, projectOwner, open]);
+
+  useEffect(() => {
     // Check if any field has changed
     setHasChanges(
       name !== projectName || 

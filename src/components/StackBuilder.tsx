@@ -1,14 +1,14 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import ModuleCard from "./ModuleCard";
-import ValueCaptureForm from "./ValueCaptureForm";
 import { Stack, Module } from "@/types/stack";
-import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
-import { Plus, Save, FileText, ArrowRight, ArrowLeft, Star, HelpCircle } from "lucide-react";
+import { Save, FileText, ArrowLeft, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ModuleEditDialog from "./ModuleEditDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import ModuleList from "./modules/ModuleList";
+import CollapsedModuleList from "./modules/CollapsedModuleList";
+import ValueCaptureForm from "./ValueCaptureForm";
 
 interface StackBuilderProps {
   stack: Stack;
@@ -60,63 +60,6 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
     setStack({
       ...stack,
       modules: [...stack.modules, newModule]
-    });
-    
-    // No need to set editingModuleId here, as ModuleCard will be expanded by default
-  };
-
-  const updateModule = (moduleId: string, updatedModule: Module) => {
-    setStack({
-      ...stack,
-      modules: stack.modules.map(mod => 
-        mod.id === moduleId ? updatedModule : mod
-      )
-    });
-  };
-
-  const deleteModule = (moduleId: string) => {
-    const moduleToDelete = stack.modules.find(mod => mod.id === moduleId);
-    
-    if (moduleToDelete && moduleToDelete.nonNegotiable) {
-      toast({
-        title: "Cannot Delete Non-Negotiable Module",
-        description: "This module is marked as non-negotiable and cannot be deleted.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setStack({
-      ...stack,
-      modules: stack.modules.filter(mod => mod.id !== moduleId)
-    });
-  };
-
-  const duplicateModule = (moduleId: string) => {
-    const moduleToDuplicate = stack.modules.find(mod => mod.id === moduleId);
-    if (!moduleToDuplicate) return;
-
-    const duplicatedModule = {
-      ...moduleToDuplicate,
-      id: crypto.randomUUID()
-    };
-
-    setStack({
-      ...stack,
-      modules: [...stack.modules, duplicatedModule]
-    });
-  };
-
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
-
-    const items = Array.from(stack.modules);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    setStack({
-      ...stack,
-      modules: items
     });
   };
 
@@ -186,78 +129,14 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
       </div>
 
       {!valueCaptureView ? (
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-medium">Modules</h2>
-          </div>
-
-          {stack.modules.length === 0 ? (
-            <div className="border-2 border-dashed border-gray-200 rounded-lg p-10 text-center">
-              <p className="text-gray-500 mb-4">No modules added yet</p>
-              <Button 
-                onClick={addNewModule}
-                className="bg-black hover:bg-black/80"
-              >
-                Add Your First Module
-              </Button>
-            </div>
-          ) : (
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="modules">
-                {(provided) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className="space-y-3"
-                  >
-                    {stack.modules.map((module, index) => (
-                      <ModuleCard
-                        key={module.id}
-                        module={module}
-                        index={index}
-                        onUpdate={updateModule}
-                        onDelete={deleteModule}
-                        onDuplicate={duplicateModule}
-                        isLocked={stack.locked}
-                        currencySymbol={currencySymbol}
-                      />
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
-          )}
-          
-          {stack.modules.length > 0 && (
-            <div className="flex justify-center mt-6">
-              <Button 
-                className="bg-black hover:bg-black/80 flex items-center gap-1 mr-4"
-                onClick={addNewModule}
-              >
-                <Plus size={16} />
-                Add Module
-              </Button>
-              
-              <Button 
-                className="bg-black hover:bg-black/80 flex items-center gap-1"
-                onClick={goToPricing}
-              >
-                <ArrowRight size={16} />
-                Go to Pricing
-              </Button>
-            </div>
-          )}
-          
-          {stack.modules.length > 0 && (
-            <div className="pt-4">
-              <div className="flex justify-between items-center text-sm font-medium">
-                <span>Total Delivery Cost:</span>
-                <span>{currencySymbol}{stack.totalCost.toFixed(2)}</span>
-              </div>
-            </div>
-          )}
-        </div>
+        <ModuleList
+          stack={stack}
+          setStack={setStack}
+          onAddModule={addNewModule}
+          onGoToPricing={goToPricing}
+          onEditModule={openModuleEditor}
+          currencySymbol={currencySymbol}
+        />
       ) : (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
@@ -272,32 +151,11 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
             <h2 className="text-xl font-medium">Pricing Analysis</h2>
           </div>
           
-          {/* Show modules in collapsed view */}
-          <div className="border rounded-lg p-4 bg-gray-50">
-            <h3 className="text-lg font-medium mb-3">Modules</h3>
-            <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-              {stack.modules.map((module) => (
-                <div key={module.id} className="flex justify-between items-center p-2 bg-white rounded border">
-                  <div className="flex items-center">
-                    {module.nonNegotiable && <Star size={14} className="text-yellow-500 mr-2" fill="currentColor" />}
-                    <div className={`w-2 h-2 rounded-full mr-2 ${module.stakeholder === 'internal' ? 'bg-blue-500' : 'bg-purple-500'}`}></div>
-                    <span className="font-medium">{module.name || "Unnamed Module"}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-sm mr-4">{currencySymbol}{module.costType === 'variable' && module.costQuantity ? (module.cost * module.costQuantity).toFixed(2) : module.cost.toFixed(2)}</span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => openModuleEditor(module.id)}
-                      className="text-xs h-8"
-                    >
-                      Edit
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <CollapsedModuleList 
+            modules={stack.modules} 
+            onEditModule={openModuleEditor}
+            currencySymbol={currencySymbol} 
+          />
           
           <ValueCaptureForm 
             stack={stack} 
@@ -312,7 +170,12 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
         <ModuleEditDialog
           module={getModuleById(editingModuleId)!}
           onSave={(updatedModule) => {
-            updateModule(editingModuleId, updatedModule);
+            setStack({
+              ...stack,
+              modules: stack.modules.map(mod => 
+                mod.id === editingModuleId ? updatedModule : mod
+              )
+            });
             setEditingModuleId(null);
           }}
           onCancel={() => setEditingModuleId(null)}

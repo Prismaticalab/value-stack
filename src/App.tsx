@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 import { SidebarProvider, useSidebar } from "./context/SidebarContext";
+import { ProjectProvider } from "./context/ProjectContext";
 
 // Create the query client outside of the component to avoid recreation on re-renders
 const queryClient = new QueryClient({
@@ -48,19 +49,21 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <SidebarProvider>
-          <div className="min-h-screen bg-apple-light text-apple-neutral">
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Layout>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Layout>
-            </BrowserRouter>
-          </div>
+          <ProjectProvider>
+            <div className="min-h-screen bg-apple-light text-apple-neutral">
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Layout>
+              </BrowserRouter>
+            </div>
+          </ProjectProvider>
         </SidebarProvider>
       </TooltipProvider>
     </QueryClientProvider>
