@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Module } from "@/types/stack";
 import { Draggable } from "react-beautiful-dnd";
@@ -67,7 +68,7 @@ const ModuleCard = ({
     // Add red border for non-negotiable modules (top, right, bottom)
     // We keep the left border color based on stakeholder
     const nonNegotiableBorder = module.nonNegotiable 
-      ? "border-t-4 border-r-4 border-b-4 border-red-500" 
+      ? "border-r-4 border-red-500" 
       : "";
     
     return `border border-gray-200 shadow-sm transition-all ${borderColor} ${nonNegotiableBorder}`;
