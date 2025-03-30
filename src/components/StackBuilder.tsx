@@ -1,22 +1,12 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import ModuleCard from "./ModuleCard";
 import ValueCaptureForm from "./ValueCaptureForm";
 import { Stack, Module } from "@/types/stack";
 import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
-import { Plus, Save, FileText, ArrowRight, ArrowLeft, AlertCircle } from "lucide-react";
+import { Plus, Save, FileText, ArrowRight, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 interface StackBuilderProps {
   stack: Stack;
@@ -28,7 +18,6 @@ interface StackBuilderProps {
 
 const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }: StackBuilderProps) => {
   const [valueCaptureView, setValueCaptureView] = useState(false);
-  const [showNameAlert, setShowNameAlert] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -36,7 +25,6 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
   }, [stack.modules, stack.agencyFees, stack.referralCosts, stack.marketingExpenses, stack.desiredMargin]);
 
   const calculateTotals = () => {
-    // Calculate total module costs, accounting for variable costs
     const totalDeliveryCost = stack.modules.reduce((sum, module) => {
       if (module.costType === "variable" && module.cost && module.costQuantity) {
         return sum + (module.cost * module.costQuantity);
@@ -44,14 +32,9 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
       return sum + module.cost;
     }, 0);
     
-    // Just calculate the base cost for now
-    // The ValueCaptureForm component will handle the more complex calculations
-    // with referral percentage and final pricing
-    const totalCost = totalDeliveryCost;
-    
     setStack({
       ...stack,
-      totalCost,
+      totalCost: totalDeliveryCost,
     });
   };
 
@@ -87,11 +70,9 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
   };
 
   const deleteModule = (moduleId: string) => {
-    // Check if the module is non-negotiable
     const moduleToDelete = stack.modules.find(mod => mod.id === moduleId);
     
     if (moduleToDelete && moduleToDelete.nonNegotiable) {
-      // Show warning toast instead of deleting
       toast({
         title: "Cannot Delete Non-Negotiable Module",
         description: "This module is marked as non-negotiable and cannot be deleted.",
@@ -134,23 +115,6 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
     });
   };
 
-  const toggleLock = () => {
-    setStack({
-      ...stack,
-      locked: !stack.locked
-    });
-
-    if (!stack.locked) {
-      setValueCaptureView(true);
-      toast({
-        title: "Stack committed",
-        description: "Now you can set pricing and margins."
-      });
-    } else {
-      setValueCaptureView(false);
-    }
-  };
-
   const goToPricing = () => {
     setValueCaptureView(true);
     toast({
@@ -173,14 +137,6 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
           >
             <Save size={16} />
             Save Progress
-          </Button>
-          
-          <Button 
-            variant="outline"
-            onClick={toggleLock}
-            className={stack.locked ? "bg-gray-100" : ""}
-          >
-            {stack.locked ? "Unlock Stack" : "Commit Stack"}
           </Button>
           
           {stack.modules.length > 0 && (
@@ -228,7 +184,6 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
                         onUpdate={updateModule}
                         onDelete={deleteModule}
                         onDuplicate={duplicateModule}
-                        isLocked={stack.locked}
                         currencySymbol={currencySymbol}
                       />
                     ))}
@@ -239,8 +194,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
             </DragDropContext>
           )}
           
-          {/* Add Module button now appears at the bottom of the page */}
-          {!stack.locked && stack.modules.length > 0 && (
+          {stack.modules.length > 0 && (
             <div className="flex justify-center mt-6">
               <Button 
                 className="bg-black hover:bg-black/80 flex items-center gap-1 mr-4"
@@ -260,7 +214,6 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
             </div>
           )}
           
-          {/* Show total cost at bottom if modules exist */}
           {stack.modules.length > 0 && (
             <div className="pt-4">
               <div className="flex justify-between items-center text-sm font-medium">
@@ -288,21 +241,6 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
           />
         </div>
       )}
-      
-      {/* Alert dialog for stack name */}
-      <AlertDialog open={showNameAlert} onOpenChange={setShowNameAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Stack Name Required</AlertDialogTitle>
-            <AlertDialogDescription>
-              Please provide a unique name for your stack before proceeding to pricing.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction>Okay</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };
