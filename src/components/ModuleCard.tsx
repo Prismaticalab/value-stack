@@ -60,15 +60,15 @@ const ModuleCard = ({
     let leftBorder = "";
     
     if (module.stakeholder === 'internal') {
-      leftBorder = "border-l-4 border-l-blue-500";
+      leftBorder = "border-l-12 border-l-blue-500";
     } else if (module.stakeholder === 'external') {
-      leftBorder = "border-l-4 border-l-purple-500";
+      leftBorder = "border-l-12 border-l-purple-500";
     }
     
     // Add black border to right side by default, red if non-negotiable
     const rightBorder = module.nonNegotiable 
-      ? "border-r-4 border-r-red-500" 
-      : "border-r-4 border-r-black";
+      ? "border-r-12 border-r-red-500" 
+      : "border-r-12 border-r-black";
     
     return `border border-gray-200 shadow-sm transition-all ${leftBorder} ${rightBorder}`;
   };
