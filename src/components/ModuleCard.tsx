@@ -57,20 +57,20 @@ const ModuleCard = ({
 
   // Determine the color accent based on stakeholder and non-negotiable status
   const getCardClasses = () => {
-    let borderColor = "";
+    let leftBorder = "";
     
     if (module.stakeholder === 'internal') {
-      borderColor = "border-l-4 border-l-blue-500";
+      leftBorder = "border-l-4 border-l-blue-500";
     } else if (module.stakeholder === 'external') {
-      borderColor = "border-l-4 border-l-purple-500";
+      leftBorder = "border-l-4 border-l-purple-500";
     }
     
-    // Add red border only for the right side of non-negotiable modules
-    const nonNegotiableBorder = module.nonNegotiable 
-      ? "border-r-4 border-red-500" 
-      : "";
+    // Add black border to right side by default, red if non-negotiable
+    const rightBorder = module.nonNegotiable 
+      ? "border-r-4 border-r-red-500" 
+      : "border-r-4 border-r-black";
     
-    return `border border-gray-200 shadow-sm transition-all ${borderColor} ${nonNegotiableBorder}`;
+    return `border border-gray-200 shadow-sm transition-all ${leftBorder} ${rightBorder}`;
   };
 
   return (
