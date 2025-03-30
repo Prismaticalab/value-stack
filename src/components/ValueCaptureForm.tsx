@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,12 @@ interface ValueCaptureFormProps {
 
 const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormProps) => {
   const { toast } = useToast();
+  
+  // Add states to track if fields are active/focused
+  const [contingencyActive, setContingencyActive] = useState(false);
+  const [agencyFeesActive, setAgencyFeesActive] = useState(false);
+  const [referralCostsActive, setReferralCostsActive] = useState(false);
+  const [marketingExpensesActive, setMarketingExpensesActive] = useState(false);
   
   const handleChange = (field: string, value: number | boolean) => {
     const updatedStack = {
@@ -211,14 +218,17 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
             </div>
             <Input
               id="contingencyBuffer"
-              type="number"
+              type="text"
+              inputMode="decimal"
               min="0"
               step="1"
               max="100"
               placeholder="Enter contingency buffer"
-              value={stack.contingencyBuffer || 0}
+              value={contingencyActive ? (stack.contingencyBuffer || "") : (stack.contingencyBuffer > 0 ? stack.contingencyBuffer : "")}
               onChange={(e) => handleChange("contingencyBuffer", parseFloat(e.target.value) || 0)}
               className="pl-7 border-gray-200"
+              onFocus={() => setContingencyActive(true)}
+              onBlur={() => setContingencyActive(false)}
             />
           </div>
         </div>
@@ -244,14 +254,17 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
             </div>
             <Input
               id="agencyFees"
-              type="number"
+              type="text"
+              inputMode="decimal"
               min="0"
               step={stack.isAgencyFeesPercentage ? "1" : "0.01"}
               max={stack.isAgencyFeesPercentage ? "100" : undefined}
               placeholder="Enter agency fees"
-              value={stack.agencyFees || 0}
+              value={agencyFeesActive ? (stack.agencyFees || "") : (stack.agencyFees > 0 ? stack.agencyFees : "")}
               onChange={(e) => handleChange("agencyFees", parseFloat(e.target.value) || 0)}
               className="pl-7 border-gray-200"
+              onFocus={() => setAgencyFeesActive(true)}
+              onBlur={() => setAgencyFeesActive(false)}
             />
           </div>
         </div>
@@ -277,16 +290,19 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
             </div>
             <Input
               id="referralCosts"
-              type="number"
+              type="text"
+              inputMode="decimal"
               min="0"
               step={stack.isReferralPercentage ? "1" : "0.01"}
               max={stack.isReferralPercentage ? "100" : undefined}
               placeholder="Enter referral costs"
-              value={stack.referralCosts || 0}
+              value={referralCostsActive ? (stack.referralCosts || "") : (stack.referralCosts > 0 ? stack.referralCosts : "")}
               onChange={(e) =>
                 handleChange("referralCosts", parseFloat(e.target.value) || 0)
               }
               className="pl-7 border-gray-200"
+              onFocus={() => setReferralCostsActive(true)}
+              onBlur={() => setReferralCostsActive(false)}
             />
           </div>
         </div>
@@ -312,16 +328,19 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
             </div>
             <Input
               id="marketingExpenses"
-              type="number"
+              type="text"
+              inputMode="decimal"
               min="0"
               step={stack.isMarketingPercentage ? "1" : "0.01"}
               max={stack.isMarketingPercentage ? "100" : undefined}
               placeholder="Enter marketing expenses"
-              value={stack.marketingExpenses || 0}
+              value={marketingExpensesActive ? (stack.marketingExpenses || "") : (stack.marketingExpenses > 0 ? stack.marketingExpenses : "")}
               onChange={(e) =>
                 handleChange("marketingExpenses", parseFloat(e.target.value) || 0)
               }
               className="pl-7 border-gray-200"
+              onFocus={() => setMarketingExpensesActive(true)}
+              onBlur={() => setMarketingExpensesActive(false)}
             />
           </div>
         </div>
