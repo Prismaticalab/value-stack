@@ -38,6 +38,7 @@ const ModuleCard = ({
   const { toast } = useToast();
   const [costInputActive, setCostInputActive] = useState(false);
   const [quantityInputActive, setQuantityInputActive] = useState(false);
+  const [timeInputActive, setTimeInputActive] = useState(false);
   const [costInputError, setCostInputError] = useState<string | null>(null);
   const [quantityInputError, setQuantityInputError] = useState<string | null>(null);
 
@@ -57,7 +58,7 @@ const ModuleCard = ({
     }
     
     // Check if the value is a valid number
-    const numValue = parseFloat(value);
+    const numValue = parseFloat(value.replace(',', '.'));
     if (isNaN(numValue)) {
       setCostInputError("Please only use numbers for this field");
       return;
@@ -318,7 +319,7 @@ const ModuleCard = ({
                         className="border-gray-200 focus:border-black focus:ring-black"
                         type="text" 
                         inputMode="numeric"
-                        placeholder="Time value"
+                        placeholder={timeInputActive ? "" : "Time value"}
                         value={module.timeImpact || ""}
                         onChange={(e) => {
                           const value = e.target.value;
@@ -327,6 +328,8 @@ const ModuleCard = ({
                           }
                         }}
                         disabled={isLocked}
+                        onFocus={() => setTimeInputActive(true)}
+                        onBlur={() => setTimeInputActive(false)}
                       />
 
                       <Select
@@ -334,7 +337,7 @@ const ModuleCard = ({
                         onValueChange={(value) =>
                           handleChange(
                             "timeUnit",
-                            value as "minutes" | "hours" | "days" | "weeks" | "months"
+                            value as "hours" | "days" | "weeks" | "months"
                           )
                         }
                         disabled={isLocked}
@@ -343,7 +346,6 @@ const ModuleCard = ({
                           <SelectValue placeholder="Select time unit" />
                         </SelectTrigger>
                         <SelectContent className="bg-white">
-                          <SelectItem value="minutes">Minutes</SelectItem>
                           <SelectItem value="hours">Hours</SelectItem>
                           <SelectItem value="days">Days</SelectItem>
                           <SelectItem value="weeks">Weeks</SelectItem>
@@ -374,39 +376,45 @@ const ModuleCard = ({
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <span className="text-gray-500">{currencySymbol}</span>
-                      </div>
-                      <Input
-                        className="pl-7 border-gray-200 focus:border-black focus:ring-black"
-                        type="text"
-                        inputMode="decimal"
-                        placeholder={costInputActive ? "" : "0"}
-                        value={costInputActive ? module.cost || "" : module.cost === 0 ? "" : module.cost}
-                        onChange={handleCostChange}
-                        onFocus={() => setCostInputActive(true)}
-                        onBlur={() => setCostInputActive(false)}
-                        disabled={isLocked}
-                      />
-                      {costInputError && (
-                        <p className="text-red-500 text-xs mt-1">{costInputError}</p>
-                      )}
-                    </div>
-
-                    {module.costType === "variable" && (
+                    {module.costType === "variable" ? (
                       <>
-                        <Input
-                          className="border-gray-200 focus:border-black focus:ring-black"
-                          placeholder="Type the nature of unit (e.g., hours, users, 1000 copies, etc)"
-                          value={module.costUnit || ""}
-                          onChange={(e) =>
-                            handleChange("costUnit", e.target.value)
-                          }
-                          disabled={isLocked}
-                          onFocus={(e) => e.target.placeholder = ""}
-                          onBlur={(e) => e.target.placeholder = "Type the nature of unit (e.g., hours, users, 1000 copies, etc)"}
-                        />
+                        <div>
+                          <Label htmlFor={`unit-type-${module.id}`} className="text-sm font-medium mb-1 block">Unit Type</Label>
+                          <Input
+                            id={`unit-type-${module.id}`}
+                            className="border-gray-200 focus:border-black focus:ring-black"
+                            placeholder="Type the nature of unit (e.g., hours, users, 1000 copies, etc)"
+                            value={module.costUnit || ""}
+                            onChange={(e) =>
+                              handleChange("costUnit", e.target.value)
+                            }
+                            disabled={isLocked}
+                            onFocus={(e) => e.target.placeholder = ""}
+                            onBlur={(e) => e.target.placeholder = "Type the nature of unit (e.g., hours, users, 1000 copies, etc)"}
+                          />
+                        </div>
+
+                        <div className="relative">
+                          <Label htmlFor={`cost-per-unit-${module.id}`} className="text-sm font-medium mb-1 block">Cost Per Unit</Label>
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none mt-7">
+                            <span className="text-gray-500">{currencySymbol}</span>
+                          </div>
+                          <Input
+                            id={`cost-per-unit-${module.id}`}
+                            className="pl-7 border-gray-200 focus:border-black focus:ring-black"
+                            type="text"
+                            inputMode="decimal"
+                            placeholder={costInputActive ? "" : "0"}
+                            value={costInputActive ? module.cost || "" : module.cost === 0 ? "" : module.cost}
+                            onChange={handleCostChange}
+                            onFocus={() => setCostInputActive(true)}
+                            onBlur={() => setCostInputActive(false)}
+                            disabled={isLocked}
+                          />
+                          {costInputError && (
+                            <p className="text-red-500 text-xs mt-1">{costInputError}</p>
+                          )}
+                        </div>
 
                         <div>
                           <Label htmlFor={`quantity-${module.id}`} className="text-sm font-medium mb-1 block">Number of Units</Label>
@@ -431,6 +439,28 @@ const ModuleCard = ({
                           )}
                         </div>
                       </>
+                    ) : (
+                      <div className="relative">
+                        <Label htmlFor={`cost-fixed-${module.id}`} className="text-sm font-medium mb-1 block">Cost</Label>
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none mt-7">
+                          <span className="text-gray-500">{currencySymbol}</span>
+                        </div>
+                        <Input
+                          id={`cost-fixed-${module.id}`}
+                          className="pl-7 border-gray-200 focus:border-black focus:ring-black"
+                          type="text"
+                          inputMode="decimal"
+                          placeholder={costInputActive ? "" : "0"}
+                          value={costInputActive ? module.cost || "" : module.cost === 0 ? "" : module.cost}
+                          onChange={handleCostChange}
+                          onFocus={() => setCostInputActive(true)}
+                          onBlur={() => setCostInputActive(false)}
+                          disabled={isLocked}
+                        />
+                        {costInputError && (
+                          <p className="text-red-500 text-xs mt-1">{costInputError}</p>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
