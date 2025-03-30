@@ -7,6 +7,7 @@ import { Stack, Module } from "@/types/stack";
 import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
 import { Plus, Save, FileText, ArrowRight, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ModuleEditDialog from "./ModuleEditDialog";
 
 interface StackBuilderProps {
   stack: Stack;
@@ -18,6 +19,7 @@ interface StackBuilderProps {
 
 const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }: StackBuilderProps) => {
   const [valueCaptureView, setValueCaptureView] = useState(false);
+  const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -119,8 +121,16 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
     setValueCaptureView(true);
     toast({
       title: "Ready to set pricing",
-      description: "Now you can set your pricing and margins."
+      description: "Now you can set your pricing details."
     });
+  };
+  
+  const openModuleEditor = (moduleId: string) => {
+    setEditingModuleId(moduleId);
+  };
+
+  const getModuleById = (moduleId: string) => {
+    return stack.modules.find(mod => mod.id === moduleId);
   };
 
   return (
@@ -128,6 +138,9 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
         <div className="flex-1">
           <h2 className="text-xl font-medium">Stack Builder</h2>
+          {stack.description && (
+            <p className="text-sm text-gray-500 mt-1">{stack.description}</p>
+          )}
         </div>
         <div className="flex gap-2 self-end">
           <Button 
@@ -226,14 +239,44 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
         </div>
       ) : (
         <div className="space-y-6">
-          <Button 
-            variant="outline" 
-            onClick={() => setValueCaptureView(false)}
-            className="flex items-center gap-1"
-          >
-            <ArrowLeft size={16} />
-            Back to Builder
-          </Button>
+          <div className="flex justify-between items-center">
+            <Button 
+              variant="outline" 
+              onClick={() => setValueCaptureView(false)}
+              className="flex items-center gap-1"
+            >
+              <ArrowLeft size={16} />
+              Back to Builder
+            </Button>
+            <h2 className="text-xl font-medium">Pricing Analysis</h2>
+          </div>
+          
+          {/* Show modules in collapsed view */}
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <h3 className="text-lg font-medium mb-3">Modules</h3>
+            <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+              {stack.modules.map((module) => (
+                <div key={module.id} className="flex justify-between items-center p-2 bg-white rounded border">
+                  <div className="flex items-center">
+                    {module.nonNegotiable && <Star size={14} className="text-yellow-500 mr-2" fill="currentColor" />}
+                    <div className={`w-2 h-2 rounded-full mr-2 ${module.stakeholder === 'internal' ? 'bg-blue-500' : 'bg-purple-500'}`}></div>
+                    <span className="font-medium">{module.name || "Unnamed Module"}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm mr-4">{currencySymbol}{module.costType === 'variable' && module.costQuantity ? (module.cost * module.costQuantity).toFixed(2) : module.cost.toFixed(2)}</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => openModuleEditor(module.id)}
+                      className="text-xs h-8"
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
           
           <ValueCaptureForm 
             stack={stack} 
@@ -241,6 +284,19 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
             currencySymbol={currencySymbol}
           />
         </div>
+      )}
+      
+      {/* Module Edit Dialog */}
+      {editingModuleId && (
+        <ModuleEditDialog
+          module={getModuleById(editingModuleId)!}
+          onSave={(updatedModule) => {
+            updateModule(editingModuleId, updatedModule);
+            setEditingModuleId(null);
+          }}
+          onCancel={() => setEditingModuleId(null)}
+          currencySymbol={currencySymbol}
+        />
       )}
     </div>
   );

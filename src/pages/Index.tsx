@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import StackBuilder from "@/components/StackBuilder";
 import Summary from "@/components/Summary";
 import { Stack } from "@/types/stack";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { 
   DollarSign,
   Euro,
@@ -13,10 +13,12 @@ import {
   IndianRupee,
   JapaneseYen,
   Menu,
-  Save
+  Save,
+  Edit
 } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
 import ProjectCreation from "@/components/ProjectCreation";
+import EditProjectDialog from "@/components/EditProjectDialog";
 
 const currencyOptions = [
   { value: "USD", label: "USD", icon: DollarSign },
@@ -28,16 +30,19 @@ const currencyOptions = [
 
 const Index = () => {
   const [currentTab, setCurrentTab] = useState<"builder" | "summary">("builder");
+  const [editProjectDialogOpen, setEditProjectDialogOpen] = useState(false);
   const [currentStack, setCurrentStack] = useState<Stack>({
     id: crypto.randomUUID(),
     name: "",
+    description: "",
+    owner: "",
     modules: [],
     locked: false,
     totalCost: 0,
     agencyFees: 0,
     referralCosts: 0,
     marketingExpenses: 0,
-    desiredMargin: 20,
+    desiredMargin: 0, // Changed to 0% default
     finalPrice: 0,
     netProfit: 0,
     marginPercent: 0,
@@ -105,17 +110,35 @@ const Index = () => {
     setCurrentStack(newStack);
   };
 
-  const handleProjectCreate = (name: string, currency: string) => {
+  const handleProjectCreate = (name: string, currency: string, description: string, owner: string) => {
     setCurrentStack({
       ...currentStack,
       name: name,
       currency: currency,
+      description: description,
+      owner: owner,
       isInitialized: true
     });
     toast({
       title: "Project created",
       description: `"${name}" has been created. You can now start building your stack.`,
     });
+  };
+
+  const handleUpdateProject = (name: string, description: string, owner: string) => {
+    setCurrentStack({
+      ...currentStack,
+      name,
+      description,
+      owner
+    });
+    
+    toast({
+      title: "Project updated",
+      description: "Project details have been updated successfully.",
+    });
+    
+    setEditProjectDialogOpen(false);
   };
 
   const loadStack = (stackId: string) => {
@@ -152,13 +175,15 @@ const Index = () => {
     setCurrentStack({
       id: crypto.randomUUID(),
       name: "",
+      description: "",
+      owner: "",
       modules: [],
       locked: false,
       totalCost: 0,
       agencyFees: 0,
       referralCosts: 0,
       marketingExpenses: 0,
-      desiredMargin: 20,
+      desiredMargin: 0, // Changed to 0% default
       finalPrice: 0,
       netProfit: 0,
       marginPercent: 0,
@@ -192,10 +217,26 @@ const Index = () => {
                 >
                   <Menu size={22} />
                 </Button>
-                <h1 className="text-2xl font-semibold text-apple-neutral tracking-tight">{currentStack.name}</h1>
+                <div className="flex flex-col">
+                  <h1 className="text-2xl font-semibold text-apple-neutral tracking-tight">{currentStack.name}</h1>
+                  {(currentStack.description || currentStack.owner) && (
+                    <div className="flex items-center text-sm text-gray-500 mt-1">
+                      {currentStack.owner && <span className="mr-2">Owner: {currentStack.owner}</span>}
+                      {currentStack.description && <span className="truncate max-w-md">{currentStack.description}</span>}
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="flex items-center space-x-4">
+                <Button 
+                  variant="outline"
+                  onClick={() => setEditProjectDialogOpen(true)}
+                  className="flex items-center gap-1 border-gray-200 hover:bg-gray-100"
+                >
+                  <Edit size={16} />
+                  Edit Project
+                </Button>
                 <Button 
                   variant="outline" 
                   onClick={saveStack}
@@ -231,6 +272,15 @@ const Index = () => {
               </Card>
             </div>
           </main>
+          
+          <EditProjectDialog 
+            open={editProjectDialogOpen} 
+            onClose={() => setEditProjectDialogOpen(false)}
+            onSave={handleUpdateProject}
+            projectName={currentStack.name}
+            projectDescription={currentStack.description || ""}
+            projectOwner={currentStack.owner || ""}
+          />
         </>
       ) : (
         <div className="flex items-center justify-center min-h-screen bg-gray-50">

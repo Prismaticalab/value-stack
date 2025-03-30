@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Module } from "@/types/stack";
 import { Draggable } from "react-beautiful-dnd";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ChevronDown, ChevronUp, Copy, Trash2, Flag } from "lucide-react";
+import { ChevronDown, ChevronUp, Copy, Trash2, Flag, Star, Paperclip, X, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
 
 interface ModuleCardProps {
   module: Module;
@@ -32,6 +33,8 @@ const ModuleCard = ({
   currencySymbol
 }: ModuleCardProps) => {
   const [expanded, setExpanded] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const handleChange = (field: keyof Module, value: any) => {
     const updatedModule = { ...module, [field]: value };
@@ -46,10 +49,60 @@ const ModuleCard = ({
     handleChange('nonNegotiable', !module.nonNegotiable);
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Here you would normally upload the file to a server and get a URL back
+    // For this example, we'll create an object URL
+    const documentUrl = URL.createObjectURL(file);
+    
+    handleChange('documentUrl', documentUrl);
+    handleChange('documentName', file.name);
+    
+    toast({
+      title: "Document attached",
+      description: `"${file.name}" has been attached to this module.`
+    });
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
+  const removeDocument = () => {
+    handleChange('documentUrl', undefined);
+    handleChange('documentName', undefined);
+    
+    toast({
+      title: "Document removed",
+      description: "The document has been removed from this module."
+    });
+  };
+
   // Calculate the displayed cost based on cost type
   const displayedCost = module.costType === 'variable' && module.costQuantity 
     ? module.cost * module.costQuantity 
     : module.cost;
+
+  // Determine the color accent based on stakeholder and non-negotiable status
+  const getCardClasses = () => {
+    let borderColor = "";
+    
+    if (module.nonNegotiable) {
+      if (module.stakeholder === 'internal') {
+        borderColor = "border-l-4 border-l-blue-500";
+      } else {
+        borderColor = "border-l-4 border-l-purple-500";
+      }
+    } else if (module.stakeholder === 'internal') {
+      borderColor = "border-l-4 border-l-blue-500";
+    } else if (module.stakeholder === 'external') {
+      borderColor = "border-l-4 border-l-purple-500";
+    }
+    
+    return `border border-gray-200 shadow-sm transition-all ${borderColor}`;
+  };
 
   return (
     <Draggable draggableId={module.id} index={index} isDragDisabled={isLocked}>
@@ -58,7 +111,7 @@ const ModuleCard = ({
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`border border-gray-200 shadow-sm transition-all ${module.nonNegotiable ? 'border-l-4 border-l-red-500' : ''}`}
+          className={getCardClasses()}
         >
           <CardContent className="p-4">
             <div className="flex justify-between items-start">
@@ -70,27 +123,25 @@ const ModuleCard = ({
                     value={module.name}
                     onChange={(e) => handleChange("name", e.target.value)}
                     disabled={isLocked}
+                    onFocus={(e) => e.target.placeholder = ""}
+                    onBlur={(e) => e.target.placeholder = "Module name"}
                   />
                   
-                  {/* Non-negotiable flag toggle */}
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className={`rounded-full ${module.nonNegotiable ? 'text-red-500 hover:text-red-600' : 'text-gray-400 hover:text-gray-500'}`}
-                          onClick={toggleNonNegotiable}
-                          disabled={isLocked}
-                        >
-                          <Flag size={18} />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Mark as non-negotiable {module.nonNegotiable ? '(cannot be deleted)' : ''}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  {/* Non-negotiable star indicator */}
+                  {module.nonNegotiable && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="text-yellow-500">
+                            <Star size={18} fill="currentColor" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Non-negotiable module (cannot be deleted)</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                 </div>
               </div>
 
@@ -144,13 +195,15 @@ const ModuleCard = ({
             {expanded && (
               <div className="mt-4 space-y-4">
                 <div>
-                  <Label className="text-sm font-medium mb-1 block">Value Proposition</Label>
+                  <Label className="text-sm font-medium mb-1 block">Purpose of Module</Label>
                   <Textarea
                     className="w-full border-gray-200 focus:border-black focus:ring-black"
-                    placeholder="Describe the value of this module..."
+                    placeholder="Describe the purpose of this module..."
                     value={module.value}
                     onChange={(e) => handleChange("value", e.target.value)}
                     disabled={isLocked}
+                    onFocus={(e) => e.target.placeholder = ""}
+                    onBlur={(e) => e.target.placeholder = "Describe the purpose of this module..."}
                   />
                 </div>
 
@@ -185,6 +238,8 @@ const ModuleCard = ({
                           handleChange("stakeholderName", e.target.value)
                         }
                         disabled={isLocked}
+                        onFocus={(e) => e.target.placeholder = ""}
+                        onBlur={(e) => e.target.placeholder = "Stakeholder name"}
                       />
                     </div>
                   </div>
@@ -231,20 +286,22 @@ const ModuleCard = ({
 
                 <div className="pt-2">
                   <div className="flex justify-between items-center">
-                    <Label className="text-sm font-medium">Cost</Label>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs text-gray-500">Fixed</span>
-                      <Switch
-                        checked={module.costType === "variable"}
-                        onCheckedChange={(checked) =>
-                          handleChange(
-                            "costType",
-                            checked ? "variable" : "fixed"
-                          )
-                        }
-                        disabled={isLocked}
-                      />
-                      <span className="text-xs text-gray-500">Variable</span>
+                    <div className="flex items-center">
+                      <Label className="text-sm font-medium mr-4">Cost</Label>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs text-gray-500">Fixed</span>
+                        <Switch
+                          checked={module.costType === "variable"}
+                          onCheckedChange={(checked) =>
+                            handleChange(
+                              "costType",
+                              checked ? "variable" : "fixed"
+                            )
+                          }
+                          disabled={isLocked}
+                        />
+                        <span className="text-xs text-gray-500">Variable</span>
+                      </div>
                     </div>
                   </div>
 
@@ -276,6 +333,8 @@ const ModuleCard = ({
                             handleChange("costUnit", e.target.value)
                           }
                           disabled={isLocked}
+                          onFocus={(e) => e.target.placeholder = ""}
+                          onBlur={(e) => e.target.placeholder = "Unit (e.g., hours, users)"}
                         />
 
                         <Input
@@ -298,7 +357,79 @@ const ModuleCard = ({
                   </div>
                 </div>
                 
-                {/* Non-negotiable setting with tooltip */}
+                {/* Document attachment section */}
+                <div className="pt-4">
+                  <Label className="text-sm font-medium mb-2 block">Document Attachment</Label>
+                  
+                  {module.documentUrl ? (
+                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
+                      <div className="flex items-center">
+                        <Paperclip size={16} className="text-gray-500 mr-2" />
+                        <span className="text-sm truncate max-w-xs">{module.documentName}</span>
+                      </div>
+                      <div className="flex space-x-2">
+                        {/* Link to open document */}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-full"
+                                onClick={() => window.open(module.documentUrl, '_blank')}
+                              >
+                                <ExternalLink size={16} />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Open document</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        
+                        {/* Button to remove document */}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50"
+                                onClick={removeDocument}
+                                disabled={isLocked}
+                              >
+                                <X size={16} />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Remove document</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      className="w-full border-dashed border-gray-300 text-gray-500 hover:text-gray-700"
+                      onClick={triggerFileInput}
+                      disabled={isLocked}
+                    >
+                      <Paperclip size={16} className="mr-2" />
+                      Attach Document
+                    </Button>
+                  )}
+                  
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    onChange={handleFileChange} 
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
+                  />
+                </div>
+                
+                {/* Non-negotiable setting with aligned toggle */}
                 <div className="pt-2 flex items-center justify-between">
                   <Label htmlFor={`non-negotiable-${module.id}`} className="cursor-pointer flex items-center gap-2">
                     <span>Non-Negotiable</span>

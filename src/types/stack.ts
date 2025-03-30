@@ -12,11 +12,15 @@ export interface Module {
   timeImpact: number;
   timeUnit: 'minutes' | 'hours' | 'days' | 'weeks' | 'months';
   nonNegotiable?: boolean;
+  documentUrl?: string;
+  documentName?: string;
 }
 
 export interface Stack {
   id: string;
   name: string;
+  description?: string;
+  owner?: string;
   modules: Module[];
   locked: boolean;
   totalCost: number;
@@ -37,5 +41,5 @@ export interface Stack {
   currency: string;
   contingencyBuffer: number;
   totalRequiredIncome: number;
-  isInitialized?: boolean; // New property to track if the project has been created
+  isInitialized?: boolean;
 }

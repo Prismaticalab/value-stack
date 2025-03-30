@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Stack } from "@/types/stack";
 import { DollarSign, Euro, PoundSterling, IndianRupee, JapaneseYen, ArrowRight } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProjectCreationProps {
-  onProjectCreate: (name: string, currency: string) => void;
+  onProjectCreate: (name: string, currency: string, description: string, owner: string) => void;
 }
 
 const currencyOptions = [
@@ -21,14 +23,35 @@ const currencyOptions = [
 ];
 
 const ProjectCreation = ({ onProjectCreate }: ProjectCreationProps) => {
-  const [projectName, setProjectName] = useState("New Stack");
+  const [projectName, setProjectName] = useState("");
+  const [description, setDescription] = useState("");
+  const [owner, setOwner] = useState("");
   const [currency, setCurrency] = useState("USD");
+  const [errors, setErrors] = useState({
+    name: false,
+    owner: false
+  });
+  const { toast } = useToast();
 
   const handleCreateProject = () => {
-    if (!projectName.trim()) {
+    // Validate fields
+    const newErrors = {
+      name: !projectName.trim(),
+      owner: !owner.trim()
+    };
+    
+    setErrors(newErrors);
+    
+    if (newErrors.name || newErrors.owner) {
+      toast({
+        title: "Required fields missing",
+        description: "Please fill in all required fields to continue.",
+        variant: "destructive"
+      });
       return;
     }
-    onProjectCreate(projectName, currency);
+    
+    onProjectCreate(projectName, currency, description, owner);
   };
 
   return (
@@ -41,15 +64,54 @@ const ProjectCreation = ({ onProjectCreate }: ProjectCreationProps) => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="projectName">Project Name</Label>
+          <Label htmlFor="projectName" className="flex items-center">
+            Project Name <span className="text-red-500 ml-1">*</span>
+          </Label>
           <Input
             id="projectName"
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
             placeholder="Enter a project name"
-            className="border-gray-200 focus:border-black focus:ring-black"
+            className={`border-gray-200 focus:border-black focus:ring-black ${errors.name ? 'border-red-500' : ''}`}
           />
+          {errors.name && <p className="text-red-500 text-sm mt-1">Project name is required</p>}
         </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="description">
+            Brief Description <span className="text-gray-400 text-xs ml-1">(max 150 characters)</span>
+          </Label>
+          <Textarea
+            id="description"
+            value={description}
+            onChange={(e) => {
+              if (e.target.value.length <= 150) {
+                setDescription(e.target.value);
+              }
+            }}
+            placeholder="Enter a brief project description"
+            className="border-gray-200 focus:border-black focus:ring-black resize-none"
+            maxLength={150}
+          />
+          <div className="text-right text-xs text-gray-400">
+            {description.length}/150
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="owner" className="flex items-center">
+            Project Owner <span className="text-red-500 ml-1">*</span>
+          </Label>
+          <Input
+            id="owner"
+            value={owner}
+            onChange={(e) => setOwner(e.target.value)}
+            placeholder="Enter owner name/details"
+            className={`border-gray-200 focus:border-black focus:ring-black ${errors.owner ? 'border-red-500' : ''}`}
+          />
+          {errors.owner && <p className="text-red-500 text-sm mt-1">Project owner is required</p>}
+        </div>
+        
         <div className="space-y-2">
           <Label htmlFor="currency">Currency</Label>
           <Select value={currency} onValueChange={setCurrency}>
