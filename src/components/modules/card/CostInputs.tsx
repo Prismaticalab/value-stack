@@ -50,7 +50,7 @@ const CostInputs = ({ module, onUpdate, isLocked, currencySymbol }: CostInputsPr
     }
     
     // Check if the value is a valid integer
-    const numValue = parseInt(value, 10);
+    const numValue = parseFloat(value.replace(',', '.'));
     if (isNaN(numValue)) {
       setQuantityInputError("Please only use whole numbers for this field");
       return;
@@ -127,7 +127,7 @@ const CostInputs = ({ module, onUpdate, isLocked, currencySymbol }: CostInputsPr
                 id={`quantity-${module.id}`}
                 className="border-gray-200 focus:border-black focus:ring-black"
                 type="text"
-                inputMode="numeric"
+                inputMode="decimal"
                 placeholder={quantityInputActive ? "" : "Enter number of units needed"}
                 value={quantityInputActive ? module.costQuantity || "" : module.costQuantity || ""}
                 onChange={handleQuantityChange}
