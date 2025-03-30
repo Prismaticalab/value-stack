@@ -285,11 +285,13 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
                   />
 
                   <div>
+                    <Label htmlFor="edit-quantity" className="text-sm font-medium mb-1 block">Number of Units</Label>
                     <Input
+                      id="edit-quantity"
                       className="border-gray-200 focus:border-black focus:ring-black"
                       type="text"
                       inputMode="numeric"
-                      placeholder={quantityInputActive ? "" : "Number of units needed"}
+                      placeholder={quantityInputActive ? "" : "Enter number of units needed"}
                       value={quantityInputActive ? editedModule.costQuantity || "" : editedModule.costQuantity || ""}
                       onChange={handleQuantityChange}
                       onFocus={() => {

@@ -409,21 +409,21 @@ const ModuleCard = ({
                         />
 
                         <div>
+                          <Label htmlFor={`quantity-${module.id}`} className="text-sm font-medium mb-1 block">Number of Units</Label>
                           <Input
+                            id={`quantity-${module.id}`}
                             className="border-gray-200 focus:border-black focus:ring-black"
                             type="text"
                             inputMode="numeric"
-                            placeholder={quantityInputActive ? "" : "Number of units needed"}
+                            placeholder={quantityInputActive ? "" : "Enter number of units needed"}
                             value={quantityInputActive ? module.costQuantity || "" : module.costQuantity || ""}
                             onChange={handleQuantityChange}
                             disabled={isLocked}
-                            onFocus={(e) => {
+                            onFocus={() => {
                               setQuantityInputActive(true);
-                              e.target.placeholder = "";
                             }}
-                            onBlur={(e) => {
+                            onBlur={() => {
                               setQuantityInputActive(false);
-                              e.target.placeholder = "Number of units needed";
                             }}
                           />
                           {quantityInputError && (
