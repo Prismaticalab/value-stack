@@ -22,6 +22,38 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
   const [referralCostsActive, setReferralCostsActive] = useState(false);
   const [marketingExpensesActive, setMarketingExpensesActive] = useState(false);
   
+  // Add states to track input errors
+  const [contingencyError, setContingencyError] = useState<string | null>(null);
+  const [agencyFeesError, setAgencyFeesError] = useState<string | null>(null);
+  const [referralCostsError, setReferralCostsError] = useState<string | null>(null);
+  const [marketingExpensesError, setMarketingExpensesError] = useState<string | null>(null);
+  
+  const handleNumberInputChange = (
+    field: string, 
+    value: string, 
+    setError: (error: string | null) => void
+  ) => {
+    // Allow empty string (to clear the input when typing)
+    if (value === '') {
+      setError(null);
+      handleChange(field, 0);
+      return;
+    }
+    
+    // Check if the value is a valid number
+    // Accept both . and , as decimal separators
+    const normalizedValue = value.replace(',', '.');
+    const numValue = parseFloat(normalizedValue);
+    
+    if (isNaN(numValue)) {
+      setError("Please enter a valid number");
+      return;
+    }
+    
+    setError(null);
+    handleChange(field, numValue);
+  };
+  
   const handleChange = (field: string, value: number | boolean) => {
     const updatedStack = {
       ...stack,
@@ -225,11 +257,14 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
               max="100"
               placeholder="Enter contingency buffer"
               value={contingencyActive ? (stack.contingencyBuffer || "") : (stack.contingencyBuffer > 0 ? stack.contingencyBuffer : "")}
-              onChange={(e) => handleChange("contingencyBuffer", parseFloat(e.target.value) || 0)}
+              onChange={(e) => handleNumberInputChange("contingencyBuffer", e.target.value, setContingencyError)}
               className="pl-7 border-gray-200"
               onFocus={() => setContingencyActive(true)}
               onBlur={() => setContingencyActive(false)}
             />
+            {contingencyError && (
+              <p className="text-red-500 text-xs mt-1">{contingencyError}</p>
+            )}
           </div>
         </div>
 
@@ -261,11 +296,14 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
               max={stack.isAgencyFeesPercentage ? "100" : undefined}
               placeholder="Enter agency fees"
               value={agencyFeesActive ? (stack.agencyFees || "") : (stack.agencyFees > 0 ? stack.agencyFees : "")}
-              onChange={(e) => handleChange("agencyFees", parseFloat(e.target.value) || 0)}
+              onChange={(e) => handleNumberInputChange("agencyFees", e.target.value, setAgencyFeesError)}
               className="pl-7 border-gray-200"
               onFocus={() => setAgencyFeesActive(true)}
               onBlur={() => setAgencyFeesActive(false)}
             />
+            {agencyFeesError && (
+              <p className="text-red-500 text-xs mt-1">{agencyFeesError}</p>
+            )}
           </div>
         </div>
 
@@ -297,13 +335,14 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
               max={stack.isReferralPercentage ? "100" : undefined}
               placeholder="Enter referral costs"
               value={referralCostsActive ? (stack.referralCosts || "") : (stack.referralCosts > 0 ? stack.referralCosts : "")}
-              onChange={(e) =>
-                handleChange("referralCosts", parseFloat(e.target.value) || 0)
-              }
+              onChange={(e) => handleNumberInputChange("referralCosts", e.target.value, setReferralCostsError)}
               className="pl-7 border-gray-200"
               onFocus={() => setReferralCostsActive(true)}
               onBlur={() => setReferralCostsActive(false)}
             />
+            {referralCostsError && (
+              <p className="text-red-500 text-xs mt-1">{referralCostsError}</p>
+            )}
           </div>
         </div>
 
@@ -335,13 +374,14 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
               max={stack.isMarketingPercentage ? "100" : undefined}
               placeholder="Enter marketing expenses"
               value={marketingExpensesActive ? (stack.marketingExpenses || "") : (stack.marketingExpenses > 0 ? stack.marketingExpenses : "")}
-              onChange={(e) =>
-                handleChange("marketingExpenses", parseFloat(e.target.value) || 0)
-              }
+              onChange={(e) => handleNumberInputChange("marketingExpenses", e.target.value, setMarketingExpensesError)}
               className="pl-7 border-gray-200"
               onFocus={() => setMarketingExpensesActive(true)}
               onBlur={() => setMarketingExpensesActive(false)}
             />
+            {marketingExpensesError && (
+              <p className="text-red-500 text-xs mt-1">{marketingExpensesError}</p>
+            )}
           </div>
         </div>
       </div>
