@@ -184,6 +184,7 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
                         onUpdate={updateModule}
                         onDelete={deleteModule}
                         onDuplicate={duplicateModule}
+                        isLocked={stack.locked}
                         currencySymbol={currencySymbol}
                       />
                     ))}
