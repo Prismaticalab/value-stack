@@ -81,11 +81,15 @@ const StakeholderTimeSection = ({ module, onChange }: StakeholderTimeSectionProp
               placeholder={timeInputActive ? "" : "Time value"}
               value={timeInputActive ? module.timeImpact || "" : module.timeImpact === 0 ? "" : module.timeImpact}
               onChange={handleTimeChange}
-              onFocus={() => setTimeInputActive(true)}
-              onBlur={() => setTimeInputActive(false)}
+              onFocus={(e) => {
+                setTimeInputActive(true);
+                e.target.placeholder = "";
+              }}
+              onBlur={(e) => {
+                setTimeInputActive(false);
+                e.target.placeholder = "Time value";
+              }}
               required
-              onFocus={(e) => e.target.placeholder = ""}
-              onBlur={(e) => e.target.placeholder = "Time value"}
             />
             {timeInputError && (
               <p className="text-red-500 text-xs mt-1">{timeInputError}</p>
