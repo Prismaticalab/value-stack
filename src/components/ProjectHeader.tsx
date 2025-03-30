@@ -32,10 +32,10 @@ const ProjectHeader = ({ onEditClick }: { onEditClick: () => void }) => {
             </Button>
           </div>
           {currentStack.description && (
-            <p className="text-sm text-gray-500 mt-1 border-b border-gray-100 pb-1">{currentStack.description}</p>
+            <p className="text-sm text-gray-500 mt-1">{currentStack.description}</p>
           )}
           {currentStack.owner && (
-            <p className="text-sm text-gray-500 mt-1 border-b border-gray-100 pb-1">Owner: <span className="font-semibold">{currentStack.owner}</span></p>
+            <p className="text-sm text-gray-500 mt-1">Owner: <span className="font-semibold">{currentStack.owner}</span></p>
           )}
         </div>
         
