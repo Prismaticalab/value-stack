@@ -1,8 +1,9 @@
+
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ChevronDown, ChevronUp, Copy, Trash2, Edit } from "lucide-react";
+import { ChevronDown, ChevronUp, Copy, Trash2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Module } from "@/types/stack";
 
@@ -28,8 +29,7 @@ const ModuleHeader = ({
   toggleExpanded,
   isLocked,
   displayedCost,
-  currencySymbol,
-  onEdit
+  currencySymbol
 }: ModuleHeaderProps) => {
   return (
     <div className="flex justify-between items-start">
@@ -94,24 +94,6 @@ const ModuleHeader = ({
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Delete module</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full text-gray-400 hover:text-gray-500 hover:bg-black hover:text-white transition-colors"
-                      onClick={onEdit}
-                    >
-                      <Edit size={18} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Edit module details</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

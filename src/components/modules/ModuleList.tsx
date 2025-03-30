@@ -1,4 +1,3 @@
-
 import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
 import ModuleCard from "../ModuleCard";
 import { Stack, Module } from "@/types/stack";
@@ -59,7 +58,6 @@ const ModuleList = ({
       return;
     }
     
-    // Set module to delete to show confirmation dialog
     setModuleToDelete(moduleId);
   };
 
@@ -136,7 +134,6 @@ const ModuleList = ({
                     onDuplicate={duplicateModule}
                     isLocked={stack.locked}
                     currencySymbol={currencySymbol}
-                    onEdit={() => onEditModule(module.id)}
                   />
                 ))}
                 {provided.placeholder}
@@ -175,7 +172,6 @@ const ModuleList = ({
         </div>
       )}
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={moduleToDelete !== null} onOpenChange={(open) => !open && setModuleToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

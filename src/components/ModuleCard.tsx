@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Module } from "@/types/stack";
 import { Draggable } from "react-beautiful-dnd";
@@ -93,16 +94,20 @@ const ModuleCard = ({
               isLocked={isLocked}
               displayedCost={displayedCost}
               currencySymbol={currencySymbol}
-              onEdit={onEdit}
             />
-
-            {/* Remove the NonNegotiableToggle from this location */}
             
             {expanded && (
               <>
                 <ModuleDetails 
                   module={module}
                   onUpdate={handleChange}
+                  isLocked={isLocked}
+                />
+                
+                <NonNegotiableToggle 
+                  id={module.id}
+                  checked={module.nonNegotiable || false}
+                  onChange={(checked) => handleChange("nonNegotiable", checked)}
                   isLocked={isLocked}
                 />
                 
