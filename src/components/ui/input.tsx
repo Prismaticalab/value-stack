@@ -5,6 +5,21 @@ import { cn } from "@/lib/utils"
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {
+    // Special handling for decimal inputs
+    const inputProps = {...props};
+    
+    // If the input is for numbers (decimal, numeric), allow commas and dots
+    if (props.inputMode === 'decimal' || props.inputMode === 'numeric') {
+      const originalOnChange = props.onChange;
+      
+      if (originalOnChange) {
+        inputProps.onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          // Let the parent component handle the actual value conversion
+          originalOnChange(e);
+        };
+      }
+    }
+    
     return (
       <input
         type={type}
@@ -13,7 +28,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           className
         )}
         ref={ref}
-        {...props}
+        {...inputProps}
       />
     )
   }

@@ -14,6 +14,31 @@ interface ModuleDetailsProps {
 
 const ModuleDetails = ({ module, onUpdate, isLocked }: ModuleDetailsProps) => {
   const [timeInputActive, setTimeInputActive] = useState(false);
+  const [timeInputError, setTimeInputError] = useState<string | null>(null);
+  
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Allow empty string (to clear the input when typing)
+    if (value === '') {
+      setTimeInputError(null);
+      onUpdate("timeImpact", 0);
+      return;
+    }
+    
+    // Replace comma with dot for decimal handling
+    const normalizedValue = value.replace(',', '.');
+    
+    // Check if the value is a valid number
+    const numValue = parseFloat(normalizedValue);
+    if (isNaN(numValue)) {
+      setTimeInputError("Please only use numbers for this field");
+      return;
+    }
+    
+    setTimeInputError(null);
+    onUpdate("timeImpact", numValue);
+  };
   
   return (
     <div className="mt-4 space-y-4">
@@ -70,22 +95,22 @@ const ModuleDetails = ({ module, onUpdate, isLocked }: ModuleDetailsProps) => {
         <div>
           <Label className="text-sm font-medium mb-1 block">Time Impact</Label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <Input
-              className="border-gray-200 focus:border-black focus:ring-black"
-              type="text" 
-              inputMode="numeric"
-              placeholder={timeInputActive ? "" : "Time value"}
-              value={module.timeImpact || ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === '' || /^\d+$/.test(value)) {
-                  onUpdate("timeImpact", value === '' ? 0 : parseInt(value));
-                }
-              }}
-              disabled={isLocked}
-              onFocus={() => setTimeInputActive(true)}
-              onBlur={() => setTimeInputActive(false)}
-            />
+            <div>
+              <Input
+                className="border-gray-200 focus:border-black focus:ring-black"
+                type="text" 
+                inputMode="decimal"
+                placeholder={timeInputActive ? "" : "Time value"}
+                value={timeInputActive ? module.timeImpact || "" : module.timeImpact === 0 ? "" : module.timeImpact}
+                onChange={handleTimeChange}
+                disabled={isLocked}
+                onFocus={() => setTimeInputActive(true)}
+                onBlur={() => setTimeInputActive(false)}
+              />
+              {timeInputError && (
+                <p className="text-red-500 text-xs mt-1">{timeInputError}</p>
+              )}
+            </div>
 
             <Select
               value={module.timeUnit}
