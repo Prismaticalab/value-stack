@@ -14,8 +14,8 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
       const originalOnKeyDown = props.onKeyDown;
       
       inputProps.onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        // Allow comma as decimal separator by converting it to dot
-        if (e.key === ',') {
+        // Allow comma and period as decimal separators
+        if (e.key === ',' || e.key === '.') {
           e.preventDefault();
           
           // Get the current value and cursor position
@@ -24,7 +24,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           const selectionStart = input.selectionStart || 0;
           const selectionEnd = input.selectionEnd || 0;
           
-          // Insert a dot instead of a comma
+          // Insert a dot as the decimal separator
           const newValue = value.slice(0, selectionStart) + '.' + value.slice(selectionEnd);
           
           // Set the new value and cursor position
