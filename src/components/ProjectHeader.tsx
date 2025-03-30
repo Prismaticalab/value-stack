@@ -4,11 +4,7 @@ import { Menu, Save, Edit } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useProject } from "@/context/ProjectContext";
 
-interface ProjectHeaderProps {
-  onEditClick: () => void;
-}
-
-const ProjectHeader = ({ onEditClick }: ProjectHeaderProps) => {
+const ProjectHeader = ({ onEditClick }: { onEditClick: () => void }) => {
   const { toggleSidebar } = useSidebar();
   const { currentStack, saveStack } = useProject();
 
@@ -24,26 +20,26 @@ const ProjectHeader = ({ onEditClick }: ProjectHeaderProps) => {
           >
             <Menu size={22} />
           </Button>
-          <div className="flex flex-col">
+          <div className="flex items-center">
             <h1 className="text-2xl font-semibold text-apple-neutral tracking-tight">{currentStack.name}</h1>
-            {currentStack.description && (
-              <p className="text-sm text-gray-500 mt-1 line-clamp-2">{currentStack.description}</p>
-            )}
-            {currentStack.owner && (
-              <p className="text-xs text-gray-500 mt-0.5">Owner: {currentStack.owner}</p>
-            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-2 h-8 w-8 rounded-full hover:bg-gray-100"
+              onClick={onEditClick}
+            >
+              <Edit size={16} />
+            </Button>
           </div>
+          {currentStack.description && (
+            <p className="text-sm text-gray-500 mt-1 line-clamp-2 hidden md:block ml-1">{currentStack.description}</p>
+          )}
+          {currentStack.owner && (
+            <p className="text-xs text-gray-500 mt-0.5 hidden md:block ml-1">Owner: {currentStack.owner}</p>
+          )}
         </div>
         
-        <div className="flex items-center space-x-4">
-          <Button 
-            variant="outline"
-            onClick={onEditClick}
-            className="flex items-center gap-1 border-gray-200 hover:bg-black hover:text-white transition-colors"
-          >
-            <Edit size={16} />
-            Edit Project
-          </Button>
+        <div className="flex items-center">
           <Button 
             variant="outline" 
             onClick={saveStack}

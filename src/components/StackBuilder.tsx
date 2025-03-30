@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Stack, Module } from "@/types/stack";
-import { Save, FileText, ArrowLeft, HelpCircle } from "lucide-react";
+import { ArrowLeft, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ModuleEditDialog from "./module-edit-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -67,7 +67,8 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
     setValueCaptureView(true);
     toast({
       title: "Ready to set pricing",
-      description: "Now you can set your pricing details."
+      description: "Now you can set your pricing details.",
+      duration: 5000,
     });
   };
   
@@ -81,52 +82,28 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-medium">Let's build your value delivery stack!</h2>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full">
-                    <HelpCircle size={16} className="text-gray-500" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p>
-                    This is where you build the modules that make up your value delivery stack.
-                    Each module represents a component of your service offering.
-                    Add, edit, or arrange modules to create your complete delivery stack.
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          {stack.description && (
-            <p className="text-sm text-gray-500 mt-1">{stack.description}</p>
-          )}
-        </div>
-        <div className="flex gap-2 self-end">
-          <Button 
-            variant="outline" 
-            onClick={onSave}
-            className="flex items-center gap-1"
-          >
-            <Save size={16} />
-            Save Progress
-          </Button>
-          
-          {stack.modules.length > 0 && (
-            <Button 
-              onClick={onViewSummary}
-              className="bg-black hover:bg-black/80 flex items-center gap-1"
-            >
-              <FileText size={16} />
-              Summary
-            </Button>
-          )}
-        </div>
+      <div className="flex items-center gap-2">
+        <h2 className="text-xl font-medium">Let's build your value delivery stack!</h2>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full">
+                <HelpCircle size={16} className="text-gray-500" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs">
+              <p>
+                This is where you build the modules that make up your value delivery stack.
+                Each module represents a component of your service offering.
+                Add, edit, or arrange modules to create your complete delivery stack.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
+      {stack.description && (
+        <p className="text-sm text-gray-500 mt-1">{stack.description}</p>
+      )}
 
       {!valueCaptureView ? (
         <ModuleList

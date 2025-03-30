@@ -31,7 +31,8 @@ const DocumentSection = ({
     
     toast({
       title: "Document attached",
-      description: `"${file.name}" has been attached to this module.`
+      description: `"${file.name}" has been attached to this module.`,
+      duration: 5000,
     });
   };
 
@@ -44,7 +45,8 @@ const DocumentSection = ({
     
     toast({
       title: "Document removed",
-      description: "The document has been removed from this module."
+      description: "The document has been removed from this module.",
+      duration: 5000,
     });
   };
 
@@ -52,20 +54,18 @@ const DocumentSection = ({
     <div className="space-y-2">
       <div className="flex justify-between items-center">
         <Label className="text-sm font-medium">Document Attachment</Label>
-        {!documentUrl && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 text-gray-500 hover:bg-black hover:text-white transition-colors flex items-center gap-1"
-            onClick={triggerFileInput}
-          >
-            <Paperclip size={16} />
-            <span>Attach</span>
-          </Button>
-        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 text-gray-500 hover:bg-black hover:text-white transition-colors flex items-center gap-1"
+          onClick={triggerFileInput}
+        >
+          <Paperclip size={16} />
+          <span>Attach</span>
+        </Button>
       </div>
       
-      {documentUrl ? (
+      {documentUrl && (
         <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md mt-2">
           <div className="flex items-center">
             <Paperclip size={16} className="text-gray-500 mr-2" />
@@ -111,15 +111,15 @@ const DocumentSection = ({
             </TooltipProvider>
           </div>
         </div>
-      ) : (
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          className="hidden" 
-          onChange={handleFileChange} 
-          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
-        />
       )}
+      
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        className="hidden" 
+        onChange={handleFileChange} 
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
+      />
     </div>
   );
 };

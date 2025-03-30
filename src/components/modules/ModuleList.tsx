@@ -53,7 +53,8 @@ const ModuleList = ({
       toast({
         title: "Cannot Delete Non-Negotiable Module",
         description: "This module is marked as non-negotiable and cannot be deleted.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000,
       });
       return;
     }
@@ -168,7 +169,7 @@ const ModuleList = ({
       {stack.modules.length > 0 && (
         <div className="pt-4">
           <div className="flex justify-between items-center text-sm font-medium">
-            <span>Total Delivery Cost:</span>
+            <span>Current Value Delivery Cost:</span>
             <span>{currencySymbol}{stack.totalCost.toFixed(2)}</span>
           </div>
         </div>
