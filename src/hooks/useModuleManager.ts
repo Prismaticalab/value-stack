@@ -17,12 +17,14 @@ export const useModuleManager = (stack: Stack, setStack: (stack: Stack) => void)
       
       // First set all modules to collapsed
       stack.modules.forEach(module => {
-        expandedState[module.id] = false;
+        expandedState[module.id] = expandedState[module.id] || false;
       });
       
       // If we have a newly added module ID, set only that one to expanded
       if (newModuleId && stack.modules.find(mod => mod.id === newModuleId)) {
-        expandedState[newModuleId] = true;
+        stack.modules.forEach(module => {
+          expandedState[module.id] = module.id === newModuleId;
+        });
       }
       
       setExpandedModules(expandedState);
