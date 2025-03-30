@@ -21,7 +21,6 @@ interface StackBuilderProps {
 const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }: StackBuilderProps) => {
   const [valueCaptureView, setValueCaptureView] = useState(false);
   const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
-  const [lastAddedModuleId, setLastAddedModuleId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -43,28 +42,8 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
   };
 
   const addNewModule = () => {
-    const newId = crypto.randomUUID();
-    setLastAddedModuleId(newId);
-    
-    const newModule: Module = {
-      id: newId,
-      name: "",
-      value: "",
-      stakeholder: "internal",
-      stakeholderName: "",
-      costType: "fixed", 
-      cost: 0,
-      costUnit: "",
-      costQuantity: 1,
-      timeImpact: 1,
-      timeUnit: "days",
-      nonNegotiable: false
-    };
-
-    setStack({
-      ...stack,
-      modules: [...stack.modules, newModule]
-    });
+    // This function is now just a placeholder as the actual module creation
+    // is handled in the ModuleList component
   };
 
   const goToPricing = () => {

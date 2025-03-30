@@ -15,21 +15,19 @@ export const useModuleManager = (stack: Stack, setStack: (stack: Stack) => void)
       // Create an object to track which modules should be expanded
       const expandedState: {[key: string]: boolean} = {};
       
-      // First set all modules to collapsed
+      // Set all modules to collapsed by default
       stack.modules.forEach(module => {
-        expandedState[module.id] = expandedState[module.id] || false;
+        expandedState[module.id] = false;
       });
       
       // If we have a newly added module ID, set only that one to expanded
       if (newModuleId && stack.modules.find(mod => mod.id === newModuleId)) {
-        stack.modules.forEach(module => {
-          expandedState[module.id] = module.id === newModuleId;
-        });
+        expandedState[newModuleId] = true;
       }
       
       setExpandedModules(expandedState);
     }
-  }, [stack.modules.length, newModuleId]);
+  }, [stack.modules, newModuleId]);
 
   const updateModule = (moduleId: string, updatedModule: Module) => {
     setStack({
@@ -88,6 +86,8 @@ export const useModuleManager = (stack: Stack, setStack: (stack: Stack) => void)
   const handleAddModule = () => {
     const newId = crypto.randomUUID();
     setNewModuleId(newId);
+    
+    return newId;
   };
 
   const setModuleExpanded = (moduleId: string, expanded: boolean) => {

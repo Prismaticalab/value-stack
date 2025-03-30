@@ -34,13 +34,38 @@ const ModuleList = ({
     confirmDeleteModule,
     handleDeleteConfirmed,
     duplicateModule,
+    handleAddModule,
     setModuleExpanded,
     setModuleToDelete
   } = useModuleManager(stack, setStack);
 
-  const handleAddModule = () => {
-    const newId = crypto.randomUUID();
-    setNewModuleId(newId);
+  const handleCreateModule = () => {
+    // Get the new module ID from the hook
+    const newId = handleAddModule();
+    
+    // Create a new module object
+    const newModule = {
+      id: newId,
+      name: "",
+      value: "",
+      stakeholder: "internal" as const,
+      stakeholderName: "",
+      costType: "fixed" as const, 
+      cost: 0,
+      costUnit: "",
+      costQuantity: 1,
+      timeImpact: 1,
+      timeUnit: "days" as const,
+      nonNegotiable: false
+    };
+    
+    // Add it to the stack
+    setStack({
+      ...stack,
+      modules: [...stack.modules, newModule]
+    });
+    
+    // Call the parent's onAddModule for any additional handling
     onAddModule();
   };
 
@@ -49,7 +74,7 @@ const ModuleList = ({
       <ModuleListHeader title="Modules" />
 
       {stack.modules.length === 0 ? (
-        <EmptyModuleState onAddModule={handleAddModule} />
+        <EmptyModuleState onAddModule={handleCreateModule} />
       ) : (
         <DraggableModuleList
           stack={stack}
@@ -66,7 +91,7 @@ const ModuleList = ({
       
       {stack.modules.length > 0 && (
         <ModuleActions
-          onAddModule={handleAddModule}
+          onAddModule={handleCreateModule}
           onGoToPricing={onGoToPricing}
         />
       )}
