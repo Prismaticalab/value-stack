@@ -66,9 +66,9 @@ const ModuleCard = ({
       borderColor = "border-l-4 border-l-purple-500";
     }
     
-    // Add bright yellow border for non-negotiable modules
+    // Add red border for non-negotiable modules (top, right, bottom)
     const nonNegotiableBorder = module.nonNegotiable 
-      ? "border-t-4 border-r-4 border-b-4 border-[#FEF7CD]" 
+      ? "border-t-4 border-r-4 border-b-4 border-red-500" 
       : "";
     
     return `border border-gray-200 shadow-sm transition-all ${borderColor} ${nonNegotiableBorder}`;

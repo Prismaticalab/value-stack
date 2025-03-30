@@ -27,13 +27,6 @@ const BasicModuleInfo = ({ module, onChange }: BasicModuleInfoProps) => {
         />
       </div>
       
-      <NonNegotiableToggle 
-        id={module.id}
-        checked={module.nonNegotiable || false}
-        onChange={(checked) => onChange("nonNegotiable", checked)}
-        isLocked={false}
-      />
-      
       <div className="space-y-2">
         <Label htmlFor="edit-value">Purpose of Module</Label>
         <Textarea
@@ -46,6 +39,13 @@ const BasicModuleInfo = ({ module, onChange }: BasicModuleInfoProps) => {
           onBlur={(e) => e.target.placeholder = "Describe the purpose of this module..."}
         />
       </div>
+      
+      <NonNegotiableToggle 
+        id={module.id}
+        checked={module.nonNegotiable || false}
+        onChange={(checked) => onChange("nonNegotiable", checked)}
+        isLocked={false}
+      />
     </>
   );
 };
