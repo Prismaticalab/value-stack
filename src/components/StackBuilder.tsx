@@ -5,7 +5,7 @@ import ModuleCard from "./ModuleCard";
 import ValueCaptureForm from "./ValueCaptureForm";
 import { Stack, Module } from "@/types/stack";
 import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
-import { Plus, Save, FileText, ArrowRight, ArrowLeft } from "lucide-react";
+import { Plus, Save, FileText, ArrowRight, ArrowLeft, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ModuleEditDialog from "./ModuleEditDialog";
 
