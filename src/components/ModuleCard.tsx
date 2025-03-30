@@ -65,8 +65,7 @@ const ModuleCard = ({
       borderColor = "border-l-4 border-l-purple-500";
     }
     
-    // Add red border for non-negotiable modules (top, right, bottom)
-    // We keep the left border color based on stakeholder
+    // Add red border only for the right side of non-negotiable modules
     const nonNegotiableBorder = module.nonNegotiable 
       ? "border-r-4 border-red-500" 
       : "";
