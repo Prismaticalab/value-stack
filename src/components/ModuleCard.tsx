@@ -17,6 +17,7 @@ interface ModuleCardProps {
   onDuplicate: (id: string) => void;
   isLocked: boolean;
   currencySymbol: string;
+  onEdit?: () => void;
 }
 
 const ModuleCard = ({
@@ -26,7 +27,8 @@ const ModuleCard = ({
   onDelete,
   onDuplicate,
   isLocked,
-  currencySymbol
+  currencySymbol,
+  onEdit
 }: ModuleCardProps) => {
   // Start with module expanded by default
   const [expanded, setExpanded] = useState(true);
@@ -87,6 +89,7 @@ const ModuleCard = ({
               isLocked={isLocked}
               displayedCost={displayedCost}
               currencySymbol={currencySymbol}
+              onEdit={onEdit}
             />
 
             <NonNegotiableToggle 

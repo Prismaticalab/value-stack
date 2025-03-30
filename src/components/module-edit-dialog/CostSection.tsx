@@ -27,8 +27,11 @@ const CostSection = ({ module, onChange, currencySymbol }: CostSectionProps) => 
       return;
     }
     
+    // Replace comma with dot for consistent decimal handling
+    const normalizedValue = value.replace(',', '.');
+    
     // Check if the value is a valid number
-    const numValue = parseFloat(value.replace(',', '.'));
+    const numValue = parseFloat(normalizedValue);
     if (isNaN(numValue)) {
       setCostInputError("Please only use numbers for this field");
       return;
@@ -48,10 +51,13 @@ const CostSection = ({ module, onChange, currencySymbol }: CostSectionProps) => 
       return;
     }
     
-    // Check if the value is a valid integer
-    const numValue = parseInt(value, 10);
+    // Replace comma with dot for consistent decimal handling
+    const normalizedValue = value.replace(',', '.');
+    
+    // Check if the value is a valid number
+    const numValue = parseFloat(normalizedValue);
     if (isNaN(numValue)) {
-      setQuantityInputError("Please only use whole numbers for this field");
+      setQuantityInputError("Please only use numbers for this field");
       return;
     }
     
@@ -119,7 +125,7 @@ const CostSection = ({ module, onChange, currencySymbol }: CostSectionProps) => 
                 id="edit-quantity"
                 className="border-gray-200 focus:border-black focus:ring-black"
                 type="text"
-                inputMode="numeric"
+                inputMode="decimal"
                 placeholder={quantityInputActive ? "" : "Enter number of units needed"}
                 value={quantityInputActive ? module.costQuantity || "" : module.costQuantity || ""}
                 onChange={handleQuantityChange}

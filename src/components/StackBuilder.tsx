@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Stack, Module } from "@/types/stack";
 import { Save, FileText, ArrowLeft, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import ModuleEditDialog from "./ModuleEditDialog";
+import ModuleEditDialog from "./module-edit-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import ModuleList from "./modules/ModuleList";
 import CollapsedModuleList from "./modules/CollapsedModuleList";

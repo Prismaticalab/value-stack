@@ -51,13 +51,22 @@ const StakeholderTimeSection = ({ module, onChange }: StakeholderTimeSectionProp
           <Input
             className="border-gray-200 focus:border-black focus:ring-black"
             type="text"
-            inputMode="numeric"
+            inputMode="decimal"
             placeholder={timeInputActive ? "" : "Time value"}
             value={module.timeImpact || ""}
             onChange={(e) => {
               const value = e.target.value;
-              if (value === '' || /^\d+$/.test(value)) {
-                onChange("timeImpact", value === '' ? 0 : parseInt(value));
+              if (value === '') {
+                onChange("timeImpact", 0);
+                return;
+              }
+              
+              // Replace comma with dot for decimal handling
+              const normalizedValue = value.replace(',', '.');
+              const numValue = parseFloat(normalizedValue);
+              
+              if (!isNaN(numValue)) {
+                onChange("timeImpact", numValue);
               }
             }}
             onFocus={() => setTimeInputActive(true)}

@@ -3,8 +3,19 @@ import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
 import ModuleCard from "../ModuleCard";
 import { Stack, Module } from "@/types/stack";
 import { Button } from "@/components/ui/button";
-import { Plus, Star, ArrowRight } from "lucide-react";
+import { Plus, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 interface ModuleListProps {
   stack: Stack;
@@ -24,6 +35,7 @@ const ModuleList = ({
   currencySymbol 
 }: ModuleListProps) => {
   const { toast } = useToast();
+  const [moduleToDelete, setModuleToDelete] = useState<string | null>(null);
 
   const updateModule = (moduleId: string, updatedModule: Module) => {
     setStack({
@@ -34,7 +46,7 @@ const ModuleList = ({
     });
   };
 
-  const deleteModule = (moduleId: string) => {
+  const confirmDeleteModule = (moduleId: string) => {
     const moduleToDelete = stack.modules.find(mod => mod.id === moduleId);
     
     if (moduleToDelete && moduleToDelete.nonNegotiable) {
@@ -46,10 +58,18 @@ const ModuleList = ({
       return;
     }
     
-    setStack({
-      ...stack,
-      modules: stack.modules.filter(mod => mod.id !== moduleId)
-    });
+    // Set module to delete to show confirmation dialog
+    setModuleToDelete(moduleId);
+  };
+
+  const handleDeleteConfirmed = () => {
+    if (moduleToDelete) {
+      setStack({
+        ...stack,
+        modules: stack.modules.filter(mod => mod.id !== moduleToDelete)
+      });
+      setModuleToDelete(null);
+    }
   };
 
   const duplicateModule = (moduleId: string) => {
@@ -111,10 +131,11 @@ const ModuleList = ({
                     module={module}
                     index={index}
                     onUpdate={updateModule}
-                    onDelete={deleteModule}
+                    onDelete={confirmDeleteModule}
                     onDuplicate={duplicateModule}
                     isLocked={stack.locked}
                     currencySymbol={currencySymbol}
+                    onEdit={() => onEditModule(module.id)}
                   />
                 ))}
                 {provided.placeholder}
@@ -131,7 +152,7 @@ const ModuleList = ({
             onClick={onAddModule}
           >
             <Plus size={16} />
-            Add Module
+            <span>Add Module</span>
           </Button>
           
           <Button 
@@ -139,7 +160,7 @@ const ModuleList = ({
             onClick={onGoToPricing}
           >
             <ArrowRight size={16} />
-            Go to Pricing
+            <span>Go to Pricing</span>
           </Button>
         </div>
       )}
@@ -152,6 +173,24 @@ const ModuleList = ({
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={moduleToDelete !== null} onOpenChange={(open) => !open && setModuleToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this module?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the module and its data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirmed} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
