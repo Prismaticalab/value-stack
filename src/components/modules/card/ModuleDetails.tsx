@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Module } from "@/types/stack";
+import NonNegotiableToggle from "./NonNegotiableToggle";
 
 interface ModuleDetailsProps {
   module: Module;
@@ -54,6 +55,13 @@ const ModuleDetails = ({ module, onUpdate, isLocked }: ModuleDetailsProps) => {
           onBlur={(e) => e.target.placeholder = "Describe the purpose of this module..."}
         />
       </div>
+
+      <NonNegotiableToggle 
+        id={module.id}
+        checked={module.nonNegotiable || false}
+        onChange={(checked) => onUpdate("nonNegotiable", checked)}
+        isLocked={isLocked}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>

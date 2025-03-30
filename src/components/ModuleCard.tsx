@@ -1,10 +1,8 @@
-
 import React, { useState } from "react";
 import { Module } from "@/types/stack";
 import { Draggable } from "react-beautiful-dnd";
 import { Card, CardContent } from "@/components/ui/card";
 import ModuleHeader from "./modules/card/ModuleHeader";
-import NonNegotiableToggle from "./modules/card/NonNegotiableToggle";
 import ModuleDetails from "./modules/card/ModuleDetails";
 import CostInputs from "./modules/card/CostInputs";
 import DocumentAttachment from "./modules/card/DocumentAttachment";
@@ -67,6 +65,7 @@ const ModuleCard = ({
     }
     
     // Add red border for non-negotiable modules (top, right, bottom)
+    // We keep the left border color based on stakeholder
     const nonNegotiableBorder = module.nonNegotiable 
       ? "border-t-4 border-r-4 border-b-4 border-red-500" 
       : "";
@@ -101,13 +100,6 @@ const ModuleCard = ({
                 <ModuleDetails 
                   module={module}
                   onUpdate={handleChange}
-                  isLocked={isLocked}
-                />
-                
-                <NonNegotiableToggle 
-                  id={module.id}
-                  checked={module.nonNegotiable || false}
-                  onChange={(checked) => handleChange("nonNegotiable", checked)}
                   isLocked={isLocked}
                 />
                 
