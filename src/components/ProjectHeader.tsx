@@ -26,11 +26,11 @@ const ProjectHeader = ({ onEditClick }: ProjectHeaderProps) => {
           </Button>
           <div className="flex flex-col">
             <h1 className="text-2xl font-semibold text-apple-neutral tracking-tight">{currentStack.name}</h1>
-            {(currentStack.description || currentStack.owner) && (
-              <div className="flex items-center text-sm text-gray-500 mt-1">
-                {currentStack.owner && <span className="mr-2">Owner: {currentStack.owner}</span>}
-                {currentStack.description && <span className="truncate max-w-md">{currentStack.description}</span>}
-              </div>
+            {currentStack.description && (
+              <p className="text-sm text-gray-500 mt-1 line-clamp-2">{currentStack.description}</p>
+            )}
+            {currentStack.owner && (
+              <p className="text-xs text-gray-500 mt-0.5">Owner: {currentStack.owner}</p>
             )}
           </div>
         </div>
@@ -39,7 +39,7 @@ const ProjectHeader = ({ onEditClick }: ProjectHeaderProps) => {
           <Button 
             variant="outline"
             onClick={onEditClick}
-            className="flex items-center gap-1 border-gray-200 hover:bg-gray-100"
+            className="flex items-center gap-1 border-gray-200 hover:bg-black hover:text-white transition-colors"
           >
             <Edit size={16} />
             Edit Project
@@ -47,7 +47,7 @@ const ProjectHeader = ({ onEditClick }: ProjectHeaderProps) => {
           <Button 
             variant="outline" 
             onClick={saveStack}
-            className="flex items-center gap-1 border-gray-200 hover:bg-gray-100"
+            className="flex items-center gap-1 border-gray-200 hover:bg-black hover:text-white transition-colors"
           >
             <Save size={16} />
             Save Progress

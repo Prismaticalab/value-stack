@@ -102,12 +102,14 @@ const EditProjectDialog = ({
           <Button
             variant="outline"
             onClick={onClose}
+            className="hover:bg-gray-100 transition-colors"
           >
             Cancel
           </Button>
           <Button
             onClick={() => onSave(name, description, owner)}
             disabled={!hasChanges || !name || !owner}
+            className={`transition-colors ${!hasChanges || !name || !owner ? 'opacity-50' : 'hover:bg-black hover:text-white'}`}
           >
             Save Changes
           </Button>

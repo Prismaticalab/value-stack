@@ -86,8 +86,8 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
             />
           </div>
           
-          {/* Non-negotiable setting - moved up between module name and purpose */}
-          <div className="flex items-center justify-between">
+          {/* Non-negotiable setting - moved next to the text */}
+          <div className="flex items-center gap-2">
             <Label htmlFor="edit-non-negotiable" className="cursor-pointer flex items-center gap-2">
               <span>Non-Negotiable</span>
               <TooltipProvider>
@@ -135,7 +135,7 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
                   <SelectTrigger className="border-gray-200 focus:ring-black">
                     <SelectValue placeholder="Select stakeholder" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white">
                     <SelectItem value="internal">Internal</SelectItem>
                     <SelectItem value="external">External</SelectItem>
                   </SelectContent>
@@ -174,7 +174,7 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
                   <SelectTrigger className="border-gray-200 focus:ring-black">
                     <SelectValue placeholder="Select time unit" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white">
                     <SelectItem value="minutes">Minutes</SelectItem>
                     <SelectItem value="hours">Hours</SelectItem>
                     <SelectItem value="days">Days</SelectItem>
@@ -249,7 +249,7 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
             </div>
           </div>
           
-          {/* Document attachment section */}
+          {/* Document attachment section - updated with icon instead of button */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <Label className="text-sm font-medium">Document Attachment</Label>
@@ -257,11 +257,11 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                  className="h-8 text-gray-500 hover:bg-black hover:text-white transition-colors flex items-center gap-1"
                   onClick={triggerFileInput}
                 >
                   <Paperclip size={16} />
-                  Attach Document
+                  <span>Attach</span>
                 </Button>
               )}
             </div>
@@ -280,7 +280,7 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 rounded-full"
+                          className="h-8 w-8 rounded-full hover:bg-black hover:text-white transition-colors"
                           onClick={() => window.open(editedModule.documentUrl, '_blank')}
                         >
                           <ExternalLink size={16} />
@@ -299,7 +299,7 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50"
+                          className="h-8 w-8 rounded-full text-red-500 hover:bg-red-100 hover:text-red-600 transition-colors"
                           onClick={removeDocument}
                         >
                           <X size={16} />
@@ -326,7 +326,7 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
         
         <DialogFooter>
           <Button variant="outline" onClick={onCancel}>Cancel</Button>
-          <Button onClick={() => onSave(editedModule)}>Save Changes</Button>
+          <Button onClick={() => onSave(editedModule)} className="hover:bg-black hover:text-white transition-colors">Save Changes</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

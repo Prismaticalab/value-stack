@@ -159,7 +159,7 @@ const ModuleCard = ({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="rounded-full text-gray-400 hover:text-gray-500"
+                        className="rounded-full text-gray-400 hover:text-gray-500 hover:bg-black hover:text-white transition-colors"
                         onClick={() => onDuplicate(module.id)}
                       >
                         <Copy size={18} />
@@ -167,7 +167,7 @@ const ModuleCard = ({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="rounded-full text-gray-400 hover:text-red-500"
+                        className="rounded-full text-gray-400 hover:text-red-500 hover:bg-black hover:text-white transition-colors"
                         onClick={() => onDelete(module.id)}
                       >
                         <Trash2 size={18} />
@@ -177,7 +177,7 @@ const ModuleCard = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="rounded-full text-gray-400 hover:text-gray-500"
+                    className="rounded-full text-gray-400 hover:text-gray-500 hover:bg-black hover:text-white transition-colors"
                     onClick={toggleExpanded}
                   >
                     {expanded ? (
@@ -190,27 +190,29 @@ const ModuleCard = ({
               </div>
             </div>
 
-            {/* Non-negotiable setting - moved up between module name and purpose */}
+            {/* Non-negotiable setting - moved next to the text */}
             <div className="mt-3 flex items-center justify-between">
-              <Label htmlFor={`non-negotiable-${module.id}`} className="cursor-pointer flex items-center gap-2">
-                <span>Non-Negotiable</span>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger className="cursor-help text-gray-400 hover:text-gray-500">
-                      <Flag size={14} />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>When marked as non-negotiable, this module cannot be deleted.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </Label>
-              <Switch
-                id={`non-negotiable-${module.id}`}
-                checked={module.nonNegotiable || false}
-                onCheckedChange={(checked) => handleChange("nonNegotiable", checked)}
-                disabled={isLocked}
-              />
+              <div className="flex items-center gap-2">
+                <Label htmlFor={`non-negotiable-${module.id}`} className="cursor-pointer flex items-center gap-2">
+                  <span>Non-Negotiable</span>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="cursor-help text-gray-400 hover:text-gray-500">
+                        <Flag size={14} />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>When marked as non-negotiable, this module cannot be deleted.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </Label>
+                <Switch
+                  id={`non-negotiable-${module.id}`}
+                  checked={module.nonNegotiable || false}
+                  onCheckedChange={(checked) => handleChange("nonNegotiable", checked)}
+                  disabled={isLocked}
+                />
+              </div>
             </div>
 
             {expanded && (
@@ -245,7 +247,7 @@ const ModuleCard = ({
                         <SelectTrigger className="border-gray-200 focus:ring-black">
                           <SelectValue placeholder="Select stakeholder" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white">
                           <SelectItem value="internal">Internal</SelectItem>
                           <SelectItem value="external">External</SelectItem>
                         </SelectContent>
@@ -293,7 +295,7 @@ const ModuleCard = ({
                         <SelectTrigger className="border-gray-200 focus:ring-black">
                           <SelectValue placeholder="Select time unit" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white">
                           <SelectItem value="minutes">Minutes</SelectItem>
                           <SelectItem value="hours">Hours</SelectItem>
                           <SelectItem value="days">Days</SelectItem>
@@ -383,7 +385,7 @@ const ModuleCard = ({
                   </div>
                 </div>
                 
-                {/* Document attachment section */}
+                {/* Document attachment section - updated with icon instead of button */}
                 <div className="pt-4">
                   <div className="flex justify-between items-center">
                     <Label className="text-sm font-medium">Document Attachment</Label>
@@ -391,11 +393,11 @@ const ModuleCard = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                        className="h-8 text-gray-500 hover:bg-black hover:text-white transition-colors flex items-center gap-1"
                         onClick={triggerFileInput}
                       >
                         <Paperclip size={16} />
-                        Attach Document
+                        <span>Attach</span>
                       </Button>
                     )}
                   </div>
@@ -414,7 +416,7 @@ const ModuleCard = ({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 rounded-full"
+                                className="h-8 w-8 rounded-full hover:bg-black hover:text-white transition-colors"
                                 onClick={() => window.open(module.documentUrl, '_blank')}
                               >
                                 <ExternalLink size={16} />
@@ -433,7 +435,7 @@ const ModuleCard = ({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50"
+                                className="h-8 w-8 rounded-full text-red-500 hover:bg-red-100 hover:text-red-600 transition-colors"
                                 onClick={removeDocument}
                                 disabled={isLocked}
                               >

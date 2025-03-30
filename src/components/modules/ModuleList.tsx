@@ -91,7 +91,7 @@ const ModuleList = ({
           <p className="text-gray-500 mb-4">No modules added yet</p>
           <Button 
             onClick={onAddModule}
-            className="bg-black hover:bg-black/80"
+            className="bg-black hover:bg-black/80 transition-colors"
           >
             Add Your First Module
           </Button>
@@ -127,7 +127,7 @@ const ModuleList = ({
       {stack.modules.length > 0 && (
         <div className="flex justify-center mt-6">
           <Button 
-            className="bg-black hover:bg-black/80 flex items-center gap-1 mr-4"
+            className="bg-black hover:bg-black/80 transition-colors flex items-center gap-1 mr-4"
             onClick={onAddModule}
           >
             <Plus size={16} />
@@ -135,7 +135,7 @@ const ModuleList = ({
           </Button>
           
           <Button 
-            className="bg-black hover:bg-black/80 flex items-center gap-1"
+            className="bg-black hover:bg-black/80 transition-colors flex items-center gap-1"
             onClick={onGoToPricing}
           >
             <ArrowRight size={16} />

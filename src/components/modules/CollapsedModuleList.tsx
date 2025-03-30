@@ -27,7 +27,7 @@ const CollapsedModuleList = ({ modules, onEditModule, currencySymbol }: Collapse
                 variant="ghost" 
                 size="sm" 
                 onClick={() => onEditModule(module.id)}
-                className="text-xs h-8"
+                className="text-xs h-8 hover:bg-black hover:text-white transition-colors"
               >
                 Edit
               </Button>
