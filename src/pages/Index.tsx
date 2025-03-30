@@ -29,7 +29,7 @@ const Index = () => {
             onEditClick={() => setEditProjectDialogOpen(true)} 
           />
 
-          <main className="p-6 md:p-8 max-w-7xl mx-auto">
+          <main className="p-6 md:p-8 pt-2 max-w-7xl mx-auto">
             <div className={currentTab === "builder" ? "block" : "hidden"}>
               <Card className="apple-card">
                 <StackBuilder 
