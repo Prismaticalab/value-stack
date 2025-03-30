@@ -28,8 +28,11 @@ const NumberInput = ({
 }: NumberInputProps) => {
   const [isActive, setIsActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [inputValue, setInputValue] = useState<string>(value > 0 ? value.toString() : "");
 
   const handleInputChange = (value: string) => {
+    setInputValue(value);
+    
     // Allow empty string (to clear the input when typing)
     if (value === '') {
       setError(null);
@@ -51,6 +54,13 @@ const NumberInput = ({
     onChange(numValue);
   };
 
+  // Update inputValue when value prop changes externally
+  React.useEffect(() => {
+    if (!isActive) {
+      setInputValue(value > 0 ? value.toString() : "");
+    }
+  }, [value, isActive]);
+
   return (
     <div className="space-y-2">
       {label && (
@@ -70,11 +80,23 @@ const NumberInput = ({
           step={step}
           max={max}
           placeholder={placeholder}
-          value={isActive ? (value || "") : (value > 0 ? value : "")}
+          value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
           className="pl-7 border-gray-200"
-          onFocus={() => setIsActive(true)}
-          onBlur={() => setIsActive(false)}
+          onFocus={() => {
+            setIsActive(true);
+          }}
+          onBlur={() => {
+            setIsActive(false);
+            // Format value on blur if needed
+            if (inputValue) {
+              const normalizedValue = inputValue.replace(',', '.');
+              const numValue = parseFloat(normalizedValue);
+              if (!isNaN(numValue)) {
+                setInputValue(numValue.toString());
+              }
+            }
+          }}
         />
         {error && (
           <p className="text-red-500 text-xs mt-1">{error}</p>

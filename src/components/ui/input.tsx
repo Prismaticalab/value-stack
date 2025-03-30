@@ -27,17 +27,23 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           // Insert a dot as the decimal separator
           const newValue = value.slice(0, selectionStart) + '.' + value.slice(selectionEnd);
           
-          // Set the new value and cursor position
-          input.value = newValue;
+          // Set the new value
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+            window.HTMLInputElement.prototype, "value"
+          )?.set;
           
-          // Set cursor position after the inserted dot
-          setTimeout(() => {
-            input.setSelectionRange(selectionStart + 1, selectionStart + 1);
-          }, 0);
-          
-          // Manually trigger change event
-          const event = new Event('input', { bubbles: true });
-          input.dispatchEvent(event);
+          if (nativeInputValueSetter) {
+            nativeInputValueSetter.call(input, newValue);
+            
+            // Set cursor position after the inserted dot
+            setTimeout(() => {
+              input.setSelectionRange(selectionStart + 1, selectionStart + 1);
+            }, 0);
+            
+            // Manually trigger input event to ensure React's onChange is called
+            const event = new Event('input', { bubbles: true });
+            input.dispatchEvent(event);
+          }
         }
         
         // Call the original onKeyDown handler if it exists
