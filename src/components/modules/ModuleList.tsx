@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
 import ModuleCard from "../ModuleCard";
@@ -38,14 +39,22 @@ const ModuleList = ({
   const [expandedModules, setExpandedModules] = useState<{[key: string]: boolean}>({});
   const [newModuleId, setNewModuleId] = useState<string | null>(null);
 
-  // Initialize expanded state for all modules
+  // Handle expansion of modules whenever modules list changes or a new module is added
   useEffect(() => {
-    if (newModuleId) {
-      // Collapse all modules except the new one
+    if (stack.modules.length > 0) {
+      // Create an object to track which modules should be expanded
       const expandedState: {[key: string]: boolean} = {};
+      
+      // First set all modules to collapsed
       stack.modules.forEach(module => {
-        expandedState[module.id] = module.id === newModuleId;
+        expandedState[module.id] = false;
       });
+      
+      // If we have a newly added module ID, set only that one to expanded
+      if (newModuleId && stack.modules.find(mod => mod.id === newModuleId)) {
+        expandedState[newModuleId] = true;
+      }
+      
       setExpandedModules(expandedState);
     }
   }, [stack.modules.length, newModuleId]);
