@@ -1,7 +1,6 @@
 
 import { Module } from "@/types/stack";
 import { Button } from "@/components/ui/button";
-import { Star } from "lucide-react";
 
 interface CollapsedModuleListProps {
   modules: Module[];
@@ -17,7 +16,7 @@ const CollapsedModuleList = ({ modules, onEditModule, currencySymbol }: Collapse
         {modules.map((module) => (
           <div key={module.id} className="flex justify-between items-center p-2 bg-white rounded border">
             <div className="flex items-center">
-              {module.nonNegotiable && <Star size={14} className="text-yellow-500 mr-2" fill="currentColor" />}
+              {/* Removed star icon */}
               <div className={`w-2 h-2 rounded-full mr-2 ${module.stakeholder === 'internal' ? 'bg-blue-500' : 'bg-purple-500'}`}></div>
               <span className="font-medium">{module.name || "Unnamed Module"}</span>
             </div>

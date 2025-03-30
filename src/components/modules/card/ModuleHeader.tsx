@@ -1,9 +1,8 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ChevronDown, ChevronUp, Copy, Trash2, Star, Edit } from "lucide-react";
+import { ChevronDown, ChevronUp, Copy, Trash2, Edit } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Module } from "@/types/stack";
 
@@ -47,22 +46,6 @@ const ModuleHeader = ({
             onFocus={(e) => e.target.placeholder = ""}
             onBlur={(e) => e.target.placeholder = "Module name"}
           />
-          
-          {/* Non-negotiable star indicator */}
-          {module.nonNegotiable && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-yellow-500">
-                    <Star size={18} fill="currentColor" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Non-negotiable module (cannot be deleted)</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
         </div>
       </div>
 

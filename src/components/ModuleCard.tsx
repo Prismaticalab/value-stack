@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Module } from "@/types/stack";
 import { Draggable } from "react-beautiful-dnd";
@@ -66,7 +65,12 @@ const ModuleCard = ({
       borderColor = "border-l-4 border-l-purple-500";
     }
     
-    return `border border-gray-200 shadow-sm transition-all ${borderColor}`;
+    // Add bright yellow border for non-negotiable modules
+    const nonNegotiableBorder = module.nonNegotiable 
+      ? "border-t-4 border-r-4 border-b-4 border-[#FEF7CD]" 
+      : "";
+    
+    return `border border-gray-200 shadow-sm transition-all ${borderColor} ${nonNegotiableBorder}`;
   };
 
   return (
@@ -92,13 +96,8 @@ const ModuleCard = ({
               onEdit={onEdit}
             />
 
-            <NonNegotiableToggle 
-              id={module.id}
-              checked={module.nonNegotiable || false}
-              onChange={(checked) => handleChange("nonNegotiable", checked)}
-              isLocked={isLocked}
-            />
-
+            {/* Remove the NonNegotiableToggle from this location */}
+            
             {expanded && (
               <>
                 <ModuleDetails 
