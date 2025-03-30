@@ -71,7 +71,7 @@ const StakeholderTimeSection = ({ module, onChange }: StakeholderTimeSectionProp
       </div>
       
       <div className="space-y-2">
-        <Label>Time Impact</Label>
+        <Label>Time Impact <span className="text-red-500">*</span></Label>
         <div className="grid grid-cols-2 gap-2">
           <div>
             <Input
@@ -83,6 +83,7 @@ const StakeholderTimeSection = ({ module, onChange }: StakeholderTimeSectionProp
               onChange={handleTimeChange}
               onFocus={() => setTimeInputActive(true)}
               onBlur={() => setTimeInputActive(false)}
+              required
             />
             {timeInputError && (
               <p className="text-red-500 text-xs mt-1">{timeInputError}</p>
@@ -113,3 +114,4 @@ const StakeholderTimeSection = ({ module, onChange }: StakeholderTimeSectionProp
 };
 
 export default StakeholderTimeSection;
+
