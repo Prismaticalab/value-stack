@@ -27,11 +27,11 @@ const CostSection = ({ module, onChange, currencySymbol }: CostSectionProps) => 
       return;
     }
     
-    // Replace comma with dot for consistent decimal handling
-    const normalizedValue = value.replace(',', '.');
-    
     // Check if the value is a valid number
+    // Accept both . and , as decimal separators
+    const normalizedValue = value.replace(',', '.');
     const numValue = parseFloat(normalizedValue);
+    
     if (isNaN(numValue)) {
       setCostInputError("Please only use numbers for this field");
       return;
@@ -51,11 +51,11 @@ const CostSection = ({ module, onChange, currencySymbol }: CostSectionProps) => 
       return;
     }
     
-    // Replace comma with dot for consistent decimal handling
-    const normalizedValue = value.replace(',', '.');
-    
     // Check if the value is a valid number
+    // Accept both . and , as decimal separators
+    const normalizedValue = value.replace(',', '.');
     const numValue = parseFloat(normalizedValue);
+    
     if (isNaN(numValue)) {
       setQuantityInputError("Please only use numbers for this field");
       return;

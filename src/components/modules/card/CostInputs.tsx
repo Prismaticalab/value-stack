@@ -29,7 +29,10 @@ const CostInputs = ({ module, onUpdate, isLocked, currencySymbol }: CostInputsPr
     }
     
     // Check if the value is a valid number
-    const numValue = parseFloat(value.replace(',', '.'));
+    // Accept both . and , as decimal separators
+    const normalizedValue = value.replace(',', '.');
+    const numValue = parseFloat(normalizedValue);
+    
     if (isNaN(numValue)) {
       setCostInputError("Please only use numbers for this field");
       return;
@@ -49,10 +52,13 @@ const CostInputs = ({ module, onUpdate, isLocked, currencySymbol }: CostInputsPr
       return;
     }
     
-    // Check if the value is a valid integer
-    const numValue = parseFloat(value.replace(',', '.'));
+    // Check if the value is a valid number
+    // Accept both . and , as decimal separators
+    const normalizedValue = value.replace(',', '.');
+    const numValue = parseFloat(normalizedValue);
+    
     if (isNaN(numValue)) {
-      setQuantityInputError("Please only use whole numbers for this field");
+      setQuantityInputError("Please only use numbers for this field");
       return;
     }
     
@@ -164,12 +170,12 @@ const CostInputs = ({ module, onUpdate, isLocked, currencySymbol }: CostInputsPr
             />
             {costInputError && (
               <p className="text-red-500 text-xs mt-1">{costInputError}</p>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 export default CostInputs;

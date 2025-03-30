@@ -26,11 +26,11 @@ const ModuleDetails = ({ module, onUpdate, isLocked }: ModuleDetailsProps) => {
       return;
     }
     
-    // Replace comma with dot for decimal handling
-    const normalizedValue = value.replace(',', '.');
-    
     // Check if the value is a valid number
+    // Accept both . and , as decimal separators
+    const normalizedValue = value.replace(',', '.');
     const numValue = parseFloat(normalizedValue);
+    
     if (isNaN(numValue)) {
       setTimeInputError("Please only use numbers for this field");
       return;

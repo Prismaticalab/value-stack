@@ -5,19 +5,46 @@ import { cn } from "@/lib/utils"
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {
-    // Special handling for decimal inputs
+    // Create a new inputProps object to avoid mutating props
     const inputProps = {...props};
     
-    // If the input is for numbers (decimal, numeric), allow commas and dots
+    // Handle decimal input specifically
     if (props.inputMode === 'decimal' || props.inputMode === 'numeric') {
-      const originalOnChange = props.onChange;
+      // Create a new onKeyDown handler that allows both . and , for decimal inputs
+      const originalOnKeyDown = props.onKeyDown;
       
-      if (originalOnChange) {
-        inputProps.onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-          // Let the parent component handle the actual value conversion
-          originalOnChange(e);
-        };
-      }
+      inputProps.onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        // Allow comma as decimal separator by converting it to dot
+        if (e.key === ',') {
+          e.preventDefault();
+          
+          // Get the current value and cursor position
+          const input = e.currentTarget;
+          const value = input.value;
+          const selectionStart = input.selectionStart || 0;
+          const selectionEnd = input.selectionEnd || 0;
+          
+          // Insert a dot instead of a comma
+          const newValue = value.slice(0, selectionStart) + '.' + value.slice(selectionEnd);
+          
+          // Set the new value and cursor position
+          input.value = newValue;
+          
+          // Set cursor position after the inserted dot
+          setTimeout(() => {
+            input.setSelectionRange(selectionStart + 1, selectionStart + 1);
+          }, 0);
+          
+          // Manually trigger change event
+          const event = new Event('input', { bubbles: true });
+          input.dispatchEvent(event);
+        }
+        
+        // Call the original onKeyDown handler if it exists
+        if (originalOnKeyDown) {
+          originalOnKeyDown(e);
+        }
+      };
     }
     
     return (
