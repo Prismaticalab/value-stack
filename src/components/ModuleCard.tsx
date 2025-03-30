@@ -37,10 +37,55 @@ const ModuleCard = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [costInputActive, setCostInputActive] = useState(false);
+  const [quantityInputActive, setQuantityInputActive] = useState(false);
+  const [costInputError, setCostInputError] = useState<string | null>(null);
+  const [quantityInputError, setQuantityInputError] = useState<string | null>(null);
 
   const handleChange = (field: keyof Module, value: any) => {
     const updatedModule = { ...module, [field]: value };
     onUpdate(module.id, updatedModule);
+  };
+
+  const handleCostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Allow empty string (to clear the input when typing)
+    if (value === '') {
+      setCostInputError(null);
+      handleChange("cost", 0);
+      return;
+    }
+    
+    // Check if the value is a valid number
+    const numValue = parseFloat(value);
+    if (isNaN(numValue)) {
+      setCostInputError("Please only use numbers for this field");
+      return;
+    }
+    
+    setCostInputError(null);
+    handleChange("cost", numValue);
+  };
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Allow empty string (to clear the input when typing)
+    if (value === '') {
+      setQuantityInputError(null);
+      handleChange("costQuantity", 1);
+      return;
+    }
+    
+    // Check if the value is a valid integer
+    const numValue = parseInt(value, 10);
+    if (isNaN(numValue)) {
+      setQuantityInputError("Please only use whole numbers for this field");
+      return;
+    }
+    
+    setQuantityInputError(null);
+    handleChange("costQuantity", numValue);
   };
 
   const toggleExpanded = () => {
@@ -190,29 +235,28 @@ const ModuleCard = ({
               </div>
             </div>
 
-            {/* Non-negotiable setting - moved next to the text */}
-            <div className="mt-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Label htmlFor={`non-negotiable-${module.id}`} className="cursor-pointer flex items-center gap-2">
-                  <span>Non-Negotiable</span>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger className="cursor-help text-gray-400 hover:text-gray-500">
-                        <Flag size={14} />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>When marked as non-negotiable, this module cannot be deleted.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </Label>
-                <Switch
-                  id={`non-negotiable-${module.id}`}
-                  checked={module.nonNegotiable || false}
-                  onCheckedChange={(checked) => handleChange("nonNegotiable", checked)}
-                  disabled={isLocked}
-                />
-              </div>
+            {/* Non-negotiable setting - next to the text */}
+            <div className="mt-3 flex items-center">
+              <Label htmlFor={`non-negotiable-${module.id}`} className="cursor-pointer flex items-center gap-2">
+                <span>Non-Negotiable</span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger className="cursor-help text-gray-400 hover:text-gray-500">
+                      <Flag size={14} />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>When marked as non-negotiable, this module cannot be deleted.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </Label>
+              <Switch
+                id={`non-negotiable-${module.id}`}
+                checked={module.nonNegotiable || false}
+                onCheckedChange={(checked) => handleChange("nonNegotiable", checked)}
+                disabled={isLocked}
+                className="ml-2"
+              />
             </div>
 
             {expanded && (
@@ -272,13 +316,16 @@ const ModuleCard = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       <Input
                         className="border-gray-200 focus:border-black focus:ring-black"
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={module.timeImpact}
-                        onChange={(e) =>
-                          handleChange("timeImpact", parseInt(e.target.value) || 0)
-                        }
+                        type="text" 
+                        inputMode="numeric"
+                        placeholder="Time value"
+                        value={module.timeImpact || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === '' || /^\d+$/.test(value)) {
+                            handleChange("timeImpact", value === '' ? 0 : parseInt(value));
+                          }
+                        }}
                         disabled={isLocked}
                       />
 
@@ -333,19 +380,18 @@ const ModuleCard = ({
                       </div>
                       <Input
                         className="pl-7 border-gray-200 focus:border-black focus:ring-black"
-                        type="number"
-                        inputMode="numeric"
-                        min="0"
-                        step="0.01"
+                        type="text"
+                        inputMode="decimal"
                         placeholder={costInputActive ? "" : "0"}
-                        value={costInputActive ? module.cost : module.cost === 0 ? "" : module.cost}
-                        onChange={(e) =>
-                          handleChange("cost", parseFloat(e.target.value) || 0)
-                        }
+                        value={costInputActive ? module.cost || "" : module.cost === 0 ? "" : module.cost}
+                        onChange={handleCostChange}
                         onFocus={() => setCostInputActive(true)}
                         onBlur={() => setCostInputActive(false)}
                         disabled={isLocked}
                       />
+                      {costInputError && (
+                        <p className="text-red-500 text-xs mt-1">{costInputError}</p>
+                      )}
                     </div>
 
                     {module.costType === "variable" && (
@@ -362,30 +408,34 @@ const ModuleCard = ({
                           onBlur={(e) => e.target.placeholder = "Type the nature of unit (e.g., hours, users, 1000 copies, etc)"}
                         />
 
-                        <Input
-                          className="border-gray-200 focus:border-black focus:ring-black"
-                          type="number"
-                          inputMode="numeric"
-                          min="1"
-                          step="1"
-                          placeholder="Number of units needed"
-                          value={module.costQuantity || 1}
-                          onChange={(e) =>
-                            handleChange(
-                              "costQuantity",
-                              parseInt(e.target.value) || 1
-                            )
-                          }
-                          disabled={isLocked}
-                          onFocus={(e) => e.target.placeholder = ""}
-                          onBlur={(e) => e.target.placeholder = "Number of units needed"}
-                        />
+                        <div>
+                          <Input
+                            className="border-gray-200 focus:border-black focus:ring-black"
+                            type="text"
+                            inputMode="numeric"
+                            placeholder={quantityInputActive ? "" : "Number of units needed"}
+                            value={quantityInputActive ? module.costQuantity || "" : module.costQuantity || ""}
+                            onChange={handleQuantityChange}
+                            disabled={isLocked}
+                            onFocus={(e) => {
+                              setQuantityInputActive(true);
+                              e.target.placeholder = "";
+                            }}
+                            onBlur={(e) => {
+                              setQuantityInputActive(false);
+                              e.target.placeholder = "Number of units needed";
+                            }}
+                          />
+                          {quantityInputError && (
+                            <p className="text-red-500 text-xs mt-1">{quantityInputError}</p>
+                          )}
+                        </div>
                       </>
                     )}
                   </div>
                 </div>
                 
-                {/* Document attachment section - updated with icon instead of button */}
+                {/* Document attachment section */}
                 <div className="pt-4">
                   <div className="flex justify-between items-center">
                     <Label className="text-sm font-medium">Document Attachment</Label>

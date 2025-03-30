@@ -24,9 +24,54 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [costInputActive, setCostInputActive] = useState(false);
+  const [quantityInputActive, setQuantityInputActive] = useState(false);
+  const [costInputError, setCostInputError] = useState<string | null>(null);
+  const [quantityInputError, setQuantityInputError] = useState<string | null>(null);
 
   const handleChange = (field: keyof Module, value: any) => {
     setEditedModule({ ...editedModule, [field]: value });
+  };
+
+  const handleCostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Allow empty string (to clear the input when typing)
+    if (value === '') {
+      setCostInputError(null);
+      handleChange("cost", 0);
+      return;
+    }
+    
+    // Check if the value is a valid number
+    const numValue = parseFloat(value);
+    if (isNaN(numValue)) {
+      setCostInputError("Please only use numbers for this field");
+      return;
+    }
+    
+    setCostInputError(null);
+    handleChange("cost", numValue);
+  };
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Allow empty string (to clear the input when typing)
+    if (value === '') {
+      setQuantityInputError(null);
+      handleChange("costQuantity", 1);
+      return;
+    }
+    
+    // Check if the value is a valid integer
+    const numValue = parseInt(value, 10);
+    if (isNaN(numValue)) {
+      setQuantityInputError("Please only use whole numbers for this field");
+      return;
+    }
+    
+    setQuantityInputError(null);
+    handleChange("costQuantity", numValue);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,8 +131,8 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
             />
           </div>
           
-          {/* Non-negotiable setting - moved next to the text */}
-          <div className="flex items-center gap-2">
+          {/* Non-negotiable setting - next to the text */}
+          <div className="flex items-center">
             <Label htmlFor="edit-non-negotiable" className="cursor-pointer flex items-center gap-2">
               <span>Non-Negotiable</span>
               <TooltipProvider>
@@ -105,6 +150,7 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
               id="edit-non-negotiable"
               checked={editedModule.nonNegotiable || false}
               onCheckedChange={(checked) => handleChange("nonNegotiable", checked)}
+              className="ml-2"
             />
           </div>
           
@@ -157,11 +203,16 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
               <div className="grid grid-cols-2 gap-2">
                 <Input
                   className="border-gray-200 focus:border-black focus:ring-black"
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={editedModule.timeImpact}
-                  onChange={(e) => handleChange("timeImpact", parseInt(e.target.value) || 0)}
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Time value"
+                  value={editedModule.timeImpact || ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '' || /^\d+$/.test(value)) {
+                      handleChange("timeImpact", value === '' ? 0 : parseInt(value));
+                    }
+                  }}
                 />
 
                 <Select
@@ -209,16 +260,17 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
                 </div>
                 <Input
                   className="pl-7 border-gray-200 focus:border-black focus:ring-black"
-                  type="number"
-                  inputMode="numeric"
-                  min="0"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   placeholder={costInputActive ? "" : "0"}
-                  value={costInputActive ? editedModule.cost : editedModule.cost === 0 ? "" : editedModule.cost}
-                  onChange={(e) => handleChange("cost", parseFloat(e.target.value) || 0)}
+                  value={costInputActive ? editedModule.cost || "" : editedModule.cost === 0 ? "" : editedModule.cost}
+                  onChange={handleCostChange}
                   onFocus={() => setCostInputActive(true)}
                   onBlur={() => setCostInputActive(false)}
                 />
+                {costInputError && (
+                  <p className="text-red-500 text-xs mt-1">{costInputError}</p>
+                )}
               </div>
 
               {editedModule.costType === "variable" && (
@@ -232,24 +284,31 @@ const ModuleEditDialog = ({ module, onSave, onCancel, currencySymbol }: ModuleEd
                     onBlur={(e) => e.target.placeholder = "Type the nature of unit (e.g., hours, users, 1000 copies, etc)"}
                   />
 
-                  <Input
-                    className="border-gray-200 focus:border-black focus:ring-black"
-                    type="number"
-                    inputMode="numeric"
-                    min="1"
-                    step="1"
-                    placeholder="Number of units needed"
-                    value={editedModule.costQuantity || 1}
-                    onChange={(e) => handleChange("costQuantity", parseInt(e.target.value) || 1)}
-                    onFocus={(e) => e.target.placeholder = ""}
-                    onBlur={(e) => e.target.placeholder = "Number of units needed"}
-                  />
+                  <div>
+                    <Input
+                      className="border-gray-200 focus:border-black focus:ring-black"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder={quantityInputActive ? "" : "Number of units needed"}
+                      value={quantityInputActive ? editedModule.costQuantity || "" : editedModule.costQuantity || ""}
+                      onChange={handleQuantityChange}
+                      onFocus={() => {
+                        setQuantityInputActive(true);
+                      }}
+                      onBlur={() => {
+                        setQuantityInputActive(false);
+                      }}
+                    />
+                    {quantityInputError && (
+                      <p className="text-red-500 text-xs mt-1">{quantityInputError}</p>
+                    )}
+                  </div>
                 </>
               )}
             </div>
           </div>
           
-          {/* Document attachment section - updated with icon instead of button */}
+          {/* Document attachment section */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <Label className="text-sm font-medium">Document Attachment</Label>
