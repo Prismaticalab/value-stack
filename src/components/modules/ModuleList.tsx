@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
 import ModuleCard from "../ModuleCard";
@@ -41,13 +40,12 @@ const ModuleList = ({
 
   // Initialize expanded state for all modules
   useEffect(() => {
-    const expandedState: {[key: string]: boolean} = {};
-    stack.modules.forEach(module => {
-      // If a module is newly added, it should be expanded, others collapsed
-      expandedState[module.id] = module.id === newModuleId;
-    });
-    
-    if (Object.keys(expandedState).length > 0) {
+    if (newModuleId) {
+      // Collapse all modules except the new one
+      const expandedState: {[key: string]: boolean} = {};
+      stack.modules.forEach(module => {
+        expandedState[module.id] = module.id === newModuleId;
+      });
       setExpandedModules(expandedState);
     }
   }, [stack.modules.length, newModuleId]);
@@ -97,13 +95,7 @@ const ModuleList = ({
       id: newId
     };
 
-    // Collapse all modules and expand only the new one
-    const newExpandedState: {[key: string]: boolean} = {};
-    stack.modules.forEach(mod => {
-      newExpandedState[mod.id] = false;
-    });
-    newExpandedState[newId] = true;
-    setExpandedModules(newExpandedState);
+    // Set the new module ID so it will be expanded
     setNewModuleId(newId);
 
     setStack({
@@ -128,15 +120,6 @@ const ModuleList = ({
   const handleAddModule = () => {
     const newId = crypto.randomUUID();
     setNewModuleId(newId);
-    
-    // Collapse all existing modules
-    const newExpandedState: {[key: string]: boolean} = {};
-    stack.modules.forEach(mod => {
-      newExpandedState[mod.id] = false;
-    });
-    // The new module will be expanded in the useEffect when it's added to stack.modules
-    setExpandedModules(newExpandedState);
-    
     onAddModule();
   };
 
