@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -216,11 +215,10 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
               min="0"
               step="1"
               max="100"
+              placeholder="Enter contingency buffer"
               value={stack.contingencyBuffer || 0}
               onChange={(e) => handleChange("contingencyBuffer", parseFloat(e.target.value) || 0)}
               className="pl-7 border-gray-200"
-              onFocus={(e) => e.target.placeholder = ""}
-              onBlur={(e) => e.target.placeholder = "Enter contingency buffer"}
             />
           </div>
         </div>
@@ -250,11 +248,10 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
               min="0"
               step={stack.isAgencyFeesPercentage ? "1" : "0.01"}
               max={stack.isAgencyFeesPercentage ? "100" : undefined}
+              placeholder="Enter agency fees"
               value={stack.agencyFees || 0}
               onChange={(e) => handleChange("agencyFees", parseFloat(e.target.value) || 0)}
               className="pl-7 border-gray-200"
-              onFocus={(e) => e.target.placeholder = ""}
-              onBlur={(e) => e.target.placeholder = "Enter agency fees"}
             />
           </div>
         </div>
@@ -284,13 +281,12 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
               min="0"
               step={stack.isReferralPercentage ? "1" : "0.01"}
               max={stack.isReferralPercentage ? "100" : undefined}
+              placeholder="Enter referral costs"
               value={stack.referralCosts || 0}
               onChange={(e) =>
                 handleChange("referralCosts", parseFloat(e.target.value) || 0)
               }
               className="pl-7 border-gray-200"
-              onFocus={(e) => e.target.placeholder = ""}
-              onBlur={(e) => e.target.placeholder = "Enter referral costs"}
             />
           </div>
         </div>
@@ -320,13 +316,12 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
               min="0"
               step={stack.isMarketingPercentage ? "1" : "0.01"}
               max={stack.isMarketingPercentage ? "100" : undefined}
+              placeholder="Enter marketing expenses"
               value={stack.marketingExpenses || 0}
               onChange={(e) =>
                 handleChange("marketingExpenses", parseFloat(e.target.value) || 0)
               }
               className="pl-7 border-gray-200"
-              onFocus={(e) => e.target.placeholder = ""}
-              onBlur={(e) => e.target.placeholder = "Enter marketing expenses"}
             />
           </div>
         </div>
