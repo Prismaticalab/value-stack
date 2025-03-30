@@ -34,7 +34,8 @@ const DocumentAttachment = ({
     
     toast({
       title: "Document attached",
-      description: `"${file.name}" has been attached to this module.`
+      description: `"${file.name}" has been attached to this module.`,
+      duration: 5000,
     });
   };
 
@@ -47,7 +48,8 @@ const DocumentAttachment = ({
     
     toast({
       title: "Document removed",
-      description: "The document has been removed from this module."
+      description: "The document has been removed from this module.",
+      duration: 5000,
     });
   };
 
@@ -55,7 +57,7 @@ const DocumentAttachment = ({
     <div className="pt-4">
       <div className="flex justify-between items-center">
         <Label className="text-sm font-medium">Document Attachment</Label>
-        {!documentUrl && !isLocked && (
+        {!isLocked && (
           <Button
             variant="ghost"
             size="sm"
@@ -115,15 +117,15 @@ const DocumentAttachment = ({
             </TooltipProvider>
           </div>
         </div>
-      ) : (
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          className="hidden" 
-          onChange={handleFileChange} 
-          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
-        />
-      )}
+      ) : null}
+      
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        className="hidden" 
+        onChange={handleFileChange} 
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
+      />
     </div>
   );
 };

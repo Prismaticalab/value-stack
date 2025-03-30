@@ -219,6 +219,8 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
               value={stack.contingencyBuffer || 0}
               onChange={(e) => handleChange("contingencyBuffer", parseFloat(e.target.value) || 0)}
               className="pl-7 border-gray-200"
+              onFocus={(e) => e.target.placeholder = ""}
+              onBlur={(e) => e.target.placeholder = "Enter contingency buffer"}
             />
           </div>
         </div>
@@ -251,6 +253,8 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
               value={stack.agencyFees || 0}
               onChange={(e) => handleChange("agencyFees", parseFloat(e.target.value) || 0)}
               className="pl-7 border-gray-200"
+              onFocus={(e) => e.target.placeholder = ""}
+              onBlur={(e) => e.target.placeholder = "Enter agency fees"}
             />
           </div>
         </div>
@@ -285,6 +289,8 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
                 handleChange("referralCosts", parseFloat(e.target.value) || 0)
               }
               className="pl-7 border-gray-200"
+              onFocus={(e) => e.target.placeholder = ""}
+              onBlur={(e) => e.target.placeholder = "Enter referral costs"}
             />
           </div>
         </div>
@@ -319,6 +325,8 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
                 handleChange("marketingExpenses", parseFloat(e.target.value) || 0)
               }
               className="pl-7 border-gray-200"
+              onFocus={(e) => e.target.placeholder = ""}
+              onBlur={(e) => e.target.placeholder = "Enter marketing expenses"}
             />
           </div>
         </div>
@@ -345,7 +353,7 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
           <h3 className="font-medium mb-3">Pricing Summary</h3>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Value Delivery Cost:</span>
+              <span>Current Value Delivery Cost:</span>
               <span>{currencySymbol}{stack.totalCost.toFixed(2)}</span>
             </div>
             

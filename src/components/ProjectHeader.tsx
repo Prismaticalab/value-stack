@@ -11,11 +11,11 @@ const ProjectHeader = ({ onEditClick }: { onEditClick: () => void }) => {
   return (
     <header className="sticky top-0 z-10 backdrop-blur-xl bg-white/80 border-b border-gray-100">
       <div className="px-6 md:px-8 py-5 flex justify-between items-center">
-        <div className="flex items-center">
+        <div className="flex flex-col">
           <Button 
             variant="ghost" 
             size="icon" 
-            className="mr-2 lg:hidden text-apple-neutral hover:bg-gray-100 hover:text-apple-primary" 
+            className="absolute left-6 top-5 lg:hidden text-apple-neutral hover:bg-gray-100 hover:text-apple-primary" 
             onClick={toggleSidebar}
           >
             <Menu size={22} />
@@ -32,10 +32,10 @@ const ProjectHeader = ({ onEditClick }: { onEditClick: () => void }) => {
             </Button>
           </div>
           {currentStack.description && (
-            <p className="text-sm text-gray-500 mt-1 line-clamp-2 hidden md:block ml-1">{currentStack.description}</p>
+            <p className="text-sm text-gray-500 mt-1 border-b border-gray-100 pb-1">{currentStack.description}</p>
           )}
           {currentStack.owner && (
-            <p className="text-xs text-gray-500 mt-0.5 hidden md:block ml-1">Owner: {currentStack.owner}</p>
+            <p className="text-sm text-gray-500 mt-1 border-b border-gray-100 pb-1">Owner: <span className="font-semibold">{currentStack.owner}</span></p>
           )}
         </div>
         
