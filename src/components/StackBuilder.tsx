@@ -1,15 +1,10 @@
+
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Stack, Module } from "@/types/stack";
-import { ArrowLeft, HelpCircle, ArrowRight, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ModuleEditDialog from "./module-edit-dialog";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import ModuleList from "./modules/ModuleList";
-import CollapsedModuleList from "./modules/CollapsedModuleList";
-import ValueCaptureForm from "./ValueCaptureForm";
-import ModuleListHeader from "./modules/ModuleListHeader";
-import PricingSummary from "./value-capture/PricingSummary";
+import ModuleBuilderView from "./builder/ModuleBuilderView";
+import PricingView from "./pricing/PricingView";
 
 interface StackBuilderProps {
   stack: Stack;
@@ -58,18 +53,6 @@ const StackBuilder = ({
     });
   };
 
-  const handleToggleRounding = (enabled: boolean) => {
-    setStack({
-      ...stack,
-      roundToNearest100: enabled
-    });
-  };
-
-  const addNewModule = () => {
-    // This function is now just a placeholder as the actual module creation
-    // is handled in the ModuleList component
-  };
-
   const goToPricing = () => {
     setValueCaptureView(true);
     if (onViewPricing) {
@@ -90,100 +73,34 @@ const StackBuilder = ({
     return stack.modules.find(mod => mod.id === moduleId);
   };
 
+  const handleBackFromPricing = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      setValueCaptureView(false);
+    }
+  };
+
   return (
     <div className="space-y-6 p-6 w-full">
       {!valueCaptureView ? (
-        <>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-medium">Value Delivery Stack</h2>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full">
-                    <HelpCircle size={16} className="text-gray-500" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p>
-                    This is where you build the modules that make up your value delivery stack.
-                    Each module represents a component of your service offering.
-                    Add, edit, or arrange modules to create your complete delivery stack.
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          {stack.description && (
-            <p className="text-sm text-gray-500 mt-1">{stack.description}</p>
-          )}
-
-          <ModuleList
-            stack={stack}
-            setStack={setStack}
-            onAddModule={addNewModule}
-            onGoToPricing={goToPricing}
-            onEditModule={openModuleEditor}
-            currencySymbol={currencySymbol}
-            onSave={onSave}
-          />
-        </>
+        <ModuleBuilderView 
+          stack={stack}
+          setStack={setStack}
+          onGoToPricing={goToPricing}
+          onEditModule={openModuleEditor}
+          currencySymbol={currencySymbol}
+          onSave={onSave}
+        />
       ) : (
-        <div className="space-y-6 w-full">
-          <div className="flex justify-between items-center">
-            <ModuleListHeader 
-              title="Costing Review & Pricing" 
-              tooltip="Review costs and determine your final pricing strategy. Set additional costs, profit margins, and contingency buffers."
-            />
-          </div>
-          
-          <div className="flex justify-start mb-4">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                if (onBack) {
-                  onBack();
-                } else {
-                  setValueCaptureView(false);
-                }
-              }}
-              className="flex items-center gap-1 border-gray-200 hover:bg-black hover:text-white transition-colors"
-            >
-              <ArrowLeft size={16} />
-              Back to Builder
-            </Button>
-          </div>
-          
-          <CollapsedModuleList 
-            modules={stack.modules} 
-            onEditModule={openModuleEditor}
-            currencySymbol={currencySymbol} 
-          />
-          
-          <ValueCaptureForm 
-            stack={stack} 
-            setStack={setStack}
-            currencySymbol={currencySymbol}
-          />
-
-          <PricingSummary 
-            stack={stack} 
-            currencySymbol={currencySymbol} 
-            title="Costing Summary"
-            onToggleRounding={handleToggleRounding}
-          />
-
-          <div className="flex justify-center mt-4">
-            {onViewSummary && (
-              <Button
-                onClick={onViewSummary}
-                className="bg-black hover:bg-black/80 flex items-center gap-1"
-              >
-                <ArrowRight size={16} />
-                View Summary
-              </Button>
-            )}
-          </div>
-        </div>
+        <PricingView 
+          stack={stack}
+          setStack={setStack}
+          onBack={handleBackFromPricing}
+          onViewSummary={onViewSummary}
+          onEditModule={openModuleEditor}
+          currencySymbol={currencySymbol}
+        />
       )}
       
       {/* Module Edit Dialog */}
