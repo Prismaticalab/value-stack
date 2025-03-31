@@ -86,6 +86,10 @@ const ModuleList = ({
           onDuplicate={duplicateModule}
           newModuleId={newModuleId}
           currencySymbol={currencySymbol}
+          onSaveModule={(moduleId) => {
+            // When a module is saved, collapse it
+            setModuleExpanded(moduleId, false);
+          }}
         />
       )}
       
@@ -93,6 +97,7 @@ const ModuleList = ({
         <ModuleActions
           onAddModule={handleCreateModule}
           onGoToPricing={onGoToPricing}
+          pricingButtonText="Go to Costing Review & Pricing"
         />
       )}
       

@@ -1,110 +1,109 @@
 
-import React from "react";
 import { Stack } from "@/types/stack";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 interface PricingSummaryProps {
   stack: Stack;
   currencySymbol: string;
+  title?: string;
 }
 
-const PricingSummary = ({ stack, currencySymbol }: PricingSummaryProps) => {
+const PricingSummary = ({ stack, currencySymbol, title = "Pricing Summary" }: PricingSummaryProps) => {
+  const valueCaptureTotal = 
+    (stack.isAgencyFeesPercentage ? stack.effectiveAgencyFees : stack.agencyFees) +
+    (stack.isReferralPercentage ? stack.effectiveReferralCost : stack.referralCosts) +
+    (stack.isMarketingPercentage ? stack.effectiveMarketingExpenses : stack.marketingExpenses);
+
+  const totalCostWithContingency = stack.totalCost * (1 + (stack.contingencyBuffer || 0) / 100);
+  const estimatedNetRevenue = totalCostWithContingency * (1 + stack.desiredMargin / 100);
+  
   return (
-    <div className="bg-gray-50 p-4 rounded-lg mt-6">
-      <h3 className="font-medium mb-3">Costing Summary</h3>
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm">
-          <span>Current Value Delivery Cost:</span>
-          <span>{currencySymbol}{stack.totalCost.toFixed(2)}</span>
-        </div>
-        
-        {stack.contingencyBuffer > 0 && (
-          <div className="flex justify-between text-sm">
-            <span>Contingency Buffer ({stack.contingencyBuffer}%):</span>
-            <span>{currencySymbol}{(stack.totalCost * (stack.contingencyBuffer / 100)).toFixed(2)}</span>
+    <Card className="border-gray-200">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg font-medium">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-sm">Base Delivery Cost</span>
+            <span className="font-medium">{currencySymbol}{stack.totalCost.toFixed(2)}</span>
           </div>
-        )}
-        
-        <div className="flex justify-between text-sm">
-          <span>Cost with Contingency:</span>
-          <span>{currencySymbol}{(stack.totalCost * (1 + (stack.contingencyBuffer || 0) / 100)).toFixed(2)}</span>
-        </div>
-        
-        <div className="flex justify-between text-sm">
-          <span>Desired Margin:</span>
-          <span>{stack.desiredMargin}%</span>
-        </div>
-        
-        <div className="flex justify-between text-sm">
-          <span>Total Net Revenue Required:</span>
-          <span>{currencySymbol}{(stack.totalRequiredIncome || 0).toFixed(2)}</span>
-        </div>
-        
-        <div className="pt-2 border-t border-gray-200 mt-2">
-          <h4 className="font-medium text-sm mb-2">Value Capture Costs:</h4>
           
-          {/* Fixed costs section */}
-          {!stack.isAgencyFeesPercentage && stack.agencyFees > 0 && (
-            <div className="flex justify-between text-sm">
-              <span>Agency Fees (fixed):</span>
-              <span>{currencySymbol}{stack.agencyFees.toFixed(2)}</span>
+          {stack.contingencyBuffer > 0 && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Contingency ({stack.contingencyBuffer}%)</span>
+              <span className="font-medium">{currencySymbol}{(stack.totalCost * stack.contingencyBuffer / 100).toFixed(2)}</span>
             </div>
           )}
-          
-          {!stack.isReferralPercentage && stack.referralCosts > 0 && (
-            <div className="flex justify-between text-sm">
-              <span>Referral Fee (fixed):</span>
-              <span>{currencySymbol}{stack.referralCosts.toFixed(2)}</span>
-            </div>
-          )}
-          
-          {!stack.isMarketingPercentage && stack.marketingExpenses > 0 && (
-            <div className="flex justify-between text-sm">
-              <span>Marketing Expenses (fixed):</span>
-              <span>{currencySymbol}{stack.marketingExpenses.toFixed(2)}</span>
-            </div>
-          )}
-          
-          {/* Percentage costs section - show after Total Net Revenue Required */}
-          {(stack.isAgencyFeesPercentage || stack.isReferralPercentage || stack.isMarketingPercentage) && (
-            <div className="pt-2 mt-1 space-y-2">
-              <h4 className="font-medium text-sm">Percentage of Sales:</h4>
-              
-              {stack.isAgencyFeesPercentage && stack.agencyFees > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span>Agency Fees ({stack.agencyFees}% of sales):</span>
-                  <span>{currencySymbol}{stack.effectiveAgencyFees?.toFixed(2) || "0.00"}</span>
-                </div>
-              )}
-              
-              {stack.isReferralPercentage && stack.referralCosts > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span>Referral Fee ({stack.referralCosts}% of sales):</span>
-                  <span>{currencySymbol}{stack.effectiveReferralCost?.toFixed(2) || "0.00"}</span>
-                </div>
-              )}
-              
-              {stack.isMarketingPercentage && stack.marketingExpenses > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span>Marketing Expenses ({stack.marketingExpenses}% of sales):</span>
-                  <span>{currencySymbol}{stack.effectiveMarketingExpenses?.toFixed(2) || "0.00"}</span>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-        
-        <div className="pt-2 border-t border-gray-200 mt-2">
-          <div className="flex justify-between font-medium text-black">
-            <span>Suggested Sale Price:</span>
-            <span>{currencySymbol}{stack.finalPrice.toFixed(2)}</span>
+
+          <div className="flex justify-between items-center">
+            <span className="text-sm">Total Cost with Contingency</span>
+            <span className="font-medium">{currencySymbol}{totalCostWithContingency.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-sm">
-            <span>Net Profit:</span>
-            <span>{currencySymbol}{stack.netProfit.toFixed(2)}</span>
+
+          <div className="flex justify-between items-center">
+            <span className="text-sm">Desired Profit ({stack.desiredMargin}%)</span>
+            <span className="font-medium">{currencySymbol}{(totalCostWithContingency * stack.desiredMargin / 100).toFixed(2)}</span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-sm">Net Revenue Required</span>
+            <span className="font-medium">{currencySymbol}{estimatedNetRevenue.toFixed(2)}</span>
+          </div>
+
+          <Separator />
+
+          {stack.agencyFees > 0 && (
+            <div className="flex justify-between items-center text-gray-600">
+              <span className="text-sm">Agency Fees {stack.isAgencyFeesPercentage ? `(${stack.agencyFees}%)` : ''}</span>
+              <span>{currencySymbol}{(stack.isAgencyFeesPercentage ? stack.effectiveAgencyFees : stack.agencyFees).toFixed(2)}</span>
+            </div>
+          )}
+
+          {stack.referralCosts > 0 && (
+            <div className="flex justify-between items-center text-gray-600">
+              <span className="text-sm">Referral Costs {stack.isReferralPercentage ? `(${stack.referralCosts}%)` : ''}</span>
+              <span>{currencySymbol}{(stack.isReferralPercentage ? stack.effectiveReferralCost : stack.referralCosts).toFixed(2)}</span>
+            </div>
+          )}
+
+          {stack.marketingExpenses > 0 && (
+            <div className="flex justify-between items-center text-gray-600">
+              <span className="text-sm">Marketing Expenses {stack.isMarketingPercentage ? `(${stack.marketingExpenses}%)` : ''}</span>
+              <span>{currencySymbol}{(stack.isMarketingPercentage ? stack.effectiveMarketingExpenses : stack.marketingExpenses).toFixed(2)}</span>
+            </div>
+          )}
+
+          {(stack.agencyFees > 0 || stack.referralCosts > 0 || stack.marketingExpenses > 0) && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Total Value Capture Costs</span>
+              <span className="font-medium">{currencySymbol}{valueCaptureTotal.toFixed(2)}</span>
+            </div>
+          )}
+
+          <Separator />
+
+          <div className="flex justify-between items-center font-medium text-lg">
+            <span>Final Sale Price</span>
+            <span className="text-black">{currencySymbol}{stack.roundToNearest100 
+              ? Math.ceil(stack.finalPrice / 100) * 100
+              : stack.finalPrice.toFixed(2)
+            }</span>
+          </div>
+
+          <div className="flex justify-between items-center text-sm">
+            <span>Net Profit</span>
+            <span className="font-medium">{currencySymbol}{stack.netProfit.toFixed(2)}</span>
+          </div>
+
+          <div className="flex justify-between items-center text-sm">
+            <span>Profit Margin</span>
+            <span className="font-medium">{stack.marginPercent.toFixed(1)}%</span>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

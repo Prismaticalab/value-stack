@@ -5,9 +5,14 @@ import { Plus, ArrowRight } from "lucide-react";
 interface ModuleActionsProps {
   onAddModule: () => void;
   onGoToPricing: () => void;
+  pricingButtonText?: string;
 }
 
-const ModuleActions = ({ onAddModule, onGoToPricing }: ModuleActionsProps) => {
+const ModuleActions = ({ 
+  onAddModule, 
+  onGoToPricing, 
+  pricingButtonText = "Go to Pricing" 
+}: ModuleActionsProps) => {
   return (
     <div className="flex justify-center mt-6">
       <Button 
@@ -23,7 +28,7 @@ const ModuleActions = ({ onAddModule, onGoToPricing }: ModuleActionsProps) => {
         onClick={onGoToPricing}
       >
         <ArrowRight size={16} />
-        <span>Go to Pricing</span>
+        <span>{pricingButtonText}</span>
       </Button>
     </div>
   );

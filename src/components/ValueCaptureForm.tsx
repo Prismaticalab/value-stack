@@ -164,7 +164,7 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
         />
       </div>
 
-      <PricingSummary stack={stack} currencySymbol={currencySymbol} />
+      <PricingSummary stack={stack} currencySymbol={currencySymbol} title="Costing Summary" />
     </div>
   );
 };

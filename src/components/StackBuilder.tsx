@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Stack, Module } from "@/types/stack";
-import { ArrowLeft, HelpCircle } from "lucide-react";
+import { ArrowLeft, HelpCircle, SaveAll, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ModuleEditDialog from "./module-edit-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -14,14 +14,30 @@ interface StackBuilderProps {
   stack: Stack;
   setStack: (stack: Stack) => void;
   onSave: () => void;
-  onViewSummary: () => void;
+  onViewPricing?: () => void;
+  onViewSummary?: () => void;
+  onBack?: () => void;
   currencySymbol: string;
+  pricingView?: boolean;
 }
 
-const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }: StackBuilderProps) => {
-  const [valueCaptureView, setValueCaptureView] = useState(false);
+const StackBuilder = ({ 
+  stack, 
+  setStack, 
+  onSave, 
+  onViewPricing, 
+  onViewSummary,
+  onBack,
+  currencySymbol,
+  pricingView = false
+}: StackBuilderProps) => {
+  const [valueCaptureView, setValueCaptureView] = useState(pricingView);
   const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    setValueCaptureView(pricingView);
+  }, [pricingView]);
 
   useEffect(() => {
     calculateTotals();
@@ -48,6 +64,9 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
 
   const goToPricing = () => {
     setValueCaptureView(true);
+    if (onViewPricing) {
+      onViewPricing();
+    }
     toast({
       title: "Ready to set pricing",
       description: "Now you can set your pricing details.",
@@ -64,51 +83,59 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <h2 className="text-xl font-medium">Let's build your value delivery stack!</h2>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full">
-                <HelpCircle size={16} className="text-gray-500" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-xs">
-              <p>
-                This is where you build the modules that make up your value delivery stack.
-                Each module represents a component of your service offering.
-                Add, edit, or arrange modules to create your complete delivery stack.
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-      {stack.description && (
-        <p className="text-sm text-gray-500 mt-1">{stack.description}</p>
-      )}
-
+    <div className="space-y-6 p-6">
       {!valueCaptureView ? (
-        <ModuleList
-          stack={stack}
-          setStack={setStack}
-          onAddModule={addNewModule}
-          onGoToPricing={goToPricing}
-          onEditModule={openModuleEditor}
-          currencySymbol={currencySymbol}
-        />
+        <>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-medium">Value Delivery Stack</h2>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full">
+                    <HelpCircle size={16} className="text-gray-500" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>
+                    This is where you build the modules that make up your value delivery stack.
+                    Each module represents a component of your service offering.
+                    Add, edit, or arrange modules to create your complete delivery stack.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          {stack.description && (
+            <p className="text-sm text-gray-500 mt-1">{stack.description}</p>
+          )}
+
+          <ModuleList
+            stack={stack}
+            setStack={setStack}
+            onAddModule={addNewModule}
+            onGoToPricing={goToPricing}
+            onEditModule={openModuleEditor}
+            currencySymbol={currencySymbol}
+          />
+        </>
       ) : (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <Button 
               variant="outline" 
-              onClick={() => setValueCaptureView(false)}
+              onClick={() => {
+                if (onBack) {
+                  onBack();
+                } else {
+                  setValueCaptureView(false);
+                }
+              }}
               className="flex items-center gap-1"
             >
               <ArrowLeft size={16} />
               Back to Builder
             </Button>
-            <h2 className="text-xl font-medium">Pricing Analysis</h2>
+            <h2 className="text-xl font-medium">Costing Review & Pricing</h2>
           </div>
           
           <CollapsedModuleList 
@@ -122,6 +149,25 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
             setStack={setStack}
             currencySymbol={currencySymbol}
           />
+
+          <div className="flex justify-center mt-4">
+            <Button
+              onClick={onSave}
+              className="mr-4 bg-slate-800 hover:bg-slate-900 flex items-center gap-1"
+            >
+              <SaveAll size={16} />
+              Save Progress
+            </Button>
+            {onViewSummary && (
+              <Button
+                onClick={onViewSummary}
+                className="bg-black hover:bg-black/80 flex items-center gap-1"
+              >
+                <ArrowRight size={16} />
+                View Summary
+              </Button>
+            )}
+          </div>
         </div>
       )}
       
@@ -137,6 +183,10 @@ const StackBuilder = ({ stack, setStack, onSave, onViewSummary, currencySymbol }
               )
             });
             setEditingModuleId(null);
+            toast({
+              title: "Module Saved",
+              description: "Your module has been updated successfully.",
+            });
           }}
           onCancel={() => setEditingModuleId(null)}
           currencySymbol={currencySymbol}
