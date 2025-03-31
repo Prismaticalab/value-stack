@@ -2,7 +2,6 @@
 import React from "react";
 import { Module } from "@/types/stack";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Flag } from "lucide-react";
 
 interface ModuleDetailsListProps {
   modules: Module[];
@@ -23,9 +22,6 @@ const ModuleDetailsList: React.FC<ModuleDetailsListProps> = ({ modules, currency
                 <div>
                   <h3 className="font-medium flex items-center gap-2">
                     {index + 1}. {module.name}
-                    {module.nonNegotiable && (
-                      <Flag size={14} className="text-red-500" />
-                    )}
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">{module.value}</p>
                   <div className="flex gap-2 mt-2 text-xs">

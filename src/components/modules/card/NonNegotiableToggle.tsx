@@ -2,7 +2,6 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Flag } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface NonNegotiableToggleProps {
@@ -20,10 +19,10 @@ const NonNegotiableToggle = ({ id, checked, onChange, isLocked }: NonNegotiableT
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger className="cursor-help text-gray-400 hover:text-gray-500">
-              <Flag size={14} />
+              <span className="text-xs inline-block bg-gray-100 rounded-full h-4 w-4 text-center">?</span>
             </TooltipTrigger>
             <TooltipContent>
-              <p>When marked as non-negotiable, this module cannot be deleted.</p>
+              <p>When marked as non-negotiable, this module cannot be excluded from pricing calculations or deleted.</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

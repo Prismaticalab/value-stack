@@ -142,8 +142,8 @@ const PricingView = ({
               "Include all modules to continue"
             ) : (
               <>
-                <ArrowRight size={16} />
                 View Summary
+                <ArrowRight size={16} />
               </>
             )}
           </Button>

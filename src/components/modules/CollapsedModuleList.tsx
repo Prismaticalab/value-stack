@@ -1,8 +1,8 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Module } from "@/types/stack";
 import { Card, CardContent } from "@/components/ui/card";
-import { EyeOff, Flag } from "lucide-react";
+import { EyeOff } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,19 @@ const CollapsedModuleList = ({
   };
 
   const handleToggleModuleVisibility = (moduleId: string) => {
+    // Check if the module is non-negotiable
+    const module = modules.find(mod => mod.id === moduleId);
+    
+    if (module && module.nonNegotiable && !hiddenModules.includes(moduleId)) {
+      toast({
+        title: "Cannot Exclude Non-Negotiable Module",
+        description: "This module is marked as non-negotiable and cannot be excluded from calculations. Consider editing the module properties if needed.",
+        variant: "destructive",
+        duration: 5000,
+      });
+      return;
+    }
+    
     if (onToggleHiddenModule) {
       onToggleHiddenModule(moduleId);
     }
@@ -69,7 +82,9 @@ const CollapsedModuleList = ({
                     <span className="font-medium flex items-center">
                       {index + 1}. {module.name}
                       {module.nonNegotiable && (
-                        <Flag size={14} className="ml-2 text-red-500" />
+                        <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-800">
+                          Non-negotiable
+                        </span>
                       )}
                     </span>
                   </div>
@@ -102,10 +117,9 @@ const CollapsedModuleList = ({
                         onCheckedChange={() => handleToggleModuleVisibility(module.id)}
                         className="mr-2"
                       />
-                      <Label htmlFor={`toggle-${module.id}`} className="sr-only">
-                        {isHidden ? "Include in calculations" : "Exclude from calculations"}
+                      <Label htmlFor={`toggle-${module.id}`} className="text-xs text-gray-500">
+                        {isHidden ? "Excluded" : "Include"}
                       </Label>
-                      {isHidden && <EyeOff size={16} className="text-gray-400" />}
                     </div>
                   )}
                   
