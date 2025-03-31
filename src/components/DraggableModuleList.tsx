@@ -49,20 +49,21 @@ const DraggableModuleList = ({
           <div
             {...provided.droppableProps}
             ref={provided.innerRef}
-            className="space-y-4"
+            className="space-y-4 w-full"
           >
             {stack.modules.map((module, index) => (
               <Draggable
                 key={module.id}
                 draggableId={module.id}
                 index={index}
+                isDragDisabled={stack.locked}
               >
                 {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    className={`${snapshot.isDragging ? "opacity-70" : ""}`}
+                    className={`${snapshot.isDragging ? "opacity-70" : ""} w-full`}
                   >
                     <ModuleCard
                       module={module}
@@ -70,8 +71,8 @@ const DraggableModuleList = ({
                       isExpanded={expandedModules[module.id] || false}
                       setIsExpanded={(expanded) => setModuleExpanded(module.id, expanded)}
                       onUpdate={onUpdate}
-                      onDelete={() => onDelete(module.id)}
-                      onDuplicate={() => onDuplicate(module.id)}
+                      onDelete={onDelete}
+                      onDuplicate={onDuplicate}
                       isLocked={stack.locked}
                       currencySymbol={currencySymbol}
                       autoFocus={module.id === newModuleId}

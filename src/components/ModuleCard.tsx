@@ -50,18 +50,15 @@ const ModuleCard = ({
   }, [autoFocus]);
 
   useEffect(() => {
-    // Check if the module has changed since it was last expanded
+    // When expanded, store the current state to compare against changes
     if (isExpanded) {
       setOriginalModule({ ...module });
       setHasChanges(false);
-    } else {
-      // When collapsing, reset the hasChanges flag
-      setHasChanges(false);
     }
-  }, [isExpanded, module.id]);
+  }, [isExpanded]);
   
   useEffect(() => {
-    // Check for changes when module data changes
+    // Check for changes when module data changes, but ONLY if already expanded
     if (isExpanded) {
       const moduleKeys = Object.keys(module) as Array<keyof Module>;
       const hasAnyChanges = moduleKeys.some(key => {
@@ -82,6 +79,10 @@ const ModuleCard = ({
   };
 
   const toggleExpanded = () => {
+    // Only allow collapsing if no unsaved changes
+    if (isExpanded && hasChanges) {
+      return; // Prevent collapsing when there are unsaved changes
+    }
     setIsExpanded(!isExpanded);
   };
 
@@ -170,7 +171,7 @@ const ModuleCard = ({
                   isLocked={isLocked}
                 />
                 
-                {onSave && (
+                {hasChanges && (
                   <div className="flex justify-end mt-4">
                     <Button 
                       className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1"

@@ -49,10 +49,10 @@ const DraggableModuleList = ({
           <div
             {...provided.droppableProps}
             ref={provided.innerRef}
-            className="space-y-3"
+            className="space-y-3 w-full"
           >
             {stack.modules.map((module, index) => (
-              <div key={module.id} className="relative">
+              <div key={module.id} className="relative w-full">
                 <ModuleCard
                   key={module.id}
                   module={module}

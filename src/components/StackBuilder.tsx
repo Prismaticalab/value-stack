@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import ModuleList from "./modules/ModuleList";
 import CollapsedModuleList from "./modules/CollapsedModuleList";
 import ValueCaptureForm from "./ValueCaptureForm";
+import ModuleListHeader from "./modules/ModuleListHeader";
 
 interface StackBuilderProps {
   stack: Stack;
@@ -83,7 +84,7 @@ const StackBuilder = ({
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 w-full">
       {!valueCaptureView ? (
         <>
           <div className="flex items-center gap-2">
@@ -119,42 +120,30 @@ const StackBuilder = ({
           />
         </>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-6 w-full">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-medium">Costing Review & Pricing</h2>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full">
-                      <HelpCircle size={16} className="text-gray-500" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs">
-                    <p>
-                      Review costs and determine your final pricing strategy.
-                      Set additional costs, profit margins, and contingency buffers.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+            <ModuleListHeader 
+              title="Costing Review & Pricing" 
+              tooltip="Review costs and determine your final pricing strategy. Set additional costs, profit margins, and contingency buffers."
+            />
           </div>
           
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              if (onBack) {
-                onBack();
-              } else {
-                setValueCaptureView(false);
-              }
-            }}
-            className="flex items-center gap-1 border-gray-200 hover:bg-black hover:text-white transition-colors"
-          >
-            <ArrowLeft size={16} />
-            Back to Builder
-          </Button>
+          <div className="flex justify-start">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                if (onBack) {
+                  onBack();
+                } else {
+                  setValueCaptureView(false);
+                }
+              }}
+              className="flex items-center gap-1 border-gray-200 hover:bg-black hover:text-white transition-colors"
+            >
+              <ArrowLeft size={16} />
+              Back to Builder
+            </Button>
+          </div>
           
           <CollapsedModuleList 
             modules={stack.modules} 

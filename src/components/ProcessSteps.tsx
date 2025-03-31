@@ -19,7 +19,7 @@ const ProcessSteps = ({ currentStep, steps, className = "" }: ProcessStepsProps)
             {index > 0 && (
               <div 
                 className={`h-0.5 w-8 md:w-16 lg:w-20 ${
-                  isCompleted ? 'bg-blue-600' : 'bg-gray-300'
+                  isCompleted ? 'bg-black' : 'bg-gray-300'
                 }`}
               />
             )}
@@ -27,9 +27,9 @@ const ProcessSteps = ({ currentStep, steps, className = "" }: ProcessStepsProps)
               <div 
                 className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm
                   ${isActive 
-                    ? 'bg-blue-600 text-white' 
+                    ? 'bg-[#FEF7CD] text-black border border-black' 
                     : isCompleted 
-                      ? 'bg-blue-500 text-white' 
+                      ? 'bg-[#FEF7CD] text-black' 
                       : 'bg-gray-200 text-gray-600'
                   }`}
               >
@@ -37,7 +37,7 @@ const ProcessSteps = ({ currentStep, steps, className = "" }: ProcessStepsProps)
               </div>
               <span 
                 className={`text-xs mt-1 text-center hidden md:block ${
-                  isActive ? 'font-medium text-blue-600' : 'text-gray-500'
+                  isActive ? 'font-medium text-black' : 'text-gray-500'
                 }`}
               >
                 {step}

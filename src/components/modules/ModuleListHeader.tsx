@@ -6,9 +6,12 @@ import { HelpCircle } from "lucide-react";
 
 interface ModuleListHeaderProps {
   title?: string;
+  tooltip?: string;
 }
 
-const ModuleListHeader = ({ title }: ModuleListHeaderProps) => {
+const ModuleListHeader = ({ title, tooltip }: ModuleListHeaderProps) => {
+  const defaultTooltip = "Add modules that make up your value delivery stack. Each module represents a component of your service offering.";
+  
   return (
     <div className="flex items-center gap-2">
       {title && <h2 className="text-xl font-medium">{title}</h2>}
@@ -21,8 +24,7 @@ const ModuleListHeader = ({ title }: ModuleListHeaderProps) => {
           </TooltipTrigger>
           <TooltipContent className="max-w-xs">
             <p>
-              Add modules that make up your value delivery stack.
-              Each module represents a component of your service offering.
+              {tooltip || defaultTooltip}
             </p>
           </TooltipContent>
         </Tooltip>
