@@ -2,6 +2,8 @@
 import { Droppable, DragDropContext, DropResult } from "react-beautiful-dnd";
 import ModuleCard from "../ModuleCard";
 import { Stack, Module } from "@/types/stack";
+import { Button } from "@/components/ui/button";
+import { Save } from "lucide-react";
 
 interface DraggableModuleListProps {
   stack: Stack;
@@ -13,6 +15,7 @@ interface DraggableModuleListProps {
   onDuplicate: (moduleId: string) => void;
   newModuleId: string | null;
   currencySymbol: string;
+  onSaveModule?: (moduleId: string) => void;
 }
 
 const DraggableModuleList = ({
@@ -24,7 +27,8 @@ const DraggableModuleList = ({
   onDelete,
   onDuplicate,
   newModuleId,
-  currencySymbol
+  currencySymbol,
+  onSaveModule
 }: DraggableModuleListProps) => {
   
   const handleDragEnd = (result: DropResult) => {
@@ -50,19 +54,33 @@ const DraggableModuleList = ({
             className="space-y-3"
           >
             {stack.modules.map((module, index) => (
-              <ModuleCard
-                key={module.id}
-                module={module}
-                index={index}
-                onUpdate={onUpdate}
-                onDelete={onDelete}
-                onDuplicate={onDuplicate}
-                isLocked={stack.locked}
-                currencySymbol={currencySymbol}
-                isExpanded={expandedModules[module.id] || false}
-                setIsExpanded={(expanded) => setModuleExpanded(module.id, expanded)}
-                autoFocus={module.id === newModuleId}
-              />
+              <div key={module.id} className="relative">
+                <ModuleCard
+                  key={module.id}
+                  module={module}
+                  index={index}
+                  onUpdate={onUpdate}
+                  onDelete={onDelete}
+                  onDuplicate={onDuplicate}
+                  isLocked={stack.locked}
+                  currencySymbol={currencySymbol}
+                  isExpanded={expandedModules[module.id] || false}
+                  setIsExpanded={(expanded) => setModuleExpanded(module.id, expanded)}
+                  autoFocus={module.id === newModuleId}
+                />
+                
+                {expandedModules[module.id] && onSaveModule && (
+                  <div className="flex justify-end mt-2 mb-4">
+                    <Button 
+                      className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1"
+                      onClick={() => onSaveModule(module.id)}
+                    >
+                      <Save size={16} />
+                      Save Module
+                    </Button>
+                  </div>
+                )}
+              </div>
             ))}
             {provided.placeholder}
           </div>

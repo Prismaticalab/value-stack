@@ -71,19 +71,16 @@ const DraggableModuleList = ({
                         module={module}
                         index={index}
                         isExpanded={expandedModules[module.id] || false}
-                        onToggleExpand={() =>
-                          setModuleExpanded(
-                            module.id,
-                            !expandedModules[module.id]
-                          )
-                        }
+                        setIsExpanded={(expanded) => setModuleExpanded(module.id, expanded)}
                         onUpdate={(field, value) =>
                           onUpdate(module.id, field, value)
                         }
                         onDelete={() => onDelete(module.id)}
                         onDuplicate={() => onDuplicate(module.id)}
                         isNew={module.id === newModuleId}
+                        isLocked={stack.locked}
                         currencySymbol={currencySymbol}
+                        autoFocus={module.id === newModuleId}
                       />
                       
                       {expandedModules[module.id] && onSaveModule && (

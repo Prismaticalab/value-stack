@@ -69,6 +69,11 @@ const ModuleList = ({
     onAddModule();
   };
 
+  const handleSaveModule = (moduleId: string) => {
+    // When a module is saved, collapse it
+    setModuleExpanded(moduleId, false);
+  };
+
   return (
     <div className="space-y-4">
       <ModuleListHeader title="Modules" />
@@ -86,10 +91,7 @@ const ModuleList = ({
           onDuplicate={duplicateModule}
           newModuleId={newModuleId}
           currencySymbol={currencySymbol}
-          onSaveModule={(moduleId) => {
-            // When a module is saved, collapse it
-            setModuleExpanded(moduleId, false);
-          }}
+          onSaveModule={handleSaveModule}
         />
       )}
       
