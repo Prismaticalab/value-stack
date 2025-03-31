@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Stack, Module } from "@/types/stack";
-import { ArrowLeft, HelpCircle, ArrowRight } from "lucide-react";
+import { ArrowLeft, HelpCircle, ArrowRight, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ModuleEditDialog from "./module-edit-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -117,6 +117,7 @@ const StackBuilder = ({
             onGoToPricing={goToPricing}
             onEditModule={openModuleEditor}
             currencySymbol={currencySymbol}
+            onSave={onSave}
           />
         </>
       ) : (
@@ -128,7 +129,7 @@ const StackBuilder = ({
             />
           </div>
           
-          <div className="flex justify-start">
+          <div className="flex justify-start mb-4">
             <Button 
               variant="outline" 
               onClick={() => {

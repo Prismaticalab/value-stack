@@ -9,6 +9,8 @@ export const useModuleManager = (stack: Stack, setStack: (stack: Stack) => void)
   const [expandedModules, setExpandedModules] = useState<{[key: string]: boolean}>({});
   const [newModuleId, setNewModuleId] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<{[key: string]: boolean}>({});
+  const [editedModules, setEditedModules] = useState<{[key: string]: Module}>({});
+  const [originalModules, setOriginalModules] = useState<{[key: string]: Module}>({});
 
   // Handle expansion of modules whenever modules list changes or a new module is added
   useEffect(() => {
@@ -39,7 +41,47 @@ export const useModuleManager = (stack: Stack, setStack: (stack: Stack) => void)
     }
   }, [stack.modules.length, newModuleId]);
 
+  // When a module is expanded, store its original state
+  useEffect(() => {
+    Object.entries(expandedModules).forEach(([moduleId, isExpanded]) => {
+      if (isExpanded) {
+        const module = stack.modules.find(m => m.id === moduleId);
+        if (module && !originalModules[moduleId]) {
+          setOriginalModules(prev => ({
+            ...prev,
+            [moduleId]: { ...module }
+          }));
+        }
+      }
+    });
+  }, [expandedModules, stack.modules]);
+
   const updateModule = (moduleId: string, updatedModule: Module) => {
+    // When a module is updated, store it in editedModules
+    setEditedModules(prev => ({
+      ...prev,
+      [moduleId]: updatedModule
+    }));
+    
+    // Check if this module has unsaved changes
+    if (originalModules[moduleId]) {
+      const original = originalModules[moduleId];
+      let hasChanges = false;
+      
+      // Compare properties excluding id
+      Object.keys(original).forEach(key => {
+        if (key !== 'id' && JSON.stringify(original[key as keyof Module]) !== JSON.stringify(updatedModule[key as keyof Module])) {
+          hasChanges = true;
+        }
+      });
+      
+      setHasUnsavedChanges(prev => ({
+        ...prev,
+        [moduleId]: hasChanges
+      }));
+    }
+    
+    // Update the stack
     setStack({
       ...stack,
       modules: stack.modules.map(mod => 
@@ -70,7 +112,24 @@ export const useModuleManager = (stack: Stack, setStack: (stack: Stack) => void)
         ...stack,
         modules: stack.modules.filter(mod => mod.id !== moduleToDelete)
       });
+      
+      // Clean up state
       setModuleToDelete(null);
+      setHasUnsavedChanges(prev => {
+        const newState = { ...prev };
+        delete newState[moduleToDelete];
+        return newState;
+      });
+      setOriginalModules(prev => {
+        const newState = { ...prev };
+        delete newState[moduleToDelete];
+        return newState;
+      });
+      setEditedModules(prev => {
+        const newState = { ...prev };
+        delete newState[moduleToDelete];
+        return newState;
+      });
     }
   };
 
@@ -101,6 +160,17 @@ export const useModuleManager = (stack: Stack, setStack: (stack: Stack) => void)
   };
 
   const setModuleExpanded = (moduleId: string, expanded: boolean) => {
+    // When expanding a module, store its original state for change detection
+    if (expanded) {
+      const module = stack.modules.find(m => m.id === moduleId);
+      if (module) {
+        setOriginalModules(prev => ({
+          ...prev,
+          [moduleId]: { ...module }
+        }));
+      }
+    }
+    
     setExpandedModules(prev => ({
       ...prev,
       [moduleId]: expanded
@@ -108,8 +178,20 @@ export const useModuleManager = (stack: Stack, setStack: (stack: Stack) => void)
   };
 
   const handleSaveModule = (moduleId: string) => {
-    // When a module is saved, collapse it
-    setModuleExpanded(moduleId, false);
+    // Reset change detection state
+    setHasUnsavedChanges(prev => ({
+      ...prev,
+      [moduleId]: false
+    }));
+    
+    // Update the original module reference
+    const module = stack.modules.find(m => m.id === moduleId);
+    if (module) {
+      setOriginalModules(prev => ({
+        ...prev,
+        [moduleId]: { ...module }
+      }));
+    }
     
     // Show success toast
     toast({
@@ -117,6 +199,10 @@ export const useModuleManager = (stack: Stack, setStack: (stack: Stack) => void)
       description: "Your changes have been saved successfully.",
       duration: 3000,
     });
+  };
+
+  const checkModuleHasChanges = (moduleId: string) => {
+    return hasUnsavedChanges[moduleId] || false;
   };
 
   return {
@@ -131,6 +217,8 @@ export const useModuleManager = (stack: Stack, setStack: (stack: Stack) => void)
     handleAddModule,
     setModuleExpanded,
     setModuleToDelete,
-    handleSaveModule
+    handleSaveModule,
+    checkModuleHasChanges,
+    hasUnsavedChanges
   };
 };

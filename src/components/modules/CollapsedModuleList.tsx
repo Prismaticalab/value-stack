@@ -10,17 +10,32 @@ interface CollapsedModuleListProps {
 }
 
 const CollapsedModuleList = ({ modules, onEditModule, currencySymbol }: CollapsedModuleListProps) => {
+  const getModuleClasses = (module: Module) => {
+    let leftBorder = "";
+    
+    if (module.stakeholder === 'internal') {
+      leftBorder = "border-l-4 border-l-blue-500";
+    } else if (module.stakeholder === 'external') {
+      leftBorder = "border-l-4 border-l-purple-500";
+    }
+    
+    const rightBorder = module.nonNegotiable 
+      ? "border-r-8 border-r-red-500" 
+      : "border-r-8 border-r-gray-300";
+    
+    return `flex justify-between items-center p-2 bg-white rounded border ${leftBorder} ${rightBorder}`;
+  };
+  
   return (
     <div className="border rounded-lg p-4 bg-gray-50">
       <h3 className="text-lg font-medium mb-3">Modules</h3>
       <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
         {modules.map((module) => (
-          <div key={module.id} className="flex justify-between items-center p-2 bg-white rounded border">
+          <div key={module.id} className={getModuleClasses(module)}>
             <div className="flex items-center">
               {module.nonNegotiable && (
                 <Flag size={14} className="text-red-500 mr-1" />
               )}
-              <div className={`w-2 h-2 rounded-full mr-2 ${module.stakeholder === 'internal' ? 'bg-blue-500' : 'bg-purple-500'}`}></div>
               <span className="font-medium">{module.name || "Unnamed Module"}</span>
             </div>
             <div className="flex items-center">

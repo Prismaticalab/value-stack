@@ -7,6 +7,8 @@ import DraggableModuleList from "./DraggableModuleList";
 import ModuleActions from "./ModuleActions";
 import TotalCostDisplay from "./TotalCostDisplay";
 import DeleteModuleDialog from "./DeleteModuleDialog";
+import { Button } from "@/components/ui/button";
+import { Save } from "lucide-react";
 
 interface ModuleListProps {
   stack: Stack;
@@ -15,6 +17,7 @@ interface ModuleListProps {
   onGoToPricing: () => void;
   onEditModule: (moduleId: string) => void;
   currencySymbol: string;
+  onSave?: () => void;
 }
 
 const ModuleList = ({ 
@@ -23,7 +26,8 @@ const ModuleList = ({
   onAddModule, 
   onGoToPricing, 
   onEditModule,
-  currencySymbol 
+  currencySymbol,
+  onSave
 }: ModuleListProps) => {
   const {
     moduleToDelete,
@@ -95,18 +99,33 @@ const ModuleList = ({
         />
       )}
       
+      <div className="flex flex-col space-y-4">
+        {stack.modules.length > 0 && (
+          <TotalCostDisplay
+            totalCost={stack.totalCost}
+            currencySymbol={currencySymbol}
+          />
+        )}
+        
+        {onSave && (
+          <div className="pt-2">
+            <Button 
+              variant="outline" 
+              onClick={onSave}
+              className="flex items-center gap-1 border-gray-200 hover:bg-black hover:text-white transition-colors"
+            >
+              <Save size={16} />
+              Save Progress
+            </Button>
+          </div>
+        )}
+      </div>
+      
       {stack.modules.length > 0 && (
         <ModuleActions
           onAddModule={handleCreateModule}
           onGoToPricing={onGoToPricing}
           pricingButtonText="Go to Costing Review & Pricing"
-        />
-      )}
-      
-      {stack.modules.length > 0 && (
-        <TotalCostDisplay
-          totalCost={stack.totalCost}
-          currencySymbol={currencySymbol}
         />
       )}
 

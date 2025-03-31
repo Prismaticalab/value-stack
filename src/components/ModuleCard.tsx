@@ -79,9 +79,9 @@ const ModuleCard = ({
   };
 
   const toggleExpanded = () => {
-    // Only allow collapsing if no unsaved changes
+    // Don't allow collapsing when there are unsaved changes
     if (isExpanded && hasChanges) {
-      return; // Prevent collapsing when there are unsaved changes
+      return; 
     }
     setIsExpanded(!isExpanded);
   };

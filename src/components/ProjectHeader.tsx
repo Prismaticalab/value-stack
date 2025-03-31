@@ -1,13 +1,13 @@
 
 import { Button } from "@/components/ui/button";
-import { Menu, Save } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useProject } from "@/context/ProjectContext";
 import ProjectBanner from "./ProjectBanner";
 
 const ProjectHeader = ({ onEditClick }: { onEditClick: () => void }) => {
   const { toggleSidebar } = useSidebar();
-  const { currentStack, saveStack } = useProject();
+  const { currentStack } = useProject();
 
   return (
     <header className="sticky top-0 z-10 backdrop-blur-xl bg-white/80 border-b border-gray-100">
@@ -29,15 +29,6 @@ const ProjectHeader = ({ onEditClick }: { onEditClick: () => void }) => {
             onEditClick={onEditClick}
           />
         </div>
-        
-        <Button 
-          variant="outline" 
-          onClick={saveStack}
-          className="flex items-center gap-1 border-gray-200 hover:bg-black hover:text-white transition-colors"
-        >
-          <Save size={16} />
-          Save Progress
-        </Button>
       </div>
     </header>
   );

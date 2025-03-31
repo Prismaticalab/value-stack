@@ -27,9 +27,9 @@ const ProcessSteps = ({ currentStep, steps, className = "" }: ProcessStepsProps)
               <div 
                 className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm
                   ${isActive 
-                    ? 'bg-[#FEF7CD] text-black border border-black' 
+                    ? 'bg-[#4ade80] text-black border border-black' 
                     : isCompleted 
-                      ? 'bg-[#FEF7CD] text-black' 
+                      ? 'bg-[#4ade80] text-black' 
                       : 'bg-gray-200 text-gray-600'
                   }`}
               >
