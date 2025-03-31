@@ -112,6 +112,7 @@ const CostBreakdownCard: React.FC<CostBreakdownCardProps> = ({ stack, currencySy
               <span>Net Profit</span>
               <span>{currencySymbol}{netProfit.toFixed(2)}</span>
             </div>
+            {/* Removed the Effective Margin line */}
           </div>
         </div>
       </CardContent>

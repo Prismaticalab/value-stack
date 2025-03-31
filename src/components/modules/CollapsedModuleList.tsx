@@ -1,54 +1,144 @@
 
+import React, { useState } from "react";
 import { Module } from "@/types/stack";
+import { Card, CardContent } from "@/components/ui/card";
+import { EyeOff, Flag } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface CollapsedModuleListProps {
   modules: Module[];
   onEditModule: (moduleId: string) => void;
   currencySymbol: string;
+  hiddenModules?: string[];
+  onToggleHiddenModule?: (moduleId: string) => void;
 }
 
-const CollapsedModuleList = ({ modules, onEditModule, currencySymbol }: CollapsedModuleListProps) => {
-  const getModuleClasses = (module: Module) => {
-    let leftBorder = "";
-    
-    if (module.stakeholder === 'internal') {
-      leftBorder = "border-l-4 border-l-blue-500";
-    } else if (module.stakeholder === 'external') {
-      leftBorder = "border-l-4 border-l-purple-500";
-    }
-    
-    const rightBorder = module.nonNegotiable 
-      ? "border-r-8 border-r-red-500" 
-      : "border-r-8 border-r-gray-300";
-    
-    return `flex justify-between items-center p-2 bg-white rounded border ${leftBorder} ${rightBorder}`;
-  };
+const CollapsedModuleList = ({ 
+  modules, 
+  onEditModule, 
+  currencySymbol,
+  hiddenModules = [],
+  onToggleHiddenModule
+}: CollapsedModuleListProps) => {
+  const { toast } = useToast();
   
+  const handleEditClick = (moduleId: string) => {
+    onEditModule(moduleId);
+  };
+
+  const handleToggleModuleVisibility = (moduleId: string) => {
+    if (onToggleHiddenModule) {
+      onToggleHiddenModule(moduleId);
+    }
+  };
+
+  // Calculate total cost of only visible modules
+  const visibleTotalCost = modules
+    .filter(mod => !hiddenModules.includes(mod.id))
+    .reduce((sum, mod) => sum + mod.cost, 0);
+
   return (
-    <div className="border rounded-lg p-4 bg-gray-50">
-      <h3 className="text-lg font-medium mb-3">Modules</h3>
-      <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-        {modules.map((module) => (
-          <div key={module.id} className={getModuleClasses(module)}>
-            <div className="flex items-center">
-              <span className="font-medium">{module.name || "Unnamed Module"}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm mr-4">{currencySymbol}{module.costType === 'variable' && module.costQuantity ? (module.cost * module.costQuantity).toFixed(2) : module.cost.toFixed(2)}</span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => onEditModule(module.id)}
-                className="text-xs h-8 hover:bg-black hover:text-white transition-colors"
-              >
-                Edit
-              </Button>
+    <Card>
+      <CardContent className="pt-6">
+        <div className="space-y-4">
+          {/* Header row with total */}
+          <div className="flex justify-between items-center pb-2 border-b">
+            <h3 className="text-lg font-medium">Module List</h3>
+            <div className="text-right">
+              <div className="text-sm text-gray-500">Visible Total:</div>
+              <div className="font-semibold">{currencySymbol}{visibleTotalCost.toFixed(2)}</div>
             </div>
           </div>
-        ))}
-      </div>
-    </div>
+
+          {/* Module list */}
+          {modules.map((module, index) => {
+            const isHidden = hiddenModules.includes(module.id);
+            
+            return (
+              <div 
+                key={module.id} 
+                className={`flex items-center justify-between p-3 border rounded-md ${
+                  isHidden ? 'bg-gray-100 opacity-60' : ''
+                }`}
+              >
+                <div className="flex-1 mr-2">
+                  <div className="flex items-center">
+                    <span className="font-medium flex items-center">
+                      {index + 1}. {module.name}
+                      {module.nonNegotiable && (
+                        <Flag size={14} className="ml-2 text-red-500" />
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      module.stakeholder === 'internal' ? 
+                        'bg-blue-100 text-blue-800' : 
+                        'bg-purple-100 text-purple-800'
+                    }`}>
+                      {module.stakeholderName || module.stakeholder}
+                    </span>
+                    <span className="text-xs px-2 py-1 rounded-full bg-gray-100">
+                      {module.timeImpact} {module.timeUnit}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <div className="text-right mr-2">
+                    <div className={`font-medium ${isHidden ? 'line-through text-gray-400' : ''}`}>
+                      {currencySymbol}{module.cost.toFixed(2)}
+                    </div>
+                  </div>
+                  
+                  {onToggleHiddenModule && (
+                    <div className="flex items-center">
+                      <Switch
+                        id={`toggle-${module.id}`}
+                        checked={!isHidden}
+                        onCheckedChange={() => handleToggleModuleVisibility(module.id)}
+                        className="mr-2"
+                      />
+                      <Label htmlFor={`toggle-${module.id}`} className="sr-only">
+                        {isHidden ? "Include in calculations" : "Exclude from calculations"}
+                      </Label>
+                      {isHidden && <EyeOff size={16} className="text-gray-400" />}
+                    </div>
+                  )}
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditClick(module.id)}
+                    className="text-xs"
+                  >
+                    Edit
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+          
+          {modules.length === 0 && (
+            <div className="text-center py-6 text-gray-500">
+              No modules added yet
+            </div>
+          )}
+          
+          {hiddenModules && hiddenModules.length > 0 && (
+            <div className="mt-4 p-3 bg-amber-50 rounded-md border border-amber-200">
+              <p className="text-sm text-amber-800">
+                <strong>Note:</strong> You have {hiddenModules.length} module(s) temporarily excluded from calculations. 
+                These modules will need to be included again before proceeding to the Summary page.
+              </p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

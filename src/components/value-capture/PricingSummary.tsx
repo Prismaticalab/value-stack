@@ -112,10 +112,7 @@ const PricingSummary = ({ stack, currencySymbol, title = "Costing and Pricing Pr
             <span className="font-medium">{formatCurrency(stack.netProfit || 0)}</span>
           </div>
           
-          <div className="flex justify-between text-sm mt-2">
-            <span>Effective Margin:</span>
-            <span className="font-medium">{formatPercentage(stack.marginPercent || 0)}</span>
-          </div>
+          {/* Removed the Effective Margin line */}
         </div>
         
         {/* Final Price Section with highlighted background */}
