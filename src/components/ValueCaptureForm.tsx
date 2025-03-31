@@ -108,7 +108,22 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
         Set additional costs and your desired profit margin to calculate final pricing.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Margin Sliders moved directly under the module preview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        <MarginSlider 
+          value={stack.contingencyBuffer}
+          onChange={(val) => handleChange("contingencyBuffer", val)}
+          label="Contingency Buffer On Value Delivery Costs (%)"
+          maxValue={100}
+        />
+
+        <MarginSlider 
+          value={stack.desiredMargin}
+          onChange={(val) => handleChange("desiredMargin", val)}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <CostInputField 
           id="agencyFees"
           label="Agency Fees"
@@ -143,28 +158,15 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        <MarginSlider 
-          value={stack.contingencyBuffer}
-          onChange={(val) => handleChange("contingencyBuffer", val)}
-          label="Contingency Buffer On Value Delivery Costs (%)"
-          maxValue={100}
-        />
-
-        <MarginSlider 
-          value={stack.desiredMargin}
-          onChange={(val) => handleChange("desiredMargin", val)}
-        />
-      </div>
+      <PricingSummary stack={stack} currencySymbol={currencySymbol} title="Costing Summary" />
       
+      {/* Moved rounding toggle to appear right before the final price */}
       <div className="mt-4">
         <RoundingToggle
           enabled={stack.roundToNearest100 || false}
           onToggle={(checked) => handleChange("roundToNearest100", checked)}
         />
       </div>
-
-      <PricingSummary stack={stack} currencySymbol={currencySymbol} title="Costing Summary" />
     </div>
   );
 };

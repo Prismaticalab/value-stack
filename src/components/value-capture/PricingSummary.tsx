@@ -19,6 +19,16 @@ const PricingSummary = ({ stack, currencySymbol, title = "Pricing Summary" }: Pr
     return value % 1 === 0 ? `${value}%` : `${value.toFixed(2)}%`;
   };
 
+  // Calculate segment totals
+  const deliveryCost = stack.totalCost || 0;
+  const contingencyAmount = (deliveryCost * (stack.contingencyBuffer || 0)) / 100;
+  const totalDeliveryCosts = deliveryCost + contingencyAmount;
+  
+  const effectiveReferralCost = stack.effectiveReferralCost || 0;
+  const effectiveAgencyFees = stack.effectiveAgencyFees || 0;
+  const effectiveMarketingExpenses = stack.effectiveMarketingExpenses || 0;
+  const totalMarketingCosts = effectiveReferralCost + effectiveAgencyFees + effectiveMarketingExpenses;
+
   return (
     <div className="mt-8 p-6 border border-gray-200 rounded-lg bg-gray-50">
       <h3 className="text-lg font-medium mb-4">{title}</h3>
@@ -34,6 +44,11 @@ const PricingSummary = ({ stack, currencySymbol, title = "Pricing Summary" }: Pr
           <span className="font-medium">
             {formatCurrency((stack.totalCost || 0) * (stack.contingencyBuffer || 0) / 100)}
           </span>
+        </div>
+        
+        <div className="flex justify-between text-sm font-semibold bg-gray-100 p-2 rounded">
+          <span>Total Delivery Costs:</span>
+          <span>{formatCurrency(totalDeliveryCosts)}</span>
         </div>
         
         <div className="border-t border-gray-200 pt-2 mt-2"></div>
@@ -73,6 +88,11 @@ const PricingSummary = ({ stack, currencySymbol, title = "Pricing Summary" }: Pr
             <span className="font-medium">{formatCurrency(stack.marketingExpenses || 0)}</span>
           </div>
         )}
+        
+        <div className="flex justify-between text-sm font-semibold bg-gray-100 p-2 rounded">
+          <span>Total Marketing & Value Capture Costs:</span>
+          <span>{formatCurrency(totalMarketingCosts)}</span>
+        </div>
         
         <div className="border-t border-gray-200 pt-2 mt-2"></div>
         

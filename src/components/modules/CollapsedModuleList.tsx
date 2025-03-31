@@ -1,7 +1,6 @@
 
 import { Module } from "@/types/stack";
 import { Button } from "@/components/ui/button";
-import { Flag } from "lucide-react";
 
 interface CollapsedModuleListProps {
   modules: Module[];
@@ -33,9 +32,6 @@ const CollapsedModuleList = ({ modules, onEditModule, currencySymbol }: Collapse
         {modules.map((module) => (
           <div key={module.id} className={getModuleClasses(module)}>
             <div className="flex items-center">
-              {module.nonNegotiable && (
-                <Flag size={14} className="text-red-500 mr-1" />
-              )}
               <span className="font-medium">{module.name || "Unnamed Module"}</span>
             </div>
             <div className="flex items-center">

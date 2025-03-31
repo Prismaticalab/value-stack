@@ -11,17 +11,17 @@ const ProjectHeader = ({ onEditClick }: { onEditClick: () => void }) => {
 
   return (
     <header className="sticky top-0 z-10 backdrop-blur-xl bg-white/80 border-b border-gray-100">
-      <div className="px-6 md:px-8 py-5 flex justify-between items-center">
+      <div className="px-4 md:px-8 py-5 flex justify-between items-center">
         <Button 
           variant="ghost" 
           size="icon" 
-          className="absolute left-6 top-5 lg:hidden text-apple-neutral hover:bg-gray-100 hover:text-apple-primary" 
+          className="absolute left-2 md:left-6 top-5 lg:hidden text-apple-neutral hover:bg-gray-100 hover:text-apple-primary" 
           onClick={toggleSidebar}
         >
           <Menu size={22} />
         </Button>
         
-        <div className="flex-1">
+        <div className="flex-1 pl-8 lg:pl-0">
           <ProjectBanner
             title={currentStack.name}
             description={currentStack.description}
