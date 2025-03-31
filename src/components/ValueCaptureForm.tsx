@@ -159,14 +159,6 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       </div>
 
       <PricingSummary stack={stack} currencySymbol={currencySymbol} title="Costing Summary" />
-      
-      {/* Moved rounding toggle to appear right before the final price */}
-      <div className="mt-4">
-        <RoundingToggle
-          enabled={stack.roundToNearest100 || false}
-          onToggle={(checked) => handleChange("roundToNearest100", checked)}
-        />
-      </div>
     </div>
   );
 };

@@ -1,14 +1,16 @@
 
 import React from "react";
 import { Stack } from "@/types/stack";
+import RoundingToggle from "./RoundingToggle";
 
 interface PricingSummaryProps {
   stack: Stack;
   currencySymbol: string;
   title?: string;
+  onToggleRounding?: (enabled: boolean) => void;
 }
 
-const PricingSummary = ({ stack, currencySymbol, title = "Pricing Summary" }: PricingSummaryProps) => {
+const PricingSummary = ({ stack, currencySymbol, title = "Pricing Summary", onToggleRounding }: PricingSummaryProps) => {
   // Format currency with 2 decimal places always
   const formatCurrency = (value: number) => {
     return `${currencySymbol}${value.toFixed(2)}`;
@@ -117,6 +119,16 @@ const PricingSummary = ({ stack, currencySymbol, title = "Pricing Summary" }: Pr
           <span>Final Price:</span>
           <span className="text-blue-600">{formatCurrency(stack.finalPrice || 0)}</span>
         </div>
+        
+        {/* Add rounding toggle right under the final price */}
+        {onToggleRounding && (
+          <div className="mt-2">
+            <RoundingToggle
+              enabled={stack.roundToNearest100 || false}
+              onToggle={onToggleRounding}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

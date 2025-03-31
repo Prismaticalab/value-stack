@@ -58,6 +58,13 @@ const StackBuilder = ({
     });
   };
 
+  const handleToggleRounding = (enabled: boolean) => {
+    setStack({
+      ...stack,
+      roundToNearest100: enabled
+    });
+  };
+
   const addNewModule = () => {
     // This function is now just a placeholder as the actual module creation
     // is handled in the ModuleList component
@@ -156,6 +163,13 @@ const StackBuilder = ({
             stack={stack} 
             setStack={setStack}
             currencySymbol={currencySymbol}
+          />
+
+          <PricingSummary 
+            stack={stack} 
+            currencySymbol={currencySymbol} 
+            title="Costing Summary"
+            onToggleRounding={handleToggleRounding}
           />
 
           <div className="flex justify-center mt-4">
