@@ -1,7 +1,6 @@
 
+import React from "react";
 import { Stack } from "@/types/stack";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 
 interface PricingSummaryProps {
   stack: Stack;
@@ -10,100 +9,96 @@ interface PricingSummaryProps {
 }
 
 const PricingSummary = ({ stack, currencySymbol, title = "Pricing Summary" }: PricingSummaryProps) => {
-  const valueCaptureTotal = 
-    (stack.isAgencyFeesPercentage ? stack.effectiveAgencyFees : stack.agencyFees) +
-    (stack.isReferralPercentage ? stack.effectiveReferralCost : stack.referralCosts) +
-    (stack.isMarketingPercentage ? stack.effectiveMarketingExpenses : stack.marketingExpenses);
-
-  const totalCostWithContingency = stack.totalCost * (1 + (stack.contingencyBuffer || 0) / 100);
-  const estimatedNetRevenue = totalCostWithContingency * (1 + stack.desiredMargin / 100);
+  // Format currency with 2 decimal places always
+  const formatCurrency = (value: number) => {
+    return `${currencySymbol}${value.toFixed(2)}`;
+  };
   
+  // Format percentage with 2 decimal places if not a whole number
+  const formatPercentage = (value: number) => {
+    return value % 1 === 0 ? `${value}%` : `${value.toFixed(2)}%`;
+  };
+
   return (
-    <Card className="border-gray-200">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <span className="text-sm">Base Delivery Cost</span>
-            <span className="font-medium">{currencySymbol}{stack.totalCost.toFixed(2)}</span>
-          </div>
-          
-          {stack.contingencyBuffer > 0 && (
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Contingency ({stack.contingencyBuffer}%)</span>
-              <span className="font-medium">{currencySymbol}{(stack.totalCost * stack.contingencyBuffer / 100).toFixed(2)}</span>
-            </div>
-          )}
-
-          <div className="flex justify-between items-center">
-            <span className="text-sm">Total Cost with Contingency</span>
-            <span className="font-medium">{currencySymbol}{totalCostWithContingency.toFixed(2)}</span>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-sm">Desired Profit ({stack.desiredMargin}%)</span>
-            <span className="font-medium">{currencySymbol}{(totalCostWithContingency * stack.desiredMargin / 100).toFixed(2)}</span>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-sm">Net Revenue Required</span>
-            <span className="font-medium">{currencySymbol}{estimatedNetRevenue.toFixed(2)}</span>
-          </div>
-
-          <Separator />
-
-          {stack.agencyFees > 0 && (
-            <div className="flex justify-between items-center text-gray-600">
-              <span className="text-sm">Agency Fees {stack.isAgencyFeesPercentage ? `(${stack.agencyFees}%)` : ''}</span>
-              <span>{currencySymbol}{(stack.isAgencyFeesPercentage ? stack.effectiveAgencyFees : stack.agencyFees).toFixed(2)}</span>
-            </div>
-          )}
-
-          {stack.referralCosts > 0 && (
-            <div className="flex justify-between items-center text-gray-600">
-              <span className="text-sm">Referral Costs {stack.isReferralPercentage ? `(${stack.referralCosts}%)` : ''}</span>
-              <span>{currencySymbol}{(stack.isReferralPercentage ? stack.effectiveReferralCost : stack.referralCosts).toFixed(2)}</span>
-            </div>
-          )}
-
-          {stack.marketingExpenses > 0 && (
-            <div className="flex justify-between items-center text-gray-600">
-              <span className="text-sm">Marketing Expenses {stack.isMarketingPercentage ? `(${stack.marketingExpenses}%)` : ''}</span>
-              <span>{currencySymbol}{(stack.isMarketingPercentage ? stack.effectiveMarketingExpenses : stack.marketingExpenses).toFixed(2)}</span>
-            </div>
-          )}
-
-          {(stack.agencyFees > 0 || stack.referralCosts > 0 || stack.marketingExpenses > 0) && (
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Total Value Capture Costs</span>
-              <span className="font-medium">{currencySymbol}{valueCaptureTotal.toFixed(2)}</span>
-            </div>
-          )}
-
-          <Separator />
-
-          <div className="flex justify-between items-center font-medium text-lg">
-            <span>Final Sale Price</span>
-            <span className="text-black">{currencySymbol}{stack.roundToNearest100 
-              ? Math.ceil(stack.finalPrice / 100) * 100
-              : stack.finalPrice.toFixed(2)
-            }</span>
-          </div>
-
-          <div className="flex justify-between items-center text-sm">
-            <span>Net Profit</span>
-            <span className="font-medium">{currencySymbol}{stack.netProfit.toFixed(2)}</span>
-          </div>
-
-          <div className="flex justify-between items-center text-sm">
-            <span>Profit Margin</span>
-            <span className="font-medium">{stack.marginPercent.toFixed(1)}%</span>
-          </div>
+    <div className="mt-8 p-6 border border-gray-200 rounded-lg bg-gray-50">
+      <h3 className="text-lg font-medium mb-4">{title}</h3>
+      
+      <div className="space-y-3">
+        <div className="flex justify-between text-sm">
+          <span>Total Delivery Cost:</span>
+          <span className="font-medium">{formatCurrency(stack.totalCost || 0)}</span>
         </div>
-      </CardContent>
-    </Card>
+        
+        <div className="flex justify-between text-sm">
+          <span>Contingency Buffer ({formatPercentage(stack.contingencyBuffer || 0)}):</span>
+          <span className="font-medium">
+            {formatCurrency((stack.totalCost || 0) * (stack.contingencyBuffer || 0) / 100)}
+          </span>
+        </div>
+        
+        <div className="border-t border-gray-200 pt-2 mt-2"></div>
+        
+        {stack.isReferralPercentage ? (
+          <div className="flex justify-between text-sm">
+            <span>Referral Costs ({formatPercentage(stack.referralCosts || 0)}):</span>
+            <span className="font-medium">{formatCurrency(stack.effectiveReferralCost || 0)}</span>
+          </div>
+        ) : (
+          <div className="flex justify-between text-sm">
+            <span>Referral Costs (Fixed):</span>
+            <span className="font-medium">{formatCurrency(stack.referralCosts || 0)}</span>
+          </div>
+        )}
+        
+        {stack.isAgencyFeesPercentage ? (
+          <div className="flex justify-between text-sm">
+            <span>Agency Fees ({formatPercentage(stack.agencyFees || 0)}):</span>
+            <span className="font-medium">{formatCurrency(stack.effectiveAgencyFees || 0)}</span>
+          </div>
+        ) : (
+          <div className="flex justify-between text-sm">
+            <span>Agency Fees (Fixed):</span>
+            <span className="font-medium">{formatCurrency(stack.agencyFees || 0)}</span>
+          </div>
+        )}
+        
+        {stack.isMarketingPercentage ? (
+          <div className="flex justify-between text-sm">
+            <span>Marketing Expenses ({formatPercentage(stack.marketingExpenses || 0)}):</span>
+            <span className="font-medium">{formatCurrency(stack.effectiveMarketingExpenses || 0)}</span>
+          </div>
+        ) : (
+          <div className="flex justify-between text-sm">
+            <span>Marketing Expenses (Fixed):</span>
+            <span className="font-medium">{formatCurrency(stack.marketingExpenses || 0)}</span>
+          </div>
+        )}
+        
+        <div className="border-t border-gray-200 pt-2 mt-2"></div>
+        
+        <div className="flex justify-between text-sm">
+          <span>Target Profit Margin:</span>
+          <span className="font-medium">{formatPercentage(stack.desiredMargin || 0)}</span>
+        </div>
+        
+        <div className="flex justify-between text-sm">
+          <span>Net Profit:</span>
+          <span className="font-medium">{formatCurrency(stack.netProfit || 0)}</span>
+        </div>
+        
+        <div className="flex justify-between text-sm">
+          <span>Effective Margin:</span>
+          <span className="font-medium">{formatPercentage(stack.marginPercent || 0)}</span>
+        </div>
+        
+        <div className="border-t border-gray-200 pt-3 mt-3"></div>
+        
+        <div className="flex justify-between font-medium text-lg">
+          <span>Final Price:</span>
+          <span className="text-blue-600">{formatCurrency(stack.finalPrice || 0)}</span>
+        </div>
+      </div>
+    </div>
   );
 };
 

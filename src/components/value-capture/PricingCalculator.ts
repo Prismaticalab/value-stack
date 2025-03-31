@@ -1,90 +1,67 @@
-
 import { Stack } from "@/types/stack";
-import { toast } from "@/hooks/use-toast";
 
 export const calculateFinalPrice = (stack: Stack) => {
-  console.log('Starting price calculation with values:', {
-    totalCost: stack.totalCost,
-    referralCosts: stack.referralCosts,
-    isReferralPercentage: stack.isReferralPercentage,
-    agencyFees: stack.agencyFees,
-    isAgencyFeesPercentage: stack.isAgencyFeesPercentage,
-    marketingExpenses: stack.marketingExpenses,
-    isMarketingPercentage: stack.isMarketingPercentage,
-    desiredMargin: stack.desiredMargin,
-    contingencyBuffer: stack.contingencyBuffer
-  });
+  // Get the total cost from the modules
+  const deliveryCost = stack.totalCost || 0;
   
-  // Calculate base cost with contingency
-  const baseModulesCost = stack.totalCost;
-  const costWithContingency = baseModulesCost * (1 + (stack.contingencyBuffer || 0) / 100);
+  // Calculate contingency buffer
+  const contingencyAmount = (deliveryCost * (stack.contingencyBuffer || 0)) / 100;
+  const costWithContingency = deliveryCost + contingencyAmount;
   
-  // Calculate the total required net revenue (before value capture costs)
-  const totalRequiredIncome = costWithContingency * (1 + stack.desiredMargin / 100);
+  // Calculate the required profit based on the desired margin
+  // Profit = (Cost * Margin) / (100 - Margin)
+  const desiredMargin = stack.desiredMargin || 0;
+  let requiredProfit = 0;
   
-  // For percentage-based costs, we need to use the formula:
-  // finalPrice = totalRequiredIncome / (1 - sumOfPercentages)
-  
-  let percentageTotalDeduction = 0;
-  let fixedCostsTotal = 0;
-  
-  if (stack.isReferralPercentage) {
-    percentageTotalDeduction += (stack.referralCosts / 100);
+  if (desiredMargin < 100) {
+    requiredProfit = (costWithContingency * desiredMargin) / (100 - desiredMargin);
   } else {
-    fixedCostsTotal += stack.referralCosts;
+    // Handle edge case where margin is 100%
+    requiredProfit = costWithContingency * 10; // Arbitrary high multiplier
   }
   
-  if (stack.isAgencyFeesPercentage) {
-    percentageTotalDeduction += (stack.agencyFees / 100);
-  } else {
-    fixedCostsTotal += stack.agencyFees;
-  }
+  // Net revenue needed before value capture costs
+  const totalRequiredIncome = costWithContingency + requiredProfit;
   
-  if (stack.isMarketingPercentage) {
-    percentageTotalDeduction += (stack.marketingExpenses / 100);
-  } else {
-    fixedCostsTotal += stack.marketingExpenses;
-  }
+  // Calculate effective costs with percentages based on final price
+  let finalPrice = totalRequiredIncome;
+  let previousFinalPrice = 0;
   
-  // Prevent division by zero or negative numbers
-  let denominator = 1 - percentageTotalDeduction;
-  
-  if (denominator <= 0.01) {
-    denominator = 0.01; // Fallback to avoid errors
+  // Iteratively calculate the final price to account for percentage-based costs
+  for (let i = 0; i < 10; i++) { // Limited iterations to prevent infinite loops
+    previousFinalPrice = finalPrice;
     
-    toast({
-      title: "Warning",
-      description: "The percentage costs are too high. Adjusting calculations to prevent errors.",
-      variant: "destructive"
-    });
+    // Calculate value capture costs
+    const referralAmount = stack.isReferralPercentage
+      ? finalPrice * (stack.referralCosts || 0) / 100
+      : (stack.referralCosts || 0);
+      
+    const agencyAmount = stack.isAgencyFeesPercentage
+      ? finalPrice * (stack.agencyFees || 0) / 100
+      : (stack.agencyFees || 0);
+      
+    const marketingAmount = stack.isMarketingPercentage
+      ? finalPrice * (stack.marketingExpenses || 0) / 100
+      : (stack.marketingExpenses || 0);
+    
+    const valueCaptureTotal = referralAmount + agencyAmount + marketingAmount;
+    
+    // Recalculate final price
+    finalPrice = totalRequiredIncome + valueCaptureTotal;
+    
+    // Check if we've converged
+    if (Math.abs(finalPrice - previousFinalPrice) < 0.01) {
+      break;
+    }
   }
   
-  // Calculate the final price needed to cover all costs
-  // If we have percentage costs:
-  // finalPrice * (1 - percentages) = totalRequiredIncome + fixedCosts
-  let finalPrice;
-  
-  if (percentageTotalDeduction > 0) {
-    finalPrice = (totalRequiredIncome + fixedCostsTotal) / denominator;
-  } else {
-    finalPrice = totalRequiredIncome + fixedCostsTotal;
-  }
-  
-  // Round based on the rounding preference - default to nearest 50 if not set
+  // Round to the nearest 100 if needed
   if (stack.roundToNearest100) {
-    finalPrice = Math.ceil(finalPrice / 100) * 100;
-  } else {
-    finalPrice = Math.ceil(finalPrice / 50) * 50;
+    // Round to the nearest 100 but preserve the decimal places
+    const integerPart = Math.ceil(finalPrice / 100) * 100;
+    // We'll keep the decimal places for display purposes
+    finalPrice = integerPart;
   }
-  
-  console.log('Calculated price before returning:', { 
-    finalPrice, 
-    costWithContingency, 
-    totalRequiredIncome,
-    percentageTotalDeduction,
-    denominator,
-    fixedCostsTotal
-  });
   
   return {
     finalPrice,
@@ -94,20 +71,19 @@ export const calculateFinalPrice = (stack: Stack) => {
 };
 
 export const calculateEffectiveCosts = (stack: Stack, finalPrice: number) => {
-  // Calculate effective costs based on the final price
-  const effectiveReferralCost = stack.isReferralPercentage 
-    ? finalPrice * (stack.referralCosts / 100) 
-    : stack.referralCosts;
+  // Calculate actual costs based on final price
+  const effectiveReferralCost = stack.isReferralPercentage
+    ? finalPrice * (stack.referralCosts || 0) / 100
+    : (stack.referralCosts || 0);
     
-  const effectiveAgencyFees = stack.isAgencyFeesPercentage 
-    ? finalPrice * (stack.agencyFees / 100) 
-    : stack.agencyFees;
+  const effectiveAgencyFees = stack.isAgencyFeesPercentage
+    ? finalPrice * (stack.agencyFees || 0) / 100
+    : (stack.agencyFees || 0);
     
-  const effectiveMarketingExpenses = stack.isMarketingPercentage 
-    ? finalPrice * (stack.marketingExpenses / 100) 
-    : stack.marketingExpenses;
+  const effectiveMarketingExpenses = stack.isMarketingPercentage
+    ? finalPrice * (stack.marketingExpenses || 0) / 100
+    : (stack.marketingExpenses || 0);
   
-  // Total value capture costs
   const valueCaptureTotal = effectiveReferralCost + effectiveAgencyFees + effectiveMarketingExpenses;
   
   return {

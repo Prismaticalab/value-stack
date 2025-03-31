@@ -51,9 +51,9 @@ const Index = () => {
 
             {currentTab === "builder" && (
               <>
-                <div className="my-6 text-center">
+                <div className="my-6 text-center max-w-2xl mx-auto">
                   <h2 className="text-xl font-medium text-gray-700">Let's build your value delivery stack!</h2>
-                  <p className="text-sm text-gray-500">Add modules that represent the components of your service offering.</p>
+                  <p className="text-sm text-gray-500 mt-2">Add modules that represent the components of your service offering.</p>
                 </div>
                 
                 <Card className="apple-card">
@@ -70,9 +70,9 @@ const Index = () => {
             
             {currentTab === "pricing" && (
               <>
-                <div className="my-6 text-center">
+                <div className="my-6 text-center max-w-2xl mx-auto">
                   <h2 className="text-xl font-medium text-gray-700">Let's take a final look and finalise the details!</h2>
-                  <p className="text-sm text-gray-500">Review costs and determine your final pricing strategy.</p>
+                  <p className="text-sm text-gray-500 mt-2">Review costs and determine your final pricing strategy.</p>
                 </div>
                 
                 <Card className="apple-card">
@@ -94,9 +94,9 @@ const Index = () => {
             
             {currentTab === "summary" && (
               <>
-                <div className="my-6 text-center">
+                <div className="my-6 text-center max-w-2xl mx-auto">
                   <h2 className="text-xl font-medium text-gray-700">Project Summary</h2>
-                  <p className="text-sm text-gray-500">Review your complete project with all details.</p>
+                  <p className="text-sm text-gray-500 mt-2">Review your complete project with all details.</p>
                 </div>
                 
                 <Card className="apple-card">

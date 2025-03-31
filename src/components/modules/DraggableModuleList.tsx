@@ -2,8 +2,6 @@
 import { Droppable, DragDropContext, DropResult } from "react-beautiful-dnd";
 import ModuleCard from "../ModuleCard";
 import { Stack, Module } from "@/types/stack";
-import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
 
 interface DraggableModuleListProps {
   stack: Stack;
@@ -67,19 +65,8 @@ const DraggableModuleList = ({
                   isExpanded={expandedModules[module.id] || false}
                   setIsExpanded={(expanded) => setModuleExpanded(module.id, expanded)}
                   autoFocus={module.id === newModuleId}
+                  onSave={onSaveModule}
                 />
-                
-                {expandedModules[module.id] && onSaveModule && (
-                  <div className="flex justify-end mt-2 mb-4">
-                    <Button 
-                      className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1"
-                      onClick={() => onSaveModule(module.id)}
-                    >
-                      <Save size={16} />
-                      Save Module
-                    </Button>
-                  </div>
-                )}
               </div>
             ))}
             {provided.placeholder}

@@ -3,6 +3,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Module } from "@/types/stack";
 import { Draggable } from "react-beautiful-dnd";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Save } from "lucide-react";
 import ModuleHeader from "./modules/card/ModuleHeader";
 import ModuleDetails from "./modules/card/ModuleDetails";
 import CostInputs from "./modules/card/CostInputs";
@@ -20,6 +22,7 @@ interface ModuleCardProps {
   isExpanded: boolean;
   setIsExpanded: (expanded: boolean) => void;
   autoFocus?: boolean;
+  onSave?: (id: string) => void;
 }
 
 const ModuleCard = ({
@@ -33,15 +36,45 @@ const ModuleCard = ({
   onEdit,
   isExpanded,
   setIsExpanded,
-  autoFocus
+  autoFocus,
+  onSave
 }: ModuleCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
+  const [originalModule, setOriginalModule] = useState<Module>({ ...module });
+  const [hasChanges, setHasChanges] = useState<boolean>(false);
 
   useEffect(() => {
     if (autoFocus && cardRef.current) {
       cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [autoFocus]);
+
+  useEffect(() => {
+    // Check if the module has changed since it was last expanded
+    if (isExpanded) {
+      setOriginalModule({ ...module });
+      setHasChanges(false);
+    } else {
+      // When collapsing, reset the hasChanges flag
+      setHasChanges(false);
+    }
+  }, [isExpanded, module.id]);
+  
+  useEffect(() => {
+    // Check for changes when module data changes
+    if (isExpanded) {
+      const moduleKeys = Object.keys(module) as Array<keyof Module>;
+      const hasAnyChanges = moduleKeys.some(key => {
+        // Skip id check
+        if (key === 'id') return false;
+        
+        // Special handling for nested objects or arrays if needed
+        return JSON.stringify(module[key]) !== JSON.stringify(originalModule[key]);
+      });
+      
+      setHasChanges(hasAnyChanges);
+    }
+  }, [module, originalModule, isExpanded]);
 
   const handleChange = (field: keyof Module, value: any) => {
     const updatedModule = { ...module, [field]: value };
@@ -59,6 +92,14 @@ const ModuleCard = ({
       documentName 
     };
     onUpdate(module.id, updatedModule);
+  };
+
+  const handleSaveModule = () => {
+    if (onSave) {
+      onSave(module.id);
+      setOriginalModule({ ...module });
+      setHasChanges(false);
+    }
   };
 
   const displayedCost = module.costType === 'variable' && module.costQuantity 
@@ -128,6 +169,19 @@ const ModuleCard = ({
                   onUpdate={handleDocumentUpdate}
                   isLocked={isLocked}
                 />
+                
+                {onSave && (
+                  <div className="flex justify-end mt-4">
+                    <Button 
+                      className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1"
+                      onClick={handleSaveModule}
+                      disabled={!hasChanges || isLocked}
+                    >
+                      <Save size={16} />
+                      Save Module
+                    </Button>
+                  </div>
+                )}
               </>
             )}
           </CardContent>

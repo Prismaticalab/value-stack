@@ -2,8 +2,6 @@
 import React from "react";
 import { Stack } from "@/types/stack";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
 import ModuleCard from "@/components/ModuleCard";
 
 interface DraggableModuleListProps {
@@ -11,7 +9,7 @@ interface DraggableModuleListProps {
   setStack: (stack: Stack) => void;
   expandedModules: Record<string, boolean>;
   setModuleExpanded: (moduleId: string, expanded: boolean) => void;
-  onUpdate: (moduleId: string, field: string, value: any) => void;
+  onUpdate: (moduleId: string, updatedModule: any) => void;
   onDelete: (moduleId: string) => void;
   onDuplicate: (moduleId: string) => void;
   newModuleId: string | null;
@@ -66,34 +64,19 @@ const DraggableModuleList = ({
                     {...provided.dragHandleProps}
                     className={`${snapshot.isDragging ? "opacity-70" : ""}`}
                   >
-                    <div className="relative">
-                      <ModuleCard
-                        module={module}
-                        index={index}
-                        isExpanded={expandedModules[module.id] || false}
-                        setIsExpanded={(expanded) => setModuleExpanded(module.id, expanded)}
-                        onUpdate={(field, value) =>
-                          onUpdate(module.id, field, value)
-                        }
-                        onDelete={() => onDelete(module.id)}
-                        onDuplicate={() => onDuplicate(module.id)}
-                        isLocked={stack.locked}
-                        currencySymbol={currencySymbol}
-                        autoFocus={module.id === newModuleId}
-                      />
-                      
-                      {expandedModules[module.id] && onSaveModule && (
-                        <div className="flex justify-end mt-2 mb-4">
-                          <Button 
-                            className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1"
-                            onClick={() => onSaveModule(module.id)}
-                          >
-                            <Save size={16} />
-                            Save Module
-                          </Button>
-                        </div>
-                      )}
-                    </div>
+                    <ModuleCard
+                      module={module}
+                      index={index}
+                      isExpanded={expandedModules[module.id] || false}
+                      setIsExpanded={(expanded) => setModuleExpanded(module.id, expanded)}
+                      onUpdate={onUpdate}
+                      onDelete={() => onDelete(module.id)}
+                      onDuplicate={() => onDuplicate(module.id)}
+                      isLocked={stack.locked}
+                      currencySymbol={currencySymbol}
+                      autoFocus={module.id === newModuleId}
+                      onSave={onSaveModule}
+                    />
                   </div>
                 )}
               </Draggable>

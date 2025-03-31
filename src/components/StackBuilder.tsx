@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Stack, Module } from "@/types/stack";
-import { ArrowLeft, HelpCircle, SaveAll, ArrowRight } from "lucide-react";
+import { ArrowLeft, HelpCircle, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ModuleEditDialog from "./module-edit-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -121,22 +121,40 @@ const StackBuilder = ({
       ) : (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                if (onBack) {
-                  onBack();
-                } else {
-                  setValueCaptureView(false);
-                }
-              }}
-              className="flex items-center gap-1"
-            >
-              <ArrowLeft size={16} />
-              Back to Builder
-            </Button>
-            <h2 className="text-xl font-medium">Costing Review & Pricing</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-medium">Costing Review & Pricing</h2>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full">
+                      <HelpCircle size={16} className="text-gray-500" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>
+                      Review costs and determine your final pricing strategy.
+                      Set additional costs, profit margins, and contingency buffers.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
+          
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              if (onBack) {
+                onBack();
+              } else {
+                setValueCaptureView(false);
+              }
+            }}
+            className="flex items-center gap-1 border-gray-200 hover:bg-black hover:text-white transition-colors"
+          >
+            <ArrowLeft size={16} />
+            Back to Builder
+          </Button>
           
           <CollapsedModuleList 
             modules={stack.modules} 
@@ -151,13 +169,6 @@ const StackBuilder = ({
           />
 
           <div className="flex justify-center mt-4">
-            <Button
-              onClick={onSave}
-              className="mr-4 bg-slate-800 hover:bg-slate-900 flex items-center gap-1"
-            >
-              <SaveAll size={16} />
-              Save Progress
-            </Button>
             {onViewSummary && (
               <Button
                 onClick={onViewSummary}
