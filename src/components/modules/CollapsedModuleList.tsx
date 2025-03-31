@@ -118,7 +118,7 @@ const CollapsedModuleList = ({
                         className="mr-2"
                       />
                       <Label htmlFor={`toggle-${module.id}`} className="text-xs text-gray-500">
-                        {isHidden ? "Excluded" : "Include"}
+                        {isHidden ? "Excluded from calculations" : "Include in calculations"}
                       </Label>
                     </div>
                   )}
