@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Stack, Module } from "@/types/stack";
@@ -10,6 +9,7 @@ import ModuleList from "./modules/ModuleList";
 import CollapsedModuleList from "./modules/CollapsedModuleList";
 import ValueCaptureForm from "./ValueCaptureForm";
 import ModuleListHeader from "./modules/ModuleListHeader";
+import PricingSummary from "./value-capture/PricingSummary";
 
 interface StackBuilderProps {
   stack: Stack;
