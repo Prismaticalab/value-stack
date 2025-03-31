@@ -46,7 +46,7 @@ export const useModuleChanges = (originalModules: {[key: string]: Module}, setOr
     }));
     
     // Update the original module reference
-    // Fixed: correctly passing an object to setOriginalModules
+    // Fixed: directly setting the object rather than using a function
     setOriginalModules({
       ...originalModules,
       [moduleId]: { ...module }
