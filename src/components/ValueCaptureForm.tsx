@@ -6,6 +6,7 @@ import NumberInput from "./value-capture/NumberInput";
 import CostInputField from "./value-capture/CostInputField";
 import PricingSummary from "./value-capture/PricingSummary";
 import MarginSlider from "./value-capture/MarginSlider";
+import RoundingToggle from "./value-capture/RoundingToggle";
 import { calculateFinalPrice, calculateEffectiveCosts } from "./value-capture/PricingCalculator";
 
 interface ValueCaptureFormProps {
@@ -37,7 +38,8 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
       marketingExpenses: stack.marketingExpenses,
       isMarketingPercentage: stack.isMarketingPercentage,
       desiredMargin: stack.desiredMargin,
-      contingencyBuffer: stack.contingencyBuffer
+      contingencyBuffer: stack.contingencyBuffer,
+      roundToNearest100: stack.roundToNearest100
     });
 
     const { finalPrice, costWithContingency, totalRequiredIncome } = calculateFinalPrice(stack);
@@ -95,31 +97,18 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
     stack.isMarketingPercentage,
     stack.desiredMargin,
     stack.contingencyBuffer,
+    stack.roundToNearest100,
     setStack // Add setStack to dependencies
   ]);
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-medium">Value Capture & Pricing</h2>
+      <h2 className="text-xl font-medium">Variable & Marketing Costs</h2>
       <p className="text-sm text-gray-600">
         Set additional costs and your desired profit margin to calculate final pricing.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <NumberInput 
-            id="contingencyBuffer"
-            label="Contingency Buffer (%)"
-            prefix="%"
-            value={stack.contingencyBuffer}
-            onChange={(value) => handleChange("contingencyBuffer", value)}
-            placeholder="Enter contingency buffer"
-            min="0"
-            step="1"
-            max="100"
-          />
-        </div>
-
         <CostInputField 
           id="agencyFees"
           label="Agency Fees"
@@ -154,10 +143,26 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
         />
       </div>
 
-      <MarginSlider 
-        value={stack.desiredMargin}
-        onChange={(val) => handleChange("desiredMargin", val)}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <MarginSlider 
+          value={stack.contingencyBuffer}
+          onChange={(val) => handleChange("contingencyBuffer", val)}
+          label="Contingency Buffer On Value Delivery Costs (%)"
+          maxValue={100}
+        />
+
+        <MarginSlider 
+          value={stack.desiredMargin}
+          onChange={(val) => handleChange("desiredMargin", val)}
+        />
+      </div>
+      
+      <div className="mt-4">
+        <RoundingToggle
+          enabled={stack.roundToNearest100 || false}
+          onToggle={(checked) => handleChange("roundToNearest100", checked)}
+        />
+      </div>
 
       <PricingSummary stack={stack} currencySymbol={currencySymbol} />
     </div>

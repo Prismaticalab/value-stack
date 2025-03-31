@@ -10,7 +10,7 @@ interface PricingSummaryProps {
 const PricingSummary = ({ stack, currencySymbol }: PricingSummaryProps) => {
   return (
     <div className="bg-gray-50 p-4 rounded-lg mt-6">
-      <h3 className="font-medium mb-3">Pricing Summary</h3>
+      <h3 className="font-medium mb-3">Costing Summary</h3>
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
           <span>Current Value Delivery Cost:</span>

@@ -70,8 +70,12 @@ export const calculateFinalPrice = (stack: Stack) => {
     finalPrice = totalRequiredIncome + fixedCostsTotal;
   }
   
-  // Round up to nearest 50
-  finalPrice = Math.ceil(finalPrice / 50) * 50;
+  // Round based on the rounding preference - default to nearest 50 if not set
+  if (stack.roundToNearest100) {
+    finalPrice = Math.ceil(finalPrice / 100) * 100;
+  } else {
+    finalPrice = Math.ceil(finalPrice / 50) * 50;
+  }
   
   console.log('Calculated price before returning:', { 
     finalPrice, 

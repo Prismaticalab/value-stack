@@ -41,5 +41,6 @@ export interface Stack {
   currency: string;
   contingencyBuffer: number;
   totalRequiredIncome: number;
+  roundToNearest100?: boolean;
   isInitialized?: boolean;
 }
