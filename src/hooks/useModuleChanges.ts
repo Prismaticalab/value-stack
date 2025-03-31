@@ -46,10 +46,11 @@ export const useModuleChanges = (originalModules: {[key: string]: Module}, setOr
     }));
     
     // Update the original module reference
-    setOriginalModules(prev => ({
-      ...prev,
+    // Fixed: correctly passing an object to setOriginalModules
+    setOriginalModules({
+      ...originalModules,
       [moduleId]: { ...module }
-    }));
+    });
     
     // Show success toast
     toast({
