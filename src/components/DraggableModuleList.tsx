@@ -77,7 +77,6 @@ const DraggableModuleList = ({
                         }
                         onDelete={() => onDelete(module.id)}
                         onDuplicate={() => onDuplicate(module.id)}
-                        isNew={module.id === newModuleId}
                         isLocked={stack.locked}
                         currencySymbol={currencySymbol}
                         autoFocus={module.id === newModuleId}
