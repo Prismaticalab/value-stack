@@ -70,7 +70,7 @@ const PricingView = ({
       <PricingSummary 
         stack={stack} 
         currencySymbol={currencySymbol} 
-        title="Costing Summary"
+        title="Costing and Pricing Preview"
         onToggleRounding={handleToggleRounding}
       />
 

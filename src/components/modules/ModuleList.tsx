@@ -106,19 +106,6 @@ const ModuleList = ({
             currencySymbol={currencySymbol}
           />
         )}
-        
-        {onSave && (
-          <div className="pt-2">
-            <Button 
-              variant="outline" 
-              onClick={onSave}
-              className="flex items-center gap-1 border-gray-200 hover:bg-black hover:text-white transition-colors"
-            >
-              <Save size={16} />
-              Save Progress
-            </Button>
-          </div>
-        )}
       </div>
       
       {stack.modules.length > 0 && (
@@ -127,6 +114,20 @@ const ModuleList = ({
           onGoToPricing={onGoToPricing}
           pricingButtonText="Go to Costing Review & Pricing"
         />
+      )}
+
+      {/* Move Save Progress button to the bottom */}
+      {onSave && (
+        <div className="pt-2">
+          <Button 
+            variant="outline" 
+            onClick={onSave}
+            className="flex items-center gap-1 border-gray-200 hover:bg-black hover:text-white transition-colors"
+          >
+            <Save size={16} />
+            Save Progress
+          </Button>
+        </div>
       )}
 
       <DeleteModuleDialog

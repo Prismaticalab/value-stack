@@ -4,9 +4,7 @@ import { Stack } from "@/types/stack";
 import { useToast } from "@/hooks/use-toast";
 import NumberInput from "./value-capture/NumberInput";
 import CostInputField from "./value-capture/CostInputField";
-import PricingSummary from "./value-capture/PricingSummary";
 import MarginSlider from "./value-capture/MarginSlider";
-import RoundingToggle from "./value-capture/RoundingToggle";
 import { calculateFinalPrice, calculateEffectiveCosts } from "./value-capture/PricingCalculator";
 
 interface ValueCaptureFormProps {
@@ -158,7 +156,7 @@ const ValueCaptureForm = ({ stack, setStack, currencySymbol }: ValueCaptureFormP
         />
       </div>
 
-      <PricingSummary stack={stack} currencySymbol={currencySymbol} title="Costing Summary" />
+      {/* Removed the duplicate summary here */}
     </div>
   );
 };

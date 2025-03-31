@@ -44,7 +44,7 @@ const SummaryHeader: React.FC<SummaryHeaderProps> = ({
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold">{name}</h1>
         <p className="text-sm text-gray-500">
-          {moduleCount} modules, {currencySymbol}{finalPrice.toFixed(2)} total price
+          {moduleCount} modules, {currencySymbol}{finalPrice.toFixed(2)} suggested sale price
         </p>
       </div>
     </>

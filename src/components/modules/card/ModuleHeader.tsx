@@ -31,6 +31,17 @@ const ModuleHeader = ({
   displayedCost,
   currencySymbol
 }: ModuleHeaderProps) => {
+  // This function expands the module when editing starts
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // First, ensure the module is expanded when user starts typing
+    if (!expanded) {
+      toggleExpanded();
+    }
+    
+    // Then update the name value
+    onUpdate("name", e.target.value);
+  };
+  
   return (
     <div className="flex justify-between items-start">
       <div className="flex-1 mr-4">
@@ -41,9 +52,12 @@ const ModuleHeader = ({
             className={`font-medium ${!module.name ? 'italic text-gray-400' : ''} border-gray-200 focus:border-black focus:ring-black`}
             placeholder="Module name"
             value={module.name}
-            onChange={(e) => onUpdate("name", e.target.value)}
+            onChange={handleNameChange}
             disabled={isLocked}
-            onFocus={(e) => e.target.placeholder = ""}
+            onFocus={(e) => {
+              e.target.placeholder = "";
+              if (!expanded) toggleExpanded();
+            }}
             onBlur={(e) => e.target.placeholder = "Module name"}
           />
         </div>
